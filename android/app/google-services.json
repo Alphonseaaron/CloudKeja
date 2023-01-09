@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "122990125619",
+    "firebase_url": "https://cloudkeja-d7e6b-default-rtdb.firebaseio.com",
+    "project_id": "cloudkeja-d7e6b",
+    "storage_bucket": "cloudkeja-d7e6b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:122990125619:android:e8a4e1379218571ea8f946",
+        "android_client_info": {
+          "package_name": "com.mumbo.cloudkeja"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "122990125619-njb2h46ejc2nnhlsdjje4i5n2va7h9re.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHXxGvKllxGdqbryF_m2kxyIKVG7Uc4Ak"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "122990125619-njb2h46ejc2nnhlsdjje4i5n2va7h9re.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "122990125619-sgogdtda9epn4tllirf4sjs1ajs0qg7c.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mumbo.cloudkeja"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
