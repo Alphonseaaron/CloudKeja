@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
           backgroundColor: const Color(0xFFF5F6F6),
           primaryColor: Colors.blueAccent,
           colorScheme: ColorScheme.fromSwatch().copyWith(
-            secondary: const Color(0xFFFA5019),
+            secondary: Colors.blueAccent,
           ),
           appBarTheme: AppBarTheme(
             elevation: 0,

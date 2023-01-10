@@ -173,8 +173,8 @@ LineChartData mainData({bool isLoaded = false}) {
               ],
         isCurved: true,
         colors: [
-          Color(0xff4e65fe).withOpacity(0.5),
-          Color(0xff4e65fe).withOpacity(0),
+          Color(0xff2972ff).withOpacity(0.5),
+          Color(0xff2972ff).withOpacity(0),
         ],
         barWidth: 2,
         dotData: FlDotData(

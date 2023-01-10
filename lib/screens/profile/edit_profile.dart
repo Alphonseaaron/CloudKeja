@@ -257,9 +257,9 @@ class _UserPictureState extends State<UserPicture> {
   }
 
   void openImagePicker(BuildContext context) {
-    // openCamera(onCapture: (image){
-    //   setState(()=> mediaList = [image]);
-    // });
+    openCamera(onCapture: (image){
+      setState(()=> mediaList = [image]);
+    });
     showModalBottomSheet(
         isScrollControlled: true,
         backgroundColor: Colors.transparent,

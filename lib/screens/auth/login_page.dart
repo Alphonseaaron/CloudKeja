@@ -87,6 +87,7 @@ class _LoginPageState extends State<LoginPage> {
                             return null;
                           },
                           decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.email),
                             hintText: 'Email',
                             hintStyle: heading6.copyWith(color: textGrey),
                             border: const OutlineInputBorder(
@@ -121,6 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                             return null;
                           },
                           decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.key),
                             hintText: 'Password',
                             hintStyle: heading6.copyWith(color: textGrey),
                             suffixIcon: IconButton(

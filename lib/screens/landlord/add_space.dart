@@ -45,12 +45,18 @@ class _AddSpaceScreenState extends State<AddSpaceScreen> {
   String? rentRate;
 
   List<String> options = [
-    'House',
-    'Office',
+    'Apartment',
+    'Airbnb',
     'Conference Room',
-    'Fun',
+    'Event Grounds',
+    'House',
+    'Hostel',
+    'Hotel',
+    'Office',
+    'Stall',
+    'Store shelf',
+    'Warehouse',
     'Utility',
-    'Shelf',
   ];
 
   List<String> rates = [
@@ -353,31 +359,31 @@ class _AddSpaceScreenState extends State<AddSpaceScreen> {
                   style:
                       TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0)),
             ),
-            // InkWell(
-            //   onTap: () {
-            //     openImagePicker(context, true);
-            //   },
-            //   child: Container(
-            //       margin: const EdgeInsets.only(top: 12),
-            //       child: Row(
-            //         children: [
-            //           CircleAvatar(
-            //               backgroundColor: Colors.grey[400],
-            //               child: const Icon(Icons.camera_alt_outlined)),
-            //           const SizedBox(
-            //             width: 10,
-            //           ),
-            //           const Text('Cover Image'),
-            //           const Spacer(),
-            //           Icon(
-            //             Icons.check_circle,
-            //             color: coverImage == null
-            //                 ? Colors.grey[400]
-            //                 : Colors.green,
-            //           )
-            //         ],
-            //       )),
-            // ),
+            InkWell(
+              onTap: () {
+                openImagePicker(context, true);
+              },
+              child: Container(
+                  margin: const EdgeInsets.only(top: 12),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                          backgroundColor: Colors.grey[400],
+                          child: const Icon(Icons.camera_alt_outlined)),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      const Text('Cover Image'),
+                      const Spacer(),
+                      Icon(
+                        Icons.check_circle,
+                        color: coverImage == null
+                            ? Colors.grey[400]
+                            : Colors.green,
+                      )
+                    ],
+                  )),
+            ),
             const SizedBox(height: 10),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -507,9 +513,9 @@ class _AddSpaceScreenState extends State<AddSpaceScreen> {
     BuildContext context,
     bool isCover,
   ) async {
-    // openCamera(onCapture: (image){
-    //   setState(()=> mediaList = [image]);
-    // });
+    openCamera(onCapture: (image){
+      setState(()=> mediaList = [image]);
+    });
     showModalBottomSheet(
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
