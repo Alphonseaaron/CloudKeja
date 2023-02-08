@@ -118,6 +118,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       const SizedBox(height: 10),
                       buildUserDetail(Icons.email_outlined, owner.email!),
                       const SizedBox(height: 10),
+                      buildUserDetail(Icons.credit_card, owner.bankNumber!),
+                      const SizedBox(height: 10),
+                      buildUserDetail(Icons.credit_card, owner.bankBusinessNumber!),
+                      const SizedBox(height: 10),
                       buildUserDetail(Icons.call_outlined, owner.phone!),
                       const SizedBox(height: 10),
                       Text(user.name!),
@@ -134,7 +138,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   setState(() {
                     isLoading = true;
                   });
-                  await mpesaPayment(amount: 1, phone: user.phone!);
+                  await mpesaPayment(amount: 1, phone: user.phone!,);
 
                   await Provider.of<PaymentProvider>(context, listen: false)
                       .rentSpace(

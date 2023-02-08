@@ -1,6 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:provider/provider.dart';
 import 'package:cloudkeja/providers/auth_provider.dart';
+
+import '../screens/chat/chat_screen.dart';
 
 class WelcomeText extends StatelessWidget {
   const WelcomeText({Key? key}) : super(key: key);
@@ -13,12 +18,22 @@ class WelcomeText extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Hello ${user != null ? user.name!.split(' ')[0] : 'User'}',
-            style: Theme.of(context).textTheme.bodyText1!.copyWith(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+          Row(
+            children: [
+              Text(
+                'Hello ${user != null ? user.name!.split(' ')[0] : 'User'}',
+                style: Theme.of(context).textTheme.bodyText1!.copyWith(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              // IconButton(
+              //   onPressed: () {
+              //     Get.to(() => const ChatScreen());
+              //   },
+              //   icon: const Icon(CupertinoIcons.text_bubble),
+              // ),
+            ],
           ),
           const SizedBox(height: 10),
           Text(

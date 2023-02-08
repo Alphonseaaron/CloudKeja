@@ -210,7 +210,7 @@ class UserProfileDetails extends StatelessWidget {
         detailWidget(Icons.person_outline, user.name!),
         detailWidget(Icons.email_outlined, user.email!),
         detailWidget(Icons.call_outlined, user.phone!),
-        detailWidget(Icons.home_outlined, user.userId!),
+        // detailWidget(Icons.home_outlined, user.userId!),
       ]),
     );
   }

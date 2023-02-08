@@ -1,3 +1,4 @@
+// import 'dart:io';
 class UserModel {
   String? userId;
   final String? name;
@@ -9,6 +10,8 @@ class UserModel {
   List<dynamic>? wishlist = [];
   final String? phone;
   final bool? isLandlord;
+  final String? bankBusinessNumber;
+  final String? bankNumber;
   final bool? isAdmin;
   final double? balance;
 
@@ -21,6 +24,8 @@ class UserModel {
     this.profile,
     this.phone,
     this.isLandlord,
+    this.bankBusinessNumber,
+    this.bankNumber,
     this.isAdmin,
     this.rentedPlaces,
     this.wishlist,
@@ -36,6 +41,8 @@ class UserModel {
         'profile': profile,
         'phone': phone,
         'isLandlord': isLandlord,
+        'bankBusinessNumber': bankBusinessNumber,
+        'bankNumber' : bankNumber,
         'isAdmin': isAdmin,
         'rentedPlaces': rentedPlaces,
         'wishlist': wishlist,
@@ -52,6 +59,8 @@ class UserModel {
       profile: json['profile'],
       phone: json['phone'],
       isLandlord: json['isLandlord'],
+      bankBusinessNumber: json['bankBusinessNumber'],
+      bankNumber : json['bankNumber'],
       isAdmin: json['isAdmin'],
       rentedPlaces: json['rentedPlaces'],
       wishlist: json['wishlist'],

@@ -303,12 +303,12 @@ class _UserPictureState extends State<UserPicture> {
       if (mediaList.isNotEmpty) {
         double mediaSize =
             mediaList.first.file!.readAsBytesSync().lengthInBytes /
-                (1024 * 1024);
+                (1920 * 1080);
 
-        if (mediaSize < 1.0001) {
+        if (mediaSize < 15.0001) {
           final image = await FirebaseStorage.instance
               .ref(
-                  'userData/profilePics/${FirebaseAuth.instance.currentUser!.uid}')
+                  'userData/profile/${FirebaseAuth.instance.currentUser!.uid}')
               .putFile(mediaList.first.file!);
 
           final url = await image.ref.getDownloadURL();
@@ -316,11 +316,11 @@ class _UserPictureState extends State<UserPicture> {
               .collection('users')
               .doc(FirebaseAuth.instance.currentUser!.uid)
               .update({
-            'profilePic': url,
+            'profile': url,
           });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Image should be less than 1 MB')));
+              const SnackBar(content: Text('Image should be less than 15 MB')));
         }
 
         Future.delayed(const Duration(milliseconds: 2000))

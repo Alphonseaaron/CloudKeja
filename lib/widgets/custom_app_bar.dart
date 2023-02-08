@@ -16,36 +16,36 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            FutureBuilder<UserModel>(
-                future: Provider.of<AuthProvider>(context, listen: false)
-                    .getCurrentUser(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return GestureDetector(
-                      onTap: () {
-                        Get.to(() => const UserProfileScreen());
-                      },
-                      child: CircleAvatar(
-                        radius: 20,
-                        backgroundImage: NetworkImage(snapshot.data!.profile!),
-                      ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              FutureBuilder<UserModel>(
+                  future: Provider.of<AuthProvider>(context, listen: false)
+                      .getCurrentUser(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return GestureDetector(
+                        onTap: () {
+                          Get.to(() => const UserProfileScreen());
+                        },
+                        child: CircleAvatar(
+                          radius: 20,
+                          backgroundImage: NetworkImage(snapshot.data!.profile!),
+                        ),
+                      );
+                    }
+                    return const CircleAvatar(
+                      backgroundImage: AssetImage('assets/images/avatar.png'),
                     );
-                  }
-                  return const CircleAvatar(
-                    backgroundImage: AssetImage('assets/images/avatar.jpeg'),
-                  );
-                }),
-            IconButton(
-              onPressed: () {
-                Get.to(() => const ChatScreen());
-              },
-              icon: const Icon(CupertinoIcons.text_bubble),
-            ),
-          ],
-        ),
+                  }),
+              IconButton(
+                onPressed: () {
+                  Get.to(() => const ChatScreen());
+                },
+                icon: const Icon(CupertinoIcons.text_bubble),
+              ),
+            ],
+          ),
       ),
     );
   }

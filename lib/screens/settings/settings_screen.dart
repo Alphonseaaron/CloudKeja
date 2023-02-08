@@ -36,33 +36,33 @@ class SettingsScreen extends StatelessWidget {
             return ListView(
               children: [
                 const SizedBox(height: 20),
-                GestureDetector(
-                  onTap: () {
-                    Get.to(() => const UserProfileScreen());
-                  },
-                  child: Column(
-                    children: [
-                      Center(
-                        child: CircleAvatar(
-                            radius: 50,
-                            backgroundImage:
-                                NetworkImage(snapshot.data!.profile!)),
-                      ),
-                      const SizedBox(height: 10),
-                      Center(
-                          child: Text(snapshot.data!.name!,
-                              style: const TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold))),
-                      const SizedBox(height: 5),
-                      const Center(
-                        child: Text(
-                          'Joined since 2 days ago',
-                          style: TextStyle(fontSize: 12, color: kPrimaryColor),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                // GestureDetector(
+                //   onTap: () {
+                //     Get.to(() => const UserProfileScreen());
+                //   },
+                //   child: Column(
+                //     children: [
+                //       Center(
+                //         child: CircleAvatar(
+                //             radius: 50,
+                //             backgroundImage:
+                //                 AssetImage(snapshot.data!.profile!)),
+                //       ),
+                //       const SizedBox(height: 10),
+                //       Center(
+                //           child: Text(snapshot.data!.name!,
+                //               style: const TextStyle(
+                //                   fontSize: 20, fontWeight: FontWeight.bold))),
+                //       const SizedBox(height: 5),
+                //       const Center(
+                //         child: Text(
+                //           'Joined since 2 days ago',
+                //           style: TextStyle(fontSize: 12, color: kPrimaryColor),
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
                 const SizedBox(height: 40),
                 buildListTile('Edit Profile', Icons.person_outline, () {
                   Get.to(() => EditProfileScreen());

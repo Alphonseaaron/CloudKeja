@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +28,6 @@ class _AddSpaceScreenState extends State<AddSpaceScreen> {
   List<Media> mediaList = [];
   bool isLoading = false;
   final formKey = GlobalKey<FormState>();
-
   String? ownerId;
   String? type;
   String? name;
@@ -261,7 +259,7 @@ class _AddSpaceScreenState extends State<AddSpaceScreen> {
               margin: const EdgeInsets.only(top: 24),
               child: const Text("More",
                   style:
-                      TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0)),
+                  TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0)),
             ),
 
             MyDropDown(
@@ -322,12 +320,12 @@ class _AddSpaceScreenState extends State<AddSpaceScreen> {
             InkWell(
               onTap: () {
                 Get.to(() => AddOnMap(
-                      onChanged: (val) {
-                        setState(() {
-                          propertyLocation = val;
-                        });
-                      },
-                    ));
+                  onChanged: (val) {
+                    setState(() {
+                      propertyLocation = val;
+                    });
+                  },
+                ));
               },
               child: Container(
                   margin: const EdgeInsets.only(top: 12),
@@ -357,7 +355,7 @@ class _AddSpaceScreenState extends State<AddSpaceScreen> {
               margin: const EdgeInsets.only(top: 24, bottom: 0),
               child: const Text("Photos",
                   style:
-                      TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0)),
+                  TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0)),
             ),
             InkWell(
               onTap: () {
@@ -406,30 +404,30 @@ class _AddSpaceScreenState extends State<AddSpaceScreen> {
                   ),
                   ...List.generate(
                       imageFiles.length,
-                      (index) => Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              SizedBox(
-                                height: 80,
-                                width: 80,
-                                child: Image.file(
-                                  imageFiles[index],
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              Positioned(
-                                  top: -5,
-                                  right: -5,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      imageFiles.remove(imageFiles[index]);
-                                      setState(() {});
-                                    },
-                                    child: const Icon(Icons.cancel,
-                                        color: Colors.pinkAccent),
-                                  ))
-                            ],
-                          ))
+                          (index) => Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          SizedBox(
+                            height: 80,
+                            width: 80,
+                            child: Image.file(
+                              imageFiles[index],
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Positioned(
+                              top: -5,
+                              right: -5,
+                              child: GestureDetector(
+                                onTap: () {
+                                  imageFiles.remove(imageFiles[index]);
+                                  setState(() {});
+                                },
+                                child: const Icon(Icons.cancel,
+                                    color: Colors.pinkAccent),
+                              ))
+                        ],
+                      ))
                 ],
               ),
             ),
@@ -453,45 +451,45 @@ class _AddSpaceScreenState extends State<AddSpaceScreen> {
                     onPressed: imageFiles.isEmpty || propertyLocation == null
                         ? null
                         : () async {
-                            setState(() {
-                              isLoading = true;
-                            });
-                            final space = SpaceModel(
-                              spaceName: name,
-                              description: description,
-                              price: double.parse(price!),
-                              address: address,
-                              location: GeoPoint(propertyLocation!.latitude,
-                                  propertyLocation!.longitude),
-                              imageFiles: imageFiles,
-                              ownerId: FirebaseAuth.instance.currentUser!.uid,
-                              category: category,
-                              likes: 0,
-                              size: area,
-                              features: {
-                                'beds': beds,
-                                'baths': baths,
-                                'floors': floors,
-                                'area': area,
-                              },
-                              rentTime: getRate(),
-                            );
+                      setState(() {
+                        isLoading = true;
+                      });
+                      final space = SpaceModel(
+                        spaceName: name,
+                        description: description,
+                        price: double.parse(price!),
+                        address: address,
+                        location: GeoPoint(propertyLocation!.latitude,
+                            propertyLocation!.longitude),
+                        imageFiles: imageFiles,
+                        ownerId: FirebaseAuth.instance.currentUser!.uid,
+                        category: category,
+                        likes: 0,
+                        size: area,
+                        features: {
+                          'beds': beds,
+                          'baths': baths,
+                          'floors': floors,
+                          'area': area,
+                        },
+                        rentTime: getRate(),
+                      );
 
-                            await Provider.of<PostProvider>(context,
-                                    listen: false)
-                                .addSpace(space);
+                      await Provider.of<PostProvider>(context,
+                          listen: false)
+                          .addSpace(space);
 
-                            setState(() {
-                              isLoading = false;
-                            });
-                            Navigator.of(context).pop();
-                          },
+                      setState(() {
+                        isLoading = false;
+                      });
+                      Navigator.of(context).pop();
+                    },
                     child: isLoading
                         ? const MyLoader()
                         : const Text("Add Property",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white)),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white)),
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(
                           kPrimaryColor,
@@ -510,12 +508,12 @@ class _AddSpaceScreenState extends State<AddSpaceScreen> {
   }
 
   Future<void> openImagePicker(
-    BuildContext context,
-    bool isCover,
-  ) async {
-    openCamera(onCapture: (image){
-      setState(()=> mediaList = [image]);
-    });
+      BuildContext context,
+      bool isCover,
+      ) async {
+    // openCamera(onCapture: (image){
+    //   setState(()=> mediaList = [image]);
+    // });
     showModalBottomSheet(
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
@@ -559,7 +557,7 @@ class _AddSpaceScreenState extends State<AddSpaceScreen> {
                       },
                       onCancel: () => Navigator.pop(context),
                       mediaCount:
-                          isCover ? MediaCount.single : MediaCount.multiple,
+                      isCover ? MediaCount.single : MediaCount.multiple,
                       mediaType: MediaType.image,
                       decoration: PickerDecoration(
                         cancelIcon: const Icon(Icons.close),
@@ -570,7 +568,7 @@ class _AddSpaceScreenState extends State<AddSpaceScreen> {
                         blurStrength: 2,
                         completeButtonStyle: const ButtonStyle(),
                         completeTextStyle:
-                            TextStyle(color: Theme.of(context).iconTheme.color),
+                        TextStyle(color: Theme.of(context).iconTheme.color),
                         completeText: 'Select',
                       ),
                     )),
@@ -578,3 +576,4 @@ class _AddSpaceScreenState extends State<AddSpaceScreen> {
         });
   }
 }
+

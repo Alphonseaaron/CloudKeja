@@ -29,7 +29,7 @@ class PaymentSuccessfulScreen extends StatelessWidget {
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 30),
             child: const Text(
-              'You have successfully paid for the space. Contact the space owner for more information on checking in. Thank you for using SpaceScape.',
+              'You have successfully paid for the space. Contact the space owner for more information on checking in. Thank you for using CloudKeja.',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey),
             ),

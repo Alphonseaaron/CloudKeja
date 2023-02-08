@@ -1,1 +1,1 @@
-const dbUrl = 'https://spacescape-default-rtdb.firebaseio.com/';
+const dbUrl = 'https://cloudkeja-d7e6b-default-rtdb.firebaseio.com/';

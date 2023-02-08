@@ -19,7 +19,7 @@ class _InitialLoadingScreenState extends State<InitialLoadingScreen> {
     // TODO: implement initState
     super.initState();
 
-    Future.delayed(Duration(seconds: 5), () async {
+    Future.delayed(Duration.zero, () async {
       final user = await Provider.of<AuthProvider>(context, listen: false)
           .getCurrentUser();
 
@@ -34,19 +34,7 @@ class _InitialLoadingScreenState extends State<InitialLoadingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Expanded(
-          child: Column(
-          children: [
-            Image.asset(
-              "assets/images/cloudkeja.png",
-              height: 100,
-              width: 300,
-            ),
-            LoadingEffect.getSearchLoadingScreen(context),
-          ]
-        ),)
-      )
+      body: LoadingEffect.getSearchLoadingScreen(context),
     );
   }
 }

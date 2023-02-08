@@ -265,7 +265,7 @@ class _EditSpaceScreenState extends State<EditSpaceScreen> {
               margin: const EdgeInsets.only(top: 24),
               child: const Text("More",
                   style:
-                      TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0)),
+                  TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0)),
             ),
 
             MyDropDown(
@@ -327,12 +327,12 @@ class _EditSpaceScreenState extends State<EditSpaceScreen> {
             InkWell(
               onTap: () {
                 Get.to(() => AddOnMap(
-                      onChanged: (val) {
-                        setState(() {
-                          propertyLocation = val;
-                        });
-                      },
-                    ));
+                  onChanged: (val) {
+                    setState(() {
+                      propertyLocation = val;
+                    });
+                  },
+                ));
               },
               child: Container(
                   margin: const EdgeInsets.only(top: 12),
@@ -362,33 +362,33 @@ class _EditSpaceScreenState extends State<EditSpaceScreen> {
               margin: const EdgeInsets.only(top: 24, bottom: 0),
               child: const Text("Photos",
                   style:
-                      TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0)),
+                  TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0)),
             ),
-            InkWell(
-              onTap: () {
-                openImagePicker(context, true);
-              },
-              child: Container(
-                  margin: const EdgeInsets.only(top: 12),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                          backgroundColor: Colors.grey[400],
-                          child: const Icon(Icons.camera_alt_outlined)),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      const Text('Cover Image'),
-                      const Spacer(),
-                      Icon(
-                        Icons.check_circle,
-                        color: coverImage == null
-                            ? Colors.grey[400]
-                            : Colors.green,
-                      )
-                    ],
-                  )),
-            ),
+            // InkWell(
+            //   onTap: () {
+            //     openImagePicker(context, true);
+            //   },
+            //   child: Container(
+            //       margin: const EdgeInsets.only(top: 12),
+            //       child: Row(
+            //         children: [
+            //           CircleAvatar(
+            //               backgroundColor: Colors.grey[400],
+            //               child: const Icon(Icons.camera_alt_outlined)),
+            //           const SizedBox(
+            //             width: 10,
+            //           ),
+            //           const Text('Cover Image'),
+            //           const Spacer(),
+            //           Icon(
+            //             Icons.check_circle,
+            //             color: coverImage == null
+            //                 ? Colors.grey[400]
+            //                 : Colors.green,
+            //           )
+            //         ],
+            //       )),
+            // ),
             const SizedBox(height: 10),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -411,30 +411,30 @@ class _EditSpaceScreenState extends State<EditSpaceScreen> {
                   ),
                   ...List.generate(
                       imageFiles.length,
-                      (index) => Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              SizedBox(
-                                height: 80,
-                                width: 80,
-                                child: Image.file(
-                                  imageFiles[index],
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              Positioned(
-                                  top: -5,
-                                  right: -5,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      imageFiles.remove(imageFiles[index]);
-                                      setState(() {});
-                                    },
-                                    child: const Icon(Icons.cancel,
-                                        color: Colors.pinkAccent),
-                                  ))
-                            ],
-                          ))
+                          (index) => Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          SizedBox(
+                            height: 80,
+                            width: 80,
+                            child: Image.file(
+                              imageFiles[index],
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Positioned(
+                              top: -5,
+                              right: -5,
+                              child: GestureDetector(
+                                onTap: () {
+                                  imageFiles.remove(imageFiles[index]);
+                                  setState(() {});
+                                },
+                                child: const Icon(Icons.cancel,
+                                    color: Colors.pinkAccent),
+                              ))
+                        ],
+                      ))
                 ],
               ),
             ),
@@ -462,16 +462,16 @@ class _EditSpaceScreenState extends State<EditSpaceScreen> {
                         content: const Text(
                             "Are you sure you want to delete this space?"),
                         actions: [
-                          TextButton(
+                          ElevatedButton(
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
                             child: const Text("Cancel"),
                           ),
-                          TextButton(
+                          ElevatedButton(
                             onPressed: () async {
                               await Provider.of<PostProvider>(context,
-                                      listen: false)
+                                  listen: false)
                                   .deleteSpace(widget.space.id!);
                               Navigator.of(context).pop();
                               Navigator.of(context).pop();
@@ -517,7 +517,7 @@ class _EditSpaceScreenState extends State<EditSpaceScreen> {
                         address: address ?? widget.space.address,
                         location: propertyLocation != null
                             ? GeoPoint(propertyLocation!.latitude,
-                                propertyLocation!.longitude)
+                            propertyLocation!.longitude)
                             : widget.space.location,
                         imageFiles: imageFiles,
                         ownerId: FirebaseAuth.instance.currentUser!.uid,
@@ -545,9 +545,9 @@ class _EditSpaceScreenState extends State<EditSpaceScreen> {
                     child: isLoading
                         ? const MyLoader()
                         : const Text("Save Changes",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white)),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white)),
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(
                           kPrimaryColor,
@@ -566,12 +566,12 @@ class _EditSpaceScreenState extends State<EditSpaceScreen> {
   }
 
   Future<void> openImagePicker(
-    BuildContext context,
-    bool isCover,
-  ) async {
-    openCamera(onCapture: (image){
-      setState(()=> mediaList = [image]);
-    });
+      BuildContext context,
+      bool isCover,
+      ) async {
+    // openCamera(onCapture: (image){
+    //   setState(()=> mediaList = [image]);
+    // });
     showModalBottomSheet(
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
@@ -615,7 +615,7 @@ class _EditSpaceScreenState extends State<EditSpaceScreen> {
                       },
                       onCancel: () => Navigator.pop(context),
                       mediaCount:
-                          isCover ? MediaCount.single : MediaCount.multiple,
+                      isCover ? MediaCount.single : MediaCount.multiple,
                       mediaType: MediaType.image,
                       decoration: PickerDecoration(
                         cancelIcon: const Icon(Icons.close),
@@ -626,7 +626,7 @@ class _EditSpaceScreenState extends State<EditSpaceScreen> {
                         blurStrength: 2,
                         completeButtonStyle: const ButtonStyle(),
                         completeTextStyle:
-                            TextStyle(color: Theme.of(context).iconTheme.color),
+                        TextStyle(color: Theme.of(context).iconTheme.color),
                         completeText: 'Select',
                       ),
                     )),

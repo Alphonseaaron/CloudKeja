@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/route_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:cloudkeja/helpers/constants.dart';
@@ -9,7 +11,6 @@ import 'package:cloudkeja/screens/auth/widgets/custom_checkbox.dart';
 import 'package:cloudkeja/screens/auth/widgets/primary_button.dart';
 import 'package:cloudkeja/screens/home/my_nav.dart';
 import 'package:image_picker/image_picker.dart';
-
 import 'theme.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -27,29 +28,50 @@ class _RegisterPageState extends State<RegisterPage> {
       passwordVisible = !passwordVisible;
     });
   }
-  String? profile, name, idnumber,  email, password, phone, passwordConfrimation;
-  // late File profile;
+  String? name, idnumber,  email, password, phone, passwordConfrimation;
+  // File? _imageFile;
   bool isLoading = false;
   final _formKey = GlobalKey<FormState>();
-
-  final ImagePicker _picker = ImagePicker();
-
+  // final ImagePicker _picker = ImagePicker();
   // Function to select and display profile picture
-  _selectProfilePic() async {
-    var image = await _picker.pickImage(source: ImageSource.gallery);
-    setState(() {
-      profile = image as String?;
-    });
-  }
+  // Future pickImage() async {
+  //   try {
+  //     final image = await ImagePicker().pickImage(source: ImageSource.gallery);
+  //     if (image == null) return;
+  //     final imageTemporary = File(image.path);
+  //     this.image = imageTemporary;
+  //     setState(() => this.image = imageTemporary);
+  //   } on PlatformException catch (e) {
+  //     print('Failed to pick image: $e');
+  //   }
+  //   final bytes = await image!.readAsBytes();
+  //   print (imageBytes);
+  //   String base64Image = base64Encode(imageBytes);
+  //   print (base64Image);
+  // }
 
+
+//   Future _pickImageBase64() async {
+//     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+//     if (image == null) return;
+//
+//     Uint8List imagebyte = await image.readAsBytes();
+//     String _base64 = base64.encode(imagebyte);
+//     print (_base64);
+//
+//     final imageTemporaryPath = File(image.path);
+//     setState(() {
+//       this._imageFile = imageTemporaryPath;
+//     });
+//     print (imageTemporaryPath);
+// }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: SafeArea(
+      body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24.0, 40.0, 24.0, 0),
             child: Form(
@@ -79,24 +101,63 @@ class _RegisterPageState extends State<RegisterPage> {
                   Form(
                     child: Column(
                       children: [
-                        Center(
-                          child: profile == null
-                              ? CircleAvatar(
-                            radius: 80,
-                            backgroundColor: Colors.grey[200],
-                            child: IconButton(
-                              icon: Icon(Icons.add_a_photo),
-                              onPressed: _selectProfilePic,
-                            ),
-                          )
-                              : CircleAvatar(radius: 80,
-                            backgroundImage: FileImage(profile as File),
-                            child: IconButton(
-                              icon: Icon(Icons.add_a_photo),
-                              onPressed: _selectProfilePic,
-                            ),
-                          ),
-                        ),
+                        // Center(
+                        //   child: _imageFile == null
+                        //       ?  Container(
+                        //       padding: const EdgeInsets.all(5),
+                        //       decoration: BoxDecoration(
+                        //         color: Theme.of(context).cardColor,
+                        //         shape: BoxShape.circle,
+                        //       ),
+                        //       child: CircleAvatar(
+                        //         radius: 80,
+                        //         backgroundColor: Colors.grey[200],
+                        //         child: Stack(
+                        //             children: [
+                        //               Align(
+                        //                 alignment: Alignment.bottomRight,
+                        //                 child: CircleAvatar(
+                        //                   radius: 20,
+                        //                   backgroundColor: Colors.blueAccent,
+                        //                   child: IconButton(
+                        //                     icon: Icon(Icons.add_a_photo),
+                        //                     onPressed: _pickImageBase64,
+                        //                   ),
+                        //                 ),
+                        //               ),
+                        //             ]
+                        //         ),
+                        //       )
+                        //   )
+                        //       : Container(
+                        //     padding: const EdgeInsets.all(5),
+                        //     decoration: BoxDecoration(
+                        //       color: Theme.of(context).cardColor,
+                        //       shape: BoxShape.circle,
+                        //     ),
+                        //     child: CircleAvatar(
+                        //       radius: 80,
+                        //       backgroundImage: FileImage(
+                        //         _imageFile!,
+                        //       ),
+                        //       child: Stack(
+                        //           children: [
+                        //             Align(
+                        //               alignment: Alignment.bottomRight,
+                        //               child: CircleAvatar(
+                        //                 radius: 20,
+                        //                 backgroundColor: Colors.blueAccent,
+                        //                 child: IconButton(
+                        //                   icon: Icon(Icons.edit),
+                        //                   onPressed: _pickImageBase64,
+                        //                 ),
+                        //               ),
+                        //             ),
+                        //           ]
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
                         const SizedBox(
                           height: 20,
                         ),
@@ -113,13 +174,13 @@ class _RegisterPageState extends State<RegisterPage> {
                             },
                             validator: (val) {
                               if (val!.isEmpty) {
-                                return 'Please enter your full names';
+                                return 'Full names according to Mpesa';
                               }
                               return null;
                             },
                             decoration: InputDecoration(
                               prefixIcon: Icon(Icons.account_circle_rounded),
-                              hintText: 'Full Name As In Your ID Number',
+                              hintText: 'Full names as they appear in your ID Number',
                               hintStyle: heading6.copyWith(color: textGrey),
                               border: const OutlineInputBorder(
                                 borderSide: BorderSide.none,
@@ -353,7 +414,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   CustomPrimaryButton(
                     buttonColor: kPrimaryColor,
                     onTap: () async {
-                      if (profile != null) {
                         if (_formKey.currentState!.validate()) {
                           setState(() {
                             isLoading = true;
@@ -367,7 +427,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             phone: phone,
                             isAdmin: false,
                             isLandlord: false,
-                            profile: profile,
+                            profile: 'https://firebasestorage.googleapis.com/v0/b/cloudkeja-d7e6b.appspot.com/o/userData%2FprofilePics%2Favatar.png?alt=media&token=d41075f9-6611-40f3-9c46-80730625530e',
                             rentedPlaces: [],
                             wishlist: [],
                           );
@@ -397,7 +457,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                 ));
                           }
                         }
-                      }
+                      // }
                     },
                     textValue: 'Register',
                     textColor: Colors.white,
@@ -433,7 +493,6 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
           ),
         ),
-      ),
     );
   }
 }

@@ -14,7 +14,7 @@ import firebase_storage
 import location
 import path_provider_macos
 import photo_manager
-import shared_preferences_macos
+import shared_preferences_foundation
 import sqflite
 import url_launcher_macos
 
