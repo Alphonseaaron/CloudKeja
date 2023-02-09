@@ -25,8 +25,8 @@ import 'package:mpesa_flutter_plugin/mpesa_flutter_plugin.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 
-  int _getCommissionRate(int amount) {
-    int commission;
+  double _getCommissionRate(double amount) {
+    double commission;
     if (amount >= 0 && amount <= 50000) {
       commission = 50;
     } else if (amount > 50000 && amount <= 100000) {
@@ -45,11 +45,11 @@ import 'package:fluttertoast/fluttertoast.dart';
     return commission;
   }
 
-Future<void> mpesaPayment({String? phone, String? bankNumber, String? bankBusinessNumber, int? amount}) async {
+Future<void> mpesaPayment({String? phone, String? bankNumber, String? bankBusinessNumber, double? amount}) async {
     MpesaFlutterPlugin.setConsumerKey('KwxqAJ8AqXc0KNwsdhjYT66tvp5SnkEL');
     MpesaFlutterPlugin.setConsumerSecret('2elwsWNTGnCA2nUL');
-    int commissionAmount = _getCommissionRate(amount!);
-    int landlordAmount = amount - commissionAmount;
+    double commissionAmount = _getCommissionRate(amount!);
+    double landlordAmount = amount - commissionAmount;
 
     // Deduct commission to your till number (174359)
     MpesaFlutterPlugin.initializeMpesaSTKPush(
