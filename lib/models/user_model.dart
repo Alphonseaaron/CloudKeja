@@ -14,6 +14,12 @@ class UserModel {
   final String? bankNumber;
   final bool? isAdmin;
   final double? balance;
+  final String? role;
+  final List<String>? certifications;
+  final List<String>? servicesOffered;
+  final List<String>? serviceAreas;
+  final Map<String, dynamic>? availabilitySchedule;
+  final bool? isVerified;
 
   UserModel({
     this.userId,
@@ -30,6 +36,12 @@ class UserModel {
     this.rentedPlaces,
     this.wishlist,
     this.balance,
+    this.role,
+    this.certifications,
+    this.servicesOffered,
+    this.serviceAreas,
+    this.availabilitySchedule,
+    this.isVerified = false,
   });
 
   Map<String, dynamic> toJson() => {
@@ -47,6 +59,12 @@ class UserModel {
         'rentedPlaces': rentedPlaces,
         'wishlist': wishlist,
         'balance': 0,
+        'role': role,
+        'certifications': certifications,
+        'servicesOffered': servicesOffered,
+        'serviceAreas': serviceAreas,
+        'availabilitySchedule': availabilitySchedule,
+        'isVerified': isVerified ?? false,
       };
 
   factory UserModel.fromJson(dynamic json) {
@@ -65,6 +83,12 @@ class UserModel {
       rentedPlaces: json['rentedPlaces'],
       wishlist: json['wishlist'],
       balance: double.parse(json['balance'].toString()),
+      role: json['role'],
+      certifications: json['certifications'] != null ? List<String>.from(json['certifications']) : null,
+      servicesOffered: json['servicesOffered'] != null ? List<String>.from(json['servicesOffered']) : null,
+      serviceAreas: json['serviceAreas'] != null ? List<String>.from(json['serviceAreas']) : null,
+      availabilitySchedule: json['availabilitySchedule'] != null ? Map<String, dynamic>.from(json['availabilitySchedule']) : null,
+      isVerified: json['isVerified'] ?? false,
     );
   }
 }

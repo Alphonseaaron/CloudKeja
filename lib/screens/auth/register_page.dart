@@ -11,6 +11,7 @@ import 'package:cloudkeja/screens/auth/widgets/custom_checkbox.dart';
 import 'package:cloudkeja/screens/auth/widgets/primary_button.dart';
 import 'package:cloudkeja/screens/home/my_nav.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'theme.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -29,6 +30,11 @@ class _RegisterPageState extends State<RegisterPage> {
     });
   }
   String? name, idnumber,  email, password, phone, passwordConfrimation;
+  String? selectedRole;
+  List<XFile>? certificationFiles;
+  String? servicesOfferedText;
+  String? serviceAreasText;
+
   // File? _imageFile;
   bool isLoading = false;
   final _formKey = GlobalKey<FormState>();
@@ -380,12 +386,146 @@ class _RegisterPageState extends State<RegisterPage> {
                             ),
                           ),
                         ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: textWhiteGrey,
+                            borderRadius: BorderRadius.circular(14.0),
+                          ),
+                          child: DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                              hintText: 'Select Role',
+                              hintStyle: heading6.copyWith(color: textGrey),
+                              prefixIcon: Icon(Icons.person_pin_rounded),
+                              border: const OutlineInputBorder(
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                            value: selectedRole,
+                            items: ['Tenant', 'Landlord', 'ServiceProvider']
+                                .map((role) => DropdownMenuItem(
+                                      value: role,
+                                      child: Text(role),
+                                    ))
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedRole = value;
+                                // Reset service provider fields when role changes
+                                certificationFiles = null;
+                                servicesOfferedText = null;
+                                serviceAreasText = null;
+                              });
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please select a role';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
                       ],
                     ),
                   ),
                   const SizedBox(
                     height: 20,
                   ),
+                  // Conditional Fields for Service Provider
+                  if (selectedRole == 'ServiceProvider') ...[
+                    Container(
+                      decoration: BoxDecoration(
+                        color: textWhiteGrey,
+                        borderRadius: BorderRadius.circular(14.0),
+                      ),
+                      child: TextFormField(
+                        onChanged: (val) {
+                          setState(() {
+                            servicesOfferedText = val;
+                          });
+                        },
+                        validator: (val) {
+                          if (selectedRole == 'ServiceProvider' && (val == null || val.isEmpty)) {
+                            return 'Please enter services offered';
+                          }
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.miscellaneous_services),
+                          hintText: 'Services Offered (comma-separated)',
+                          hintStyle: heading6.copyWith(color: textGrey),
+                          border: const OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: textWhiteGrey,
+                        borderRadius: BorderRadius.circular(14.0),
+                      ),
+                      child: TextFormField(
+                        onChanged: (val) {
+                          setState(() {
+                            serviceAreasText = val;
+                          });
+                        },
+                        validator: (val) {
+                          if (selectedRole == 'ServiceProvider' && (val == null || val.isEmpty)) {
+                            return 'Please enter service areas';
+                          }
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.map_outlined),
+                          hintText: 'Service Areas (comma-separated)',
+                          hintStyle: heading6.copyWith(color: textGrey),
+                          border: const OutlineInputBorder(
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      icon: Icon(Icons.upload_file),
+                      label: Text(certificationFiles == null || certificationFiles!.isEmpty
+                          ? 'Upload Certifications'
+                          : '${certificationFiles!.length} file(s) selected'),
+                      onPressed: () async {
+                        final ImagePicker picker = ImagePicker();
+                        final List<XFile>? pickedFiles = await picker.pickMultiImage();
+                        if (pickedFiles != null && pickedFiles.isNotEmpty) {
+                          setState(() {
+                            certificationFiles = pickedFiles;
+                          });
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kPrimaryColor,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.0),
+                        ),
+                      ),
+                    ),
+                    if (certificationFiles != null && certificationFiles!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Wrap(
+                          spacing: 8.0,
+                          runSpacing: 4.0,
+                          children: certificationFiles!
+                              .map((file) => Chip(label: Text(file.name)))
+                              .toList(),
+                        ),
+                      ),
+                    const SizedBox(height: 20),
+                  ],
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
@@ -426,11 +566,50 @@ class _RegisterPageState extends State<RegisterPage> {
                             name: name,
                             phone: phone,
                             isAdmin: false,
-                            isLandlord: false,
+                            isLandlord: selectedRole == 'Landlord',
                             profile: 'https://firebasestorage.googleapis.com/v0/b/cloudkeja-d7e6b.appspot.com/o/userData%2FprofilePics%2Favatar.png?alt=media&token=d41075f9-6611-40f3-9c46-80730625530e',
                             rentedPlaces: [],
                             wishlist: [],
+                            role: selectedRole,
+                            // Service provider specific fields are handled below
                           );
+
+                          if (selectedRole == 'ServiceProvider') {
+                            // Validate service provider specific fields
+                            if (certificationFiles == null || certificationFiles!.isEmpty) {
+                              throw Exception('Please upload at least one certification.');
+                            }
+                             if (servicesOfferedText == null || servicesOfferedText!.isEmpty) {
+                              throw Exception('Please enter services offered.');
+                            }
+                            if (serviceAreasText == null || serviceAreasText!.isEmpty) {
+                              throw Exception('Please enter service areas.');
+                            }
+
+
+                            List<String> certificationUrls = [];
+                            try {
+                              for (XFile file in certificationFiles!) {
+                                String fileName = DateTime.now().millisecondsSinceEpoch.toString() + '_' + file.name;
+                                firebase_storage.Reference ref = firebase_storage.FirebaseStorage.instance
+                                    .ref()
+                                    .child('users_certs/${user.userId ?? DateTime.now().millisecondsSinceEpoch.toString()}/$fileName'); // Ensure userId is available or use a placeholder
+                                firebase_storage.UploadTask uploadTask = ref.putData(await file.readAsBytes());
+                                firebase_storage.TaskSnapshot snapshot = await uploadTask;
+                                String downloadUrl = await snapshot.ref.getDownloadURL();
+                                certificationUrls.add(downloadUrl);
+                              }
+                            } catch (e) {
+                              setState(() => isLoading = false);
+                              throw Exception('Error uploading certifications: $e');
+                            }
+                            
+
+                            user.certifications = certificationUrls;
+                            user.servicesOffered = servicesOfferedText?.split(',').map((e) => e.trim()).toList() ?? [];
+                            user.serviceAreas = serviceAreasText?.split(',').map((e) => e.trim()).toList() ?? [];
+                            user.availabilitySchedule = {'monday': '9am-5pm', 'tuesday': '9am-5pm', 'wednesday': '9am-5pm', 'thursday': '9am-5pm', 'friday': '9am-5pm'}; // Default schedule
+                          }
 
                           try {
                             await Provider.of<AuthProvider>(context,
