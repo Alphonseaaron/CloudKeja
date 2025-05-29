@@ -1,16 +1,16 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart'; // Used for chat functionality only
+// import 'package:firebase_auth/firebase_auth.dart'; // Used for chat functionality only
+import 'package:flutter/cupertino.dart'; // For CupertinoIcons, consider replacing with Material
 import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart'; // Used by SpaceLocation
 import 'package:provider/provider.dart';
-import 'package:cloudkeja/helpers/constants.dart';
-import 'package:cloudkeja/helpers/review_widget.dart';
-import 'package:cloudkeja/models/chat_provider.dart';
-
+// import 'package:cloudkeja/helpers/constants.dart'; // Old constants, replaced by theme
+import 'package:cloudkeja/helpers/review_widget.dart'; // UserReview widget
+import 'package:cloudkeja/models/chat_provider.dart'; // For chat
 import 'package:cloudkeja/models/space_model.dart';
-import 'package:cloudkeja/models/user_model.dart';
+import 'package:cloudkeja/models/user_model.dart'; // For chat owner details
+import 'package:cloudkeja/providers/auth_provider.dart'; // For current user ID in chat
 import 'package:cloudkeja/screens/chat/chat_room.dart';
 import 'package:cloudkeja/screens/details/space_location.dart';
 import 'package:cloudkeja/screens/details/owner_tile.dart';
@@ -28,153 +28,172 @@ class Details extends StatelessWidget {
     required this.space,
   }) : super(key: key);
 
+  // Helper for section titles
+  Widget _buildSectionTitle(BuildContext context, String title) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 20.0, bottom: 12.0),
+        child: Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        ),
+      ),
+    );
+  }
+  
+  // Helper for wrapping content sections
+  Widget _buildSectionContent(Widget content) {
+    return SliverToBoxAdapter(
+      child: content, // ContentIntro, HouseInfo, etc. already have their own padding.
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
     return Scaffold(
+      backgroundColor: colorScheme.background,
+      // Using Stack to keep the bottom action bar persistent over scrollable content
       body: Stack(
         children: [
-          ListView(
-            shrinkWrap: true,
-            children: [
-              DetailsAppBar(space: space),
-              const SizedBox(height: 20),
-              ContentIntro(space: space),
-              const SizedBox(height: 20),
-              const HouseInfo(),
-              const SizedBox(height: 5),
-              OwnerTile(
-                userId: space.ownerId,
-              ),
-              const SizedBox(height: 5),
-              About(
-                space: space,
-              ),
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Text('Reviews',
-                    style: Theme.of(context).textTheme.headline1!.copyWith(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        )),
-              ),
-              const SizedBox(height: 5),
-              SpaceReviews(spaceId: space.id!),
-              const SizedBox(height: 5),
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 10),
-                height: 65,
+          CustomScrollView(
+            slivers: [
+              // DetailsAppBar is not a true SliverAppBar, so it's treated as regular content.
+              // If it were a SliverAppBar, it would integrate with CustomScrollView's scrolling.
+              _buildSectionContent(DetailsAppBar(space: space)),
+              _buildSectionContent(const SizedBox(height: 16)), // Spacing after app bar
+              _buildSectionContent(ContentIntro(space: space)),
+              _buildSectionContent(const SizedBox(height: 16)),
+              _buildSectionContent(const HouseInfo()), // Assumes HouseInfo has its own padding
+              _buildSectionContent(OwnerTile(userId: space.ownerId)),
+              _buildSectionContent(About(space: space)),
+              
+              _buildSectionTitle(context, 'Reviews & Ratings'),
+              _buildSectionContent(SpaceReviews(spaceId: space.id!)),
+              SliverToBoxAdapter( // For the "Add Review" button
                 child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: OutlinedButton(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.rate_review_outlined),
+                    label: const Text('Write a Review'),
                     onPressed: () {
                       showDialog(
-                          barrierDismissible: false,
-                          context: context,
-                          builder: (context) => SimpleDialog(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5)),
-                                  children: [
-                                    UserReview(
-                                      space.id!,
-                                    )
-                                  ]));
+                        barrierDismissible: true, // Allow dismissing by tapping outside
+                        context: context,
+                        builder: (context) => AlertDialog( // Using AlertDialog for better M3 theming
+                          contentPadding: EdgeInsets.zero, // UserReview has its own padding
+                          // title: Text('Leave a Review', style: textTheme.titleLarge), // Title can be part of UserReview
+                          content: UserReview(space.id!),
+                          shape: theme.dialogTheme.shape, // Uses global DialogTheme shape
+                        ),
+                      );
                     },
-                    style: ElevatedButton.styleFrom(
-                      primary: kPrimaryColor,
-                    ),
-                    child: const Text('Add Review'),
+                    // Style will come from OutlinedButtonThemeData
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
-              SpaceLocation(
-                imageUrl: space.images!.first,
-                location:
-                    LatLng(space.location!.latitude, space.location!.longitude),
+              
+              // SpaceLocation section (already includes its own title and padding)
+              _buildSectionContent(SpaceLocation(
+                location: (space.location != null) 
+                  ? LatLng(space.location!.latitude, space.location!.longitude) 
+                  : null, // Handle null location gracefully
+                imageUrl: space.images?.first,
+                spaceName: space.spaceName,
+              )),
+              
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 100), // Space for the floating action bar at the bottom
               ),
-              const SizedBox(height: 80),
             ],
           ),
+
+          // Bottom Action Bar (Book Now & Chat)
           Positioned(
-            bottom: 15,
+            bottom: 0,
             left: 0,
             right: 0,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0)
+                  .copyWith(bottom: MediaQuery.of(context).padding.bottom + 12.0), // Consider safe area
+              decoration: BoxDecoration(
+                color: colorScheme.surface, // Use surface color for background
+                boxShadow: [
+                  BoxShadow(
+                    color: colorScheme.shadow.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+                // border: Border(top: BorderSide(color: colorScheme.outline.withOpacity(0.5)))
+              ),
               child: Row(
                 children: [
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        Get.off(() => PaymentScreen(
-                              space: space,
-                            ));
+                        // Check if user is owner - if so, disable booking
+                        final currentUser = Provider.of<AuthProvider>(context, listen: false).user;
+                        if (currentUser?.userId == space.ownerId) {
+                           ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('You cannot book your own space.', style: TextStyle(color: colorScheme.onError)), backgroundColor: colorScheme.error),
+                          );
+                          return;
+                        }
+                        Get.to(() => PaymentScreen(space: space));
                       },
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        primary: Theme.of(context).primaryColor,
+                      // Style will come from ElevatedButtonThemeData
+                      // Ensure button height is adequate
+                      style: theme.elevatedButtonTheme.style?.copyWith(
+                        padding: MaterialStateProperty.all(const EdgeInsets.symmetric(vertical: 16)),
                       ),
-                      child: Container(
-                        alignment: Alignment.center,
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                        child: const Text(
-                          'Book Now',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                      child: Text('Book Now', style: textTheme.labelLarge?.copyWith(color: colorScheme.onPrimary)),
                     ),
                   ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  InkWell(
-                    onTap: () async {
-                      final users =
-                          Provider.of<ChatProvider>(context, listen: false)
-                              .contactedUsers;
-                      List<String> room = users.map<String>((e) {
-                        return e.chatRoomId!.contains(
-                                FirebaseAuth.instance.currentUser!.uid +
-                                    '_' +
-                                    space.ownerId!)
-                            ? FirebaseAuth.instance.currentUser!.uid +
-                                '_' +
-                                space.ownerId!
-                            : space.ownerId! +
-                                '_' +
-                                FirebaseAuth.instance.currentUser!.uid;
-                      }).toList();
-                      await FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(space.ownerId!)
-                          .get()
-                          .then((value) {
-                        Navigator.of(context)
-                            .pushNamed(ChatRoom.routeName, arguments: {
-                          'user': UserModel.fromJson(value),
-                          'chatRoomId': room.isEmpty
-                              ? FirebaseAuth.instance.currentUser!.uid +
-                                  '_' +
-                                  space.ownerId!
-                              : room.first,
-                        });
-                      });
+                  const SizedBox(width: 12),
+                  IconButton.filledTonal( // M3 style icon button
+                    onPressed: () async {
+                      // Chat functionality (remains largely the same logic)
+                      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                      if (authProvider.user == null) {
+                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Please log in to chat.', style: TextStyle(color: colorScheme.onError)), backgroundColor: colorScheme.error));
+                         return;
+                      }
+                      if (authProvider.user?.userId == space.ownerId) {
+                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('You cannot chat about your own space.', style: TextStyle(color: colorScheme.onError)), backgroundColor: colorScheme.error));
+                         return;
+                      }
+
+                      // Simplified chat room ID logic (can be more robust)
+                      String chatRoomId;
+                      if (authProvider.user!.userId!.compareTo(space.ownerId!) > 0) {
+                        chatRoomId = '${authProvider.user!.userId}_${space.ownerId}';
+                      } else {
+                        chatRoomId = '${space.ownerId}_${authProvider.user!.userId}';
+                      }
+                      
+                      // Fetch owner details for chat screen
+                      UserModel? ownerDetails = await authProvider.getOwnerDetails(space.ownerId!);
+                      if (ownerDetails != null) {
+                         Navigator.of(context).pushNamed(ChatRoom.routeName, arguments: {
+                           'user': ownerDetails, // The user to chat with (owner)
+                           'chatRoomId': chatRoomId,
+                         });
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not load owner details for chat.', style: TextStyle(color: colorScheme.onError)), backgroundColor: colorScheme.error));
+                      }
                     },
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: kPrimaryColor),
-                      child: const Icon(CupertinoIcons.text_bubble,
-                          color: Colors.white),
-                    ),
+                    icon: Icon(CupertinoIcons.text_bubble, color: colorScheme.onPrimaryContainer), // Consider Material Icons.chat_bubble_outline
+                    // style: IconButton.styleFrom(
+                    //   backgroundColor: colorScheme.primaryContainer, // M3 filledTonal uses this
+                    //   foregroundColor: colorScheme.onPrimaryContainer,
+                    //   padding: const EdgeInsets.all(16),
+                    // ),
+                     tooltip: 'Chat with Owner',
                   ),
                 ],
               ),

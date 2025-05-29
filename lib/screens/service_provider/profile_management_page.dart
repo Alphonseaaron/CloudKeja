@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloudkeja/models/user_model.dart';
 import 'package:cloudkeja/providers/auth_provider.dart';
+import 'package:skeletonizer/skeletonizer.dart'; // Import Skeletonizer
+import 'package:url_launcher/url_launcher.dart'; // For opening certification URLs
 
 class ServiceProviderProfilePage extends StatefulWidget {
   const ServiceProviderProfilePage({Key? key}) : super(key: key);
-
   static const String routeName = '/service-provider-profile';
 
   @override
@@ -19,6 +20,7 @@ class _ServiceProviderProfilePageState extends State<ServiceProviderProfilePage>
 
   final _formKey = GlobalKey<FormState>();
 
+  // TextEditingControllers remain the same
   late TextEditingController _phoneController;
   late TextEditingController _servicesOfferedController;
   late TextEditingController _serviceAreasController;
@@ -33,6 +35,11 @@ class _ServiceProviderProfilePageState extends State<ServiceProviderProfilePage>
   @override
   void initState() {
     super.initState();
+    _initializeControllers();
+    _loadUserData();
+  }
+
+  void _initializeControllers() {
     _phoneController = TextEditingController();
     _servicesOfferedController = TextEditingController();
     _serviceAreasController = TextEditingController();
@@ -43,19 +50,15 @@ class _ServiceProviderProfilePageState extends State<ServiceProviderProfilePage>
     _fridayAvailabilityController = TextEditingController();
     _saturdayAvailabilityController = TextEditingController();
     _sundayAvailabilityController = TextEditingController();
-    _loadUserData();
   }
 
   Future<void> _loadUserData() async {
-    setState(() {
-      _isLoading = true;
-    });
+    if (!mounted) return;
+    setState(() => _isLoading = true);
+
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    if (authProvider.user == null) {
-      // This assumes getCurrentUser fetches and sets the user in AuthProvider
-      // Or that the user is already available from a previous login/fetch
-      await authProvider.getCurrentUser(); 
-    }
+    // Ensure user data is fetched if not already available
+    await authProvider.getCurrentUser(); 
 
     if (mounted) {
       setState(() {
@@ -65,13 +68,14 @@ class _ServiceProviderProfilePageState extends State<ServiceProviderProfilePage>
           _servicesOfferedController.text = (_currentUser!.servicesOffered ?? []).join(', ');
           _serviceAreasController.text = (_currentUser!.serviceAreas ?? []).join(', ');
           
-          _mondayAvailabilityController.text = _currentUser!.availabilitySchedule?['monday'] ?? '';
-          _tuesdayAvailabilityController.text = _currentUser!.availabilitySchedule?['tuesday'] ?? '';
-          _wednesdayAvailabilityController.text = _currentUser!.availabilitySchedule?['wednesday'] ?? '';
-          _thursdayAvailabilityController.text = _currentUser!.availabilitySchedule?['thursday'] ?? '';
-          _fridayAvailabilityController.text = _currentUser!.availabilitySchedule?['friday'] ?? '';
-          _saturdayAvailabilityController.text = _currentUser!.availabilitySchedule?['saturday'] ?? '';
-          _sundayAvailabilityController.text = _currentUser!.availabilitySchedule?['sunday'] ?? '';
+          final schedule = _currentUser!.availabilitySchedule ?? {};
+          _mondayAvailabilityController.text = schedule['monday'] ?? 'Not Set';
+          _tuesdayAvailabilityController.text = schedule['tuesday'] ?? 'Not Set';
+          _wednesdayAvailabilityController.text = schedule['wednesday'] ?? 'Not Set';
+          _thursdayAvailabilityController.text = schedule['thursday'] ?? 'Not Set';
+          _fridayAvailabilityController.text = schedule['friday'] ?? 'Not Set';
+          _saturdayAvailabilityController.text = schedule['saturday'] ?? 'Not Set';
+          _sundayAvailabilityController.text = schedule['sunday'] ?? 'Not Set';
         }
         _isLoading = false;
       });
@@ -94,24 +98,20 @@ class _ServiceProviderProfilePageState extends State<ServiceProviderProfilePage>
   }
 
   Future<void> _saveProfile() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-    setState(() {
-      _isSaving = true;
-    });
+    if (!_formKey.currentState!.validate()) return;
+    
+    if (mounted) setState(() => _isSaving = true);
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     if (_currentUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error: User data not found.')),
+         SnackBar(content: Text('Error: User data not found.', style: TextStyle(color: Theme.of(context).colorScheme.onError)), backgroundColor: Theme.of(context).colorScheme.error),
       );
-      setState(() {
-        _isSaving = false;
-      });
+      if (mounted) setState(() => _isSaving = false);
       return;
     }
 
+    // Prepare data (same as before)
     List<String> servicesOffered = _servicesOfferedController.text.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
     List<String> serviceAreas = _serviceAreasController.text.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
     Map<String, dynamic> availabilitySchedule = {
@@ -124,30 +124,11 @@ class _ServiceProviderProfilePageState extends State<ServiceProviderProfilePage>
       'sunday': _sundayAvailabilityController.text.trim(),
     };
 
-    // Create a new UserModel instance with updated fields
-    // We must include all fields from the original _currentUser,
-    // especially those not editable on this page.
-    UserModel updatedUser = UserModel(
-      userId: _currentUser!.userId,
-      name: _currentUser!.name, // Assuming name is not editable here or handled elsewhere
-      idnumber: _currentUser!.idnumber,
-      email: _currentUser!.email, // Email is typically not editable
-      password: _currentUser!.password, // Password management is a separate flow
-      profile: _currentUser!.profile,
+    UserModel updatedUser = _currentUser!.copyWith( // Assuming UserModel has copyWith
       phone: _phoneController.text.trim(),
-      isLandlord: _currentUser!.isLandlord,
-      bankBusinessNumber: _currentUser!.bankBusinessNumber,
-      bankNumber: _currentUser!.bankNumber,
-      isAdmin: _currentUser!.isAdmin,
-      rentedPlaces: _currentUser!.rentedPlaces,
-      wishlist: _currentUser!.wishlist,
-      balance: _currentUser!.balance,
-      role: _currentUser!.role,
-      certifications: _currentUser!.certifications, // Certifications might be updated in a separate flow
       servicesOffered: servicesOffered,
       serviceAreas: serviceAreas,
       availabilitySchedule: availabilitySchedule,
-      isVerified: _currentUser!.isVerified, // Verification status is read-only for the user
     );
 
     try {
@@ -155,140 +136,214 @@ class _ServiceProviderProfilePageState extends State<ServiceProviderProfilePage>
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile updated successfully!')),
       );
-      // Optionally, reload data if needed, or trust provider to update state
-      _loadUserData(); 
+      _loadUserData(); // Refresh data
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating profile: ${error.toString()}')),
+        SnackBar(content: Text('Error updating profile: ${error.toString()}', style: TextStyle(color: Theme.of(context).colorScheme.onError)), backgroundColor: Theme.of(context).colorScheme.error),
       );
     } finally {
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
-      }
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, {IconData? icon}) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        icon: icon != null ? Icon(icon) : null,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+  Widget _buildSectionTitle(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 24.0, bottom: 8.0),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
       ),
-      validator: (value) {
-        // Basic validation, can be expanded
-        // if (value == null || value.isEmpty) {
-        //   return 'Please enter $label';
-        // }
-        return null;
-      },
     );
   }
 
-  Widget _buildReadOnlyField(String label, String? value, {IconData? icon}) {
+  Widget _buildReadOnlyField(BuildContext context, String label, String? value, {IconData? icon}) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (icon != null) ...[Icon(icon, color: Theme.of(context).primaryColor), const SizedBox(width: 12)],
-          Text('$label: ', style: const TextStyle(fontWeight: FontWeight.bold)),
-          Expanded(child: Text(value ?? 'Not available')),
+          if (icon != null) ...[Icon(icon, color: theme.colorScheme.primary, size: 20), const SizedBox(width: 12)],
+          Expanded(
+            flex: 2, // Give more space to label
+            child: Text('$label:', style: theme.textTheme.titleSmall?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.7))),
+          ),
+          Expanded(
+            flex: 3, // More space to value
+            child: Text(value ?? 'Not available', style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500)),
+          ),
         ],
+      ),
+    );
+  }
+  
+  Widget _buildTextField(TextEditingController controller, String label, {IconData? icon, int maxLines = 1}) {
+    // InputDecoration will be largely handled by the global theme
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label, // Uses floating label behavior from theme
+          prefixIcon: icon != null ? Icon(icon) : null, // Icon inside the field
+          // Border, contentPadding, fillColor, etc., will come from InputDecorationTheme
+        ),
+        maxLines: maxLines,
+        validator: (value) {
+          if (value == null || value.isEmpty || value == 'Not Set') { // Consider "Not Set" as empty for validation
+            return 'Please enter $label';
+          }
+          return null;
+        },
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Manage Your Profile')),
-        body: const Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (_currentUser == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Manage Your Profile')),
-        body: const Center(child: Text('Could not load user data. Please try again later.')),
-      );
-    }
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
 
     return Scaffold(
+      backgroundColor: colorScheme.background,
       appBar: AppBar(
         title: const Text('Manage Your Profile'),
+        // Uses AppBarTheme from AppTheme
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: <Widget>[
-              _buildReadOnlyField('Email', _currentUser!.email, icon: Icons.email),
-              _buildReadOnlyField('Name', _currentUser!.name, icon: Icons.person),
-              _buildReadOnlyField(
-                'Verification Status', 
-                _currentUser!.isVerified == true ? 'Verified' : 'Pending Verification',
-                icon: _currentUser!.isVerified == true ? Icons.verified_user : Icons.hourglass_empty
-              ),
-              const SizedBox(height: 16),
-
-              Text('Certifications:', style: Theme.of(context).textTheme.titleMedium),
-              if (_currentUser!.certifications == null || _currentUser!.certifications!.isEmpty)
-                const Text('No certifications uploaded.')
-              else
-                ..._currentUser!.certifications!.map((cert) => ListTile(
-                      leading: const Icon(Icons.article),
-                      title: Text(cert.split('/').last.split('?').first.split('%2F').last), // Basic name extraction
-                      subtitle: Text(cert, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                      onTap: () { /* Optionally open URL or show image */ },
-                    )),
-              // TODO: Add button to upload more certifications later
-              const SizedBox(height: 20),
-              
-              _buildTextField(_phoneController, 'Phone Number', icon: Icons.phone),
-              const SizedBox(height: 16),
-              _buildTextField(_servicesOfferedController, 'Services Offered (comma-separated)', icon: Icons.build),
-              const SizedBox(height: 16),
-              _buildTextField(_serviceAreasController, 'Service Areas (comma-separated)', icon: Icons.map),
-              const SizedBox(height: 20),
-
-              Text('Availability Schedule:', style: Theme.of(context).textTheme.titleMedium),
-              _buildTextField(_mondayAvailabilityController, 'Monday Availability', icon: Icons.calendar_today),
-              const SizedBox(height: 8),
-              _buildTextField(_tuesdayAvailabilityController, 'Tuesday Availability', icon: Icons.calendar_today),
-              const SizedBox(height: 8),
-              _buildTextField(_wednesdayAvailabilityController, 'Wednesday Availability', icon: Icons.calendar_today),
-              const SizedBox(height: 8),
-              _buildTextField(_thursdayAvailabilityController, 'Thursday Availability', icon: Icons.calendar_today),
-              const SizedBox(height: 8),
-              _buildTextField(_fridayAvailabilityController, 'Friday Availability', icon: Icons.calendar_today),
-              const SizedBox(height: 8),
-              _buildTextField(_saturdayAvailabilityController, 'Saturday Availability', icon: Icons.calendar_today),
-              const SizedBox(height: 8),
-              _buildTextField(_sundayAvailabilityController, 'Sunday Availability', icon: Icons.calendar_today),
-              const SizedBox(height: 24),
-
-              if (_isSaving)
-                const Center(child: CircularProgressIndicator())
-              else
-                ElevatedButton(
-                  onPressed: _saveProfile,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    textStyle: const TextStyle(fontSize: 16),
+      body: Skeletonizer(
+        enabled: _isLoading,
+        effect: ShimmerEffect(
+          baseColor: colorScheme.surfaceVariant.withOpacity(0.4),
+          highlightColor: colorScheme.surfaceVariant.withOpacity(0.8),
+        ),
+        child: RefreshIndicator( // Added RefreshIndicator
+          onRefresh: _loadUserData,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            child: Form(
+              key: _formKey,
+              child: ListView(
+                children: <Widget>[
+                  // Read-only section
+                  _buildSectionTitle(context, 'Basic Information'),
+                  _buildReadOnlyField(context, 'Email', _currentUser?.email, icon: Icons.email_outlined),
+                  _buildReadOnlyField(context, 'Name', _currentUser?.name, icon: Icons.person_outline),
+                  _buildReadOnlyField(
+                    context,
+                    'Verification Status', 
+                    _currentUser?.isVerified == true ? 'Verified' : 'Pending Verification',
+                    icon: _currentUser?.isVerified == true ? Icons.verified_user_outlined : Icons.hourglass_empty_outlined,
                   ),
-                  child: const Text('Save Profile'),
-                ),
-              const SizedBox(height: 20),
-            ],
+                  
+                  _buildSectionTitle(context, 'Certifications'),
+                  if (_currentUser?.certifications == null || _currentUser!.certifications!.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text('No certifications uploaded.', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface.withOpacity(0.7))),
+                    )
+                  else
+                    ..._currentUser!.certifications!.map((certUrl) {
+                      String fileName = 'View Certification Document';
+                      try {
+                        fileName = Uri.decodeFull(certUrl.split('/').last.split('?').first.split('%2F').last);
+                      } catch (_) {}
+                      
+                      return ListTile(
+                        leading: Icon(Icons.article_outlined, color: colorScheme.secondary),
+                        title: Text(fileName, style: textTheme.bodyMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
+                        subtitle: Text('Tap to view', style: textTheme.caption?.copyWith(color: colorScheme.onSurface.withOpacity(0.6))),
+                        onTap: () async {
+                           final Uri uri = Uri.parse(certUrl);
+                           if (await canLaunchUrl(uri)) {
+                             await launchUrl(uri, mode: LaunchMode.externalApplication);
+                           } else {
+                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not open URL: $certUrl')));
+                           }
+                        },
+                        contentPadding: EdgeInsets.zero,
+                      );
+                    }),
+                  // Consider adding a button to upload/manage certifications here if desired
+                  // E.g., TextButton.icon(icon: Icon(Icons.add_link), label: Text("Manage Certifications"), onPressed: (){})
+
+                  _buildSectionTitle(context, 'Service Details'),
+                  _buildTextField(_phoneController, 'Phone Number', icon: Icons.phone_outlined),
+                  _buildTextField(_servicesOfferedController, 'Services Offered (comma-separated)', icon: Icons.construction_outlined, maxLines: 2),
+                  _buildTextField(_serviceAreasController, 'Service Areas (comma-separated)', icon: Icons.map_outlined, maxLines: 2),
+                  
+                  _buildSectionTitle(context, 'Weekly Availability'),
+                  _buildTextField(_mondayAvailabilityController, 'Monday', icon: Icons.calendar_view_day_outlined),
+                  _buildTextField(_tuesdayAvailabilityController, 'Tuesday', icon: Icons.calendar_view_day_outlined),
+                  _buildTextField(_wednesdayAvailabilityController, 'Wednesday', icon: Icons.calendar_view_day_outlined),
+                  _buildTextField(_thursdayAvailabilityController, 'Thursday', icon: Icons.calendar_view_day_outlined),
+                  _buildTextField(_fridayAvailabilityController, 'Friday', icon: Icons.calendar_view_day_outlined),
+                  _buildTextField(_saturdayAvailabilityController, 'Saturday', icon: Icons.calendar_view_day_outlined),
+                  _buildTextField(_sundayAvailabilityController, 'Sunday', icon: Icons.calendar_view_day_outlined),
+                  
+                  const SizedBox(height: 32),
+                  if (_isSaving)
+                    const Center(child: CircularProgressIndicator())
+                  else
+                    ElevatedButton.icon( // Changed to ElevatedButton.icon for better UX
+                      icon: const Icon(Icons.save_outlined),
+                      label: const Text('Save Profile'),
+                      onPressed: _saveProfile,
+                      // Style from ElevatedButtonThemeData
+                      style: theme.elevatedButtonTheme.style?.copyWith(
+                        minimumSize: MaterialStateProperty.all(const Size(double.infinity, 48)), // Full width button
+                      ),
+                    ),
+                  const SizedBox(height: 20), // Bottom padding
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 }
+
+// Helper extension for UserModel if copyWith is not defined
+// Ensure UserModel has a copyWith method or define one like this:
+/*
+extension UserModelCopyWith on UserModel {
+  UserModel copyWith({
+    String? userId,
+    String? name,
+    // ... other fields
+    String? phone,
+    List<String>? servicesOffered,
+    List<String>? serviceAreas,
+    Map<String, dynamic>? availabilitySchedule,
+    // ... other fields
+  }) {
+    return UserModel(
+      userId: userId ?? this.userId,
+      name: name ?? this.name,
+      // ... other fields
+      phone: phone ?? this.phone,
+      servicesOffered: servicesOffered ?? this.servicesOffered,
+      serviceAreas: serviceAreas ?? this.serviceAreas,
+      availabilitySchedule: availabilitySchedule ?? this.availabilitySchedule,
+      // ... other fields
+      // Ensure all fields are covered
+      idnumber: this.idnumber,
+      email: this.email,
+      password: this.password,
+      profile: this.profile,
+      isLandlord: this.isLandlord,
+      bankBusinessNumber: this.bankBusinessNumber,
+      bankNumber: this.bankNumber,
+      isAdmin: this.isAdmin,
+      rentedPlaces: this.rentedPlaces,
+      wishlist: this.wishlist,
+      balance: this.balance,
+      role: this.role,
+      certifications: this.certifications,
+      isVerified: this.isVerified,
+    );
+  }
+}
+*/

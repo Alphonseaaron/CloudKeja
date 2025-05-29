@@ -2,7 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
+// google_fonts is now primarily used within app_theme.dart
+// import 'package:google_fonts/google_fonts.dart'; 
 import 'package:provider/provider.dart';
 import 'package:cloudkeja/firebase_options.dart';
 import 'package:cloudkeja/models/chat_provider.dart';
@@ -13,10 +14,13 @@ import 'package:cloudkeja/providers/payment_provider.dart';
 import 'package:cloudkeja/providers/post_provider.dart';
 import 'package:cloudkeja/providers/tenancy_provider.dart';
 import 'package:cloudkeja/providers/wishlist_provider.dart';
+import 'package:cloudkeja/providers/theme_provider.dart'; // Import ThemeProvider
+import 'package:cloudkeja/providers/maintenance_provider.dart'; // Import MaintenanceProvider
 import 'package:cloudkeja/screens/auth/login_page.dart';
 import 'package:cloudkeja/screens/chat/chat_room.dart';
 import 'package:cloudkeja/screens/home/my_nav.dart';
 import 'package:cloudkeja/widgets/initial_loading.dart';
+import 'package:cloudkeja/theme/app_theme.dart'; // Import AppTheme
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,49 +45,32 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (ctx) => ChatProvider()),
         ChangeNotifierProvider(create: (ctx) => TenancyProvider()),
         ChangeNotifierProvider(create: (ctx) => AdminProvider()),
+        ChangeNotifierProvider(create: (ctx) => ThemeProvider()), 
+        ChangeNotifierProvider(create: (ctx) => MaintenanceProvider()), // Register MaintenanceProvider
       ],
-      child: GetMaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-          backgroundColor: const Color(0xFFF5F6F6),
-          primaryColor: Colors.blueAccent,
-          colorScheme: ColorScheme.fromSwatch().copyWith(
-            secondary: Colors.blueAccent,
-          ),
-          appBarTheme: AppBarTheme(
-            elevation: 0,
-            iconTheme: const IconThemeData(
-              color: Colors.black,
-            ),
-            titleTextStyle: GoogleFonts.ibmPlexSans(
-              color: Colors.black,
-              fontSize: 18,
-            ),
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          ),
-          textTheme: GoogleFonts.ibmPlexSansTextTheme(
-            Theme.of(context).textTheme,
-          ).copyWith(
-            headline1: GoogleFonts.ibmPlexSans(
-              color: const Color(0xFF100E34),
-            ),
-            bodyText1: GoogleFonts.ibmPlexSans(
-              color: const Color(0xFF100E34).withOpacity(0.5),
-            ),
-          ),
-        ),
-        home: StreamBuilder(
-            stream: FirebaseAuth.instance.authStateChanges(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return const InitialLoadingScreen();
-              } else {
-                return const LoginPage();
-              }
-            }),
-        routes: {
-          ChatRoom.routeName: (ctx) => ChatRoom(),
+      child: Consumer<ThemeProvider>( 
+        builder: (context, themeProvider, child) {
+          return GetMaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,         
+            darkTheme: AppTheme.darkTheme,       
+            themeMode: themeProvider.themeMode,  
+            home: StreamBuilder(
+                stream: FirebaseAuth.instance.authStateChanges(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+                  }
+                  if (snapshot.hasData) {
+                    return const InitialLoadingScreen();
+                  } else {
+                    return const LoginPage();
+                  }
+                }),
+            routes: {
+              ChatRoom.routeName: (ctx) => ChatRoom(),
+            },
+          );
         },
       ),
     );
