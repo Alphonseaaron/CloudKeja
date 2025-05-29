@@ -7,23 +7,30 @@ class About extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      // Use M3 standard padding or adjust as per overall design language
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), 
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'About',
-            style: Theme.of(context).textTheme.headline1!.copyWith(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+            style: textTheme.titleLarge?.copyWith(
+                // fontWeight: FontWeight.bold, // titleLarge from theme might already be bold
+                // color: colorScheme.onBackground, // Default from textTheme.apply
                 ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8.0), // M3 standard spacing
           Text(
-            space.description!,
-            style: Theme.of(context).textTheme.bodyText1!.copyWith(
-                  fontSize: 14,
+            space.description ?? 'No description available.', // Handle null description
+            style: textTheme.bodyMedium?.copyWith(
+                // color: colorScheme.onBackground.withOpacity(0.85), // Default from textTheme.apply
+                // Ensure line height is comfortable if text is long
+                height: 1.5, 
                 ),
           )
         ],

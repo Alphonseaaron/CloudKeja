@@ -1,40 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:cloudkeja/screens/auth/theme.dart';
 
 class CustomCheckbox extends StatefulWidget {
-  const CustomCheckbox({Key? key}) : super(key: key);
+  final bool initialValue;
+  final ValueChanged<bool>? onChanged;
+
+  const CustomCheckbox({
+    Key? key,
+    this.initialValue = false,
+    this.onChanged,
+  }) : super(key: key);
 
   @override
   _CustomCheckboxState createState() => _CustomCheckboxState();
 }
 
 class _CustomCheckboxState extends State<CustomCheckbox> {
-  bool isChecked = false;
+  late bool _isChecked;
+
+  @override
+  void initState() {
+    super.initState();
+    _isChecked = widget.initialValue;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          isChecked = !isChecked;
-        });
+    // The standard Checkbox widget will use CheckboxThemeData from the global theme.
+    // AppTheme.lightTheme already defines colorScheme.primary which will be used.
+    return Checkbox(
+      value: _isChecked,
+      onChanged: (bool? value) {
+        if (value != null) {
+          setState(() {
+            _isChecked = value;
+          });
+          if (widget.onChanged != null) {
+            widget.onChanged!(value);
+          }
+        }
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: isChecked ? primaryBlue : Colors.transparent,
-          borderRadius: BorderRadius.circular(4.0),
-          border: isChecked ? null : Border.all(color: textGrey, width: 1.5),
-        ),
-        width: 20,
-        height: 20,
-        child: isChecked
-            ? const Icon(
-                Icons.check,
-                size: 20,
-                color: Colors.white,
-              )
-            : null,
-      ),
+      // VisualDensity can be used to make it slightly larger or smaller if needed
+      // visualDensity: VisualDensity.compact, 
+      // splashRadius: 0, // To minimize splash if directly next to text
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, // Reduces tap area to checkbox size
+      // Active color and check color will be derived from the theme (colorScheme.primary)
     );
   }
 }

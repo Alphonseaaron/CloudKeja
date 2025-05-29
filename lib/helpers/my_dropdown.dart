@@ -1,152 +1,220 @@
 import 'package:flutter/material.dart';
 
 class MyDropDown extends StatefulWidget {
-  const MyDropDown(
-      {Key? key, this.hintText, required this.selectedOption, this.options})
-      : super(key: key);
+  const MyDropDown({
+    Key? key,
+    this.hintText,
+    required this.selectedOption, // Callback when an option is selected
+    this.options,
+    this.currentValue, // Optional: To show the currently selected value
+  }) : super(key: key);
+
   final String? hintText;
   final List<String>? options;
   final Function(String option) selectedOption;
+  final String? currentValue; // To pre-fill the dropdown display
 
   @override
   State<MyDropDown> createState() => _MyDropDownState();
 }
 
 class _MyDropDownState extends State<MyDropDown> {
-  String? optionSelected;
+  String? _locallySelectedOption; // To display the selection
+
+  @override
+  void initState() {
+    super.initState();
+    _locallySelectedOption = widget.currentValue;
+  }
+
+  @override
+  void didUpdateWidget(covariant MyDropDown oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.currentValue != oldWidget.currentValue) {
+      setState(() {
+        _locallySelectedOption = widget.currentValue;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+    // Use InputDecorationTheme for consistent styling with TextFormFields
+    final inputDecorationTheme = theme.inputDecorationTheme;
+
+    // Determine text style based on whether an option is selected or hint is shown
+    final String displayText = _locallySelectedOption ?? widget.hintText ?? 'Select an option';
+    final TextStyle effectiveTextStyle = (_locallySelectedOption != null)
+        ? (inputDecorationTheme.labelStyle ?? textTheme.bodyLarge)!.copyWith(color: colorScheme.onSurface) // Style for selected value
+        : (inputDecorationTheme.hintStyle ?? textTheme.bodyLarge)!.copyWith(color: colorScheme.onSurface.withOpacity(0.6)); // Style for hint
+
     return GestureDetector(
       onTap: () {
+        if (widget.options == null || widget.options!.isEmpty) return; // Don't show if no options
+
         showModalBottomSheet(
-            isScrollControlled: true,
-            backgroundColor: Colors.transparent,
-            context: context,
-            builder: (ctx) {
-              widget.options!.sort();
-              return DropDownOptions(
-                options: widget.options,
-                hintText: widget.hintText,
-                selectedOption: (val) {
-                  setState(() {
-                    optionSelected = val;
-                    widget.selectedOption(val);
-                  });
-                },
-              );
-            });
+          context: context,
+          isScrollControlled: true, // Allows content to determine height
+          backgroundColor: Colors.transparent, // For custom rounded corners on the sheet content
+          shape: theme.bottomSheetTheme.shape ?? const RoundedRectangleBorder( // Use themed shape
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
+            ),
+          ),
+          builder: (ctx) {
+            // Sort options alphabetically
+            List<String> sortedOptions = List<String>.from(widget.options ?? []);
+            sortedOptions.sort();
+            
+            return DropDownOptions(
+              options: sortedOptions,
+              title: widget.hintText?.toUpperCase() ?? 'SELECT OPTION', // Title for the sheet
+              selectedOptionCallback: (val) { // Renamed for clarity
+                setState(() {
+                  _locallySelectedOption = val;
+                });
+                widget.selectedOption(val); // Call the original callback
+              },
+              currentlySelected: _locallySelectedOption, // Pass current selection to highlight
+            );
+          },
+        );
       },
       child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 10),
-          height: 48,
-          padding: const EdgeInsets.only(left: 25, right: 10),
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(3),
-              color: const Color(0xfff0f0f0)),
-          alignment: Alignment.centerLeft,
-          child: Row(
-            children: [
-              Text(
-                optionSelected == null ? widget.hintText! : optionSelected!,
-                style: TextStyle(
-                    color: optionSelected == null ? Colors.grey : Colors.black,
-                    fontSize: 14),
+        height: 50, // Standard height for input fields, adjust as needed
+        padding: const EdgeInsets.symmetric(horizontal: 12.0), // Consistent with TextField padding
+        decoration: BoxDecoration(
+          color: inputDecorationTheme.fillColor ?? colorScheme.surfaceVariant.withOpacity(0.5),
+          borderRadius: (inputDecorationTheme.border as OutlineInputBorder?)?.borderRadius ?? BorderRadius.circular(8.0),
+          border: Border.all(
+            color: (inputDecorationTheme.border as OutlineInputBorder?)?.borderSide.color ?? colorScheme.outline.withOpacity(0.5),
+            width: (inputDecorationTheme.border as OutlineInputBorder?)?.borderSide.width ?? 1.0,
+          ),
+        ),
+        alignment: Alignment.centerLeft,
+        child: Row(
+          children: [
+            Expanded( // Ensure text truncates if too long
+              child: Text(
+                displayText,
+                style: effectiveTextStyle,
+                overflow: TextOverflow.ellipsis,
               ),
-              const Spacer(),
-              const Icon(
-                Icons.arrow_drop_down,
-                color: Colors.grey,
-                size: 18,
-              )
-            ],
-          )),
+            ),
+            const SizedBox(width: 8),
+            Icon(
+              Icons.arrow_drop_down_rounded, // Material Design dropdown icon
+              color: colorScheme.onSurfaceVariant.withOpacity(0.7), // Themed icon color
+              size: 24,
+            )
+          ],
+        ),
+      ),
     );
   }
 }
 
 class DropDownOptions extends StatelessWidget {
-  const DropDownOptions(
-      {Key? key, this.options, this.hintText, this.selectedOption})
-      : super(key: key);
-  final List<String>? options;
-  final String? hintText;
-  final Function(String option)? selectedOption;
+  const DropDownOptions({
+    Key? key,
+    required this.options,
+    required this.title,
+    required this.selectedOptionCallback,
+    this.currentlySelected,
+  }) : super(key: key);
+
+  final List<String> options;
+  final String title;
+  final Function(String option) selectedOptionCallback;
+  final String? currentlySelected;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+
+    // This GestureDetector is for the content inside the DraggableScrollableSheet,
+    // preventing taps on it from closing the sheet.
     return GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => Navigator.of(context).pop(),
-        child: GestureDetector(
-            onTap: () {},
-            child: DraggableScrollableSheet(
-                initialChildSize: 0.3,
-                maxChildSize: 0.5,
-                minChildSize: 0.1,
-                builder: (ctx, controller) => AnimatedContainer(
-                    duration: const Duration(milliseconds: 500),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).scaffoldBackgroundColor,
-                        borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(20),
-                            topRight: Radius.circular(20)),
+      onTap: () {}, // Prevent sheet dismissal when tapping on content
+      child: DraggableScrollableSheet(
+        initialChildSize: 0.4, // Start at 40% of screen height
+        maxChildSize: 0.7,     // Max 70%
+        minChildSize: 0.2,     // Min 20%
+        expand: false, // Content determines height
+        builder: (BuildContext context, ScrollController scrollController) {
+          return Container(
+            decoration: BoxDecoration(
+              color: theme.bottomSheetTheme.backgroundColor ?? colorScheme.surface, // Themed sheet background
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16), // Consistent radius
+                topRight: Radius.circular(16),
+              ),
+            ),
+            child: Column(
+              children: [
+                // Drag Handle and Title
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0, left: 16.0, right: 16.0, bottom: 4.0),
+                  child: Column(
+                    children: [
+                      Container( // Drag handle
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: colorScheme.outline.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                              color: Colors.white,
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 15, vertical: 10),
-                              margin: const EdgeInsets.only(bottom: 2),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Center(
-                                    child: Container(
-                                      width: 70,
-                                      height: 5,
-                                      decoration: BoxDecoration(
-                                          color: Colors.blueGrey[100],
-                                          borderRadius:
-                                              BorderRadius.circular(10)),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 15),
-                                  Text(hintText!.toUpperCase(),
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 18,
-                                      )),
-                                ],
-                              )),
-                          Expanded(
-                            child: ListView(
-                              controller: controller,
-                              children: List.generate(
-                                options!.length,
-                                (index) => GestureDetector(
-                                  onTap: () {
-                                    selectedOption!(options![index]);
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: Container(
-                                    color: Colors.white,
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 15, vertical: 18),
-                                    margin:
-                                        const EdgeInsets.symmetric(vertical: 1),
-                                    child: Text(options![index]),
-                                  ),
-                                ),
-                              ),
-                            ),
+                      const SizedBox(height: 12),
+                      Text(
+                        title,
+                        style: textTheme.titleSmall?.copyWith( // More subtle title for sheet
+                          color: colorScheme.onSurface.withOpacity(0.8),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Divider(color: colorScheme.outline.withOpacity(0.2), height: 16),
+                    ],
+                  ),
+                ),
+                // Options List
+                Expanded(
+                  child: ListView.builder( // Changed from List.generate for performance
+                    controller: scrollController,
+                    itemCount: options.length,
+                    itemBuilder: (context, index) {
+                      final option = options[index];
+                      final bool isSelected = currentlySelected == option;
+                      return ListTile(
+                        title: Text(
+                          option,
+                          style: textTheme.bodyLarge?.copyWith(
+                            color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                           ),
-                        ],
-                      ),
-                    )))));
+                        ),
+                        selected: isSelected,
+                        selectedTileColor: colorScheme.primary.withOpacity(0.1), // Subtle selection indicator
+                        onTap: () {
+                          selectedOptionCallback(option);
+                          Navigator.of(context).pop(); // Close sheet after selection
+                        },
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 }
