@@ -71,12 +71,12 @@ class PdfInvoiceApi {
     pdf.addPage(pw.MultiPage(
       pageFormat: PdfPageFormat.a4,
       header: (context) => _buildHeader(
-        invoice, 
-        logoImage, 
-        fontBold, 
-        fontRegular, 
-        primaryColorPdf, 
-        darkTextColorPdf, 
+        invoice,
+        logoImage,
+        fontBold,
+        fontRegular,
+        primaryColorPdf,
+        darkTextColorPdf,
         normalTextColorPdf
       ),
       build: (context) => [
@@ -87,14 +87,14 @@ class PdfInvoiceApi {
           _buildDescription(invoice.info.description, fontRegular, normalTextColorPdf),
         pw.SizedBox(height: 0.8 * PdfPageFormat.cm),
         _buildInvoiceTable(
-          invoice, 
-          fontBold, 
-          fontRegular, 
-          tableHeaderColorPdf, 
-          tableHeaderTextPdfColor, 
-          darkTextColorPdf, 
-          normalTextColorPdf, 
-          lightGreyColorPdf, 
+          invoice,
+          fontBold,
+          fontRegular,
+          tableHeaderColorPdf,
+          tableHeaderTextPdfColor,
+          darkTextColorPdf,
+          normalTextColorPdf,
+          lightGreyColorPdf,
           whiteColorPdf
         ),
         pw.Divider(color: dividerColorPdf, thickness: 0.5),
@@ -102,9 +102,9 @@ class PdfInvoiceApi {
         _buildTotal(invoice, fontBold, fontRegular, primaryColorPdf, darkTextColorPdf, dividerColorPdf),
       ],
       footer: (context) => _buildFooter(
-        invoice, 
-        fontRegular, 
-        normalTextColorPdf, 
+        invoice,
+        fontRegular,
+        normalTextColorPdf,
         primaryColorPdf,
         context // Pass context for page numbers
       ),
@@ -114,12 +114,12 @@ class PdfInvoiceApi {
   }
 
   static pw.Widget _buildHeader(
-    Invoice invoice, 
-    pw.ImageProvider? logoImage, 
-    pw.Font fontBold, 
-    pw.Font fontRegular, 
-    PdfColor primaryColor, 
-    PdfColor darkTextColor, 
+    Invoice invoice,
+    pw.ImageProvider? logoImage,
+    pw.Font fontBold,
+    pw.Font fontRegular,
+    PdfColor primaryColor,
+    PdfColor darkTextColor,
     PdfColor normalTextColor
   ) {
     return pw.Column(
@@ -136,7 +136,7 @@ class PdfInvoiceApi {
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 mainAxisSize: pw.MainAxisSize.min,
                 children: [
-                  if (logoImage != null) 
+                  if (logoImage != null)
                     pw.Container(
                       height: 60, // Adjust height as needed
                       width: 150, // Adjust width as needed
@@ -172,7 +172,7 @@ class PdfInvoiceApi {
       ],
     );
   }
-  
+
   static pw.Widget _buildSupplierAddress(Supplier supplier, pw.Font fontBold, pw.Font fontRegular, PdfColor darkTextColor, PdfColor normalTextColor) => pw.Column(
     crossAxisAlignment: pw.CrossAxisAlignment.start,
     children: [
@@ -204,7 +204,7 @@ class PdfInvoiceApi {
       }),
     );
   }
-  
+
   static pw.Widget _buildBillToSection(Invoice invoice, pw.Font fontBold, pw.Font fontRegular, PdfColor darkTextColor, PdfColor normalTextColor) {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.start,
@@ -235,18 +235,18 @@ class PdfInvoiceApi {
   }
 
   static pw.Widget _buildInvoiceTable(
-    Invoice invoice, 
-    pw.Font fontBold, 
-    pw.Font fontRegular, 
+    Invoice invoice,
+    pw.Font fontBold,
+    pw.Font fontRegular,
     PdfColor headerColor,
     PdfColor headerTextColor,
-    PdfColor darkTextColor, 
-    PdfColor normalTextColor, 
-    PdfColor lightRowColor, 
+    PdfColor darkTextColor,
+    PdfColor normalTextColor,
+    PdfColor lightRowColor,
     PdfColor darkRowColor // Usually white for light theme
   ) {
     final headers = ['Description', 'Qty', 'Unit Price', 'Total'];
-    
+
     final data = invoice.items.map((item) {
       return [
         item.description, // Space Name

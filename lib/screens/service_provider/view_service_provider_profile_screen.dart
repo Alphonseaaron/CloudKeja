@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloudkeja/models/user_model.dart';
 import 'package:cloudkeja/providers/auth_provider.dart';
-import 'package:skeletonizer/skeletonizer.dart'; // For loading state
-import 'package:cloudkeja/screens/chat/chat_room.dart'; // For navigation
-import 'package:get/route_manager.dart'; // For navigation
-import 'package:cached_network_image/cached_network_image.dart'; // For profile picture
-import 'package:url_launcher/url_launcher.dart'; // For phone calls
+import 'package:skeletonizer/skeletonizer.dart';
+import 'package:cloudkeja/screens/chat/chat_room.dart';
+import 'package:get/route_manager.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:cloudkeja/config/app_config.dart'; // For kServiceProviderTypes, though not directly used here, good for context
 
 class ViewServiceProviderProfileScreen extends StatefulWidget {
   final String serviceProviderId;
@@ -33,7 +34,7 @@ class _ViewServiceProviderProfileScreenState extends State<ViewServiceProviderPr
     _fetchServiceProviderDetails();
   }
 
-  Future<void> _fetchServiceProviderDetails() async {
+  Future<void> _fetchServiceProviderDetails({bool forceRefresh = false}) async {
     if (!mounted) return;
     setState(() {
       _isLoading = true;
@@ -41,8 +42,8 @@ class _ViewServiceProviderProfileScreenState extends State<ViewServiceProviderPr
     });
     try {
       final user = await Provider.of<AuthProvider>(context, listen: false)
-          .getOwnerDetails(widget.serviceProviderId); // Fetches any user by ID
-      
+          .getOwnerDetails(widget.serviceProviderId, forceRefresh: forceRefresh);
+
       if (mounted) {
         setState(() {
           _serviceProvider = user;
@@ -59,6 +60,16 @@ class _ViewServiceProviderProfileScreenState extends State<ViewServiceProviderPr
     }
   }
 
+  Widget _buildSectionTitle(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20.0, bottom: 8.0),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
   Widget _buildDetailRow(BuildContext context, IconData icon, String label, String? value) {
     final theme = Theme.of(context);
     return Padding(
@@ -66,15 +77,15 @@ class _ViewServiceProviderProfileScreenState extends State<ViewServiceProviderPr
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: theme.colorScheme.primary),
-          const SizedBox(width: 12),
+          Icon(icon, size: 20, color: theme.colorScheme.primary.withOpacity(0.8)),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(label, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6))),
                 const SizedBox(height: 2),
-                Text(value ?? 'Not specified', style: theme.textTheme.bodyLarge),
+                Text(value != null && value.isNotEmpty ? value : 'Not specified', style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500)),
               ],
             ),
           ),
@@ -83,11 +94,11 @@ class _ViewServiceProviderProfileScreenState extends State<ViewServiceProviderPr
     );
   }
 
-  Widget _buildChipsSection(BuildContext context, String title, List<String>? items) {
+  Widget _buildChipsSection(BuildContext context, IconData sectionIcon, String title, List<String>? items) {
     final theme = Theme.of(context);
-    if (items == null || items.isEmpty) {
-      return _buildDetailRow(context, Icons.work_outline_rounded, title, 'Not specified');
-    }
+    final textTheme = theme.textTheme;
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
@@ -95,31 +106,37 @@ class _ViewServiceProviderProfileScreenState extends State<ViewServiceProviderPr
         children: [
           Row(
             children: [
-              Icon(
-                title == 'Services Offered' ? Icons.construction_outlined : Icons.map_outlined,
-                size: 20,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 12),
-              Text(title, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface.withOpacity(0.6))),
+              Icon(sectionIcon, size: 20, color: colorScheme.primary.withOpacity(0.8)),
+              const SizedBox(width: 16),
+              Text(title, style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurface.withOpacity(0.6))),
             ],
           ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8.0,
-            runSpacing: 6.0,
-            children: items.map((item) => Chip(
-              label: Text(item),
-              // Chip styling from ChipThemeData
-            )).toList(),
-          ),
+          const SizedBox(height: 10),
+          if (items == null || items.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 36.0), // Align with text from _buildDetailRow
+              child: Text('Not specified', style: textTheme.bodyLarge?.copyWith(fontStyle: FontStyle.italic, color: colorScheme.onSurface.withOpacity(0.6))),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(left: 36.0),
+              child: Wrap(
+                spacing: 8.0,
+                runSpacing: 6.0,
+                children: items.map((item) => Chip(
+                  label: Text(item),
+                  // Chip styling from ChipThemeData
+                )).toList(),
+              ),
+            ),
         ],
       ),
     );
   }
-  
+
   void _initiateChat() async {
-    final theme = Theme.of(context); // For SnackBar theming
+    // ... (existing chat logic - unchanged)
+    final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final currentUser = authProvider.user;
@@ -130,39 +147,68 @@ class _ViewServiceProviderProfileScreenState extends State<ViewServiceProviderPr
       );
       return;
     }
-
     if (_serviceProvider == null || _serviceProvider!.userId == null) {
        ScaffoldMessenger.of(context).showSnackBar(
          SnackBar(content: Text('Service provider details are unavailable.', style: TextStyle(color: colorScheme.onError)), backgroundColor: colorScheme.error),
       );
       return;
     }
-
     if (currentUser.userId == _serviceProvider!.userId) {
        ScaffoldMessenger.of(context).showSnackBar(
          SnackBar(content: Text('You cannot chat with yourself.', style: TextStyle(color: colorScheme.onError)), backgroundColor: colorScheme.error),
       );
       return;
     }
-
     String chatRoomId;
     if (currentUser.userId!.compareTo(_serviceProvider!.userId!) > 0) {
       chatRoomId = '${currentUser.userId}_${_serviceProvider!.userId}';
     } else {
       chatRoomId = '${_serviceProvider!.userId}_${currentUser.userId}';
     }
-    
-    // Navigate to ChatRoom
-    // Using Get.to for consistency if used elsewhere for navigation to ChatRoom
     Get.to(() => ChatRoom(), arguments: {
-      'user': _serviceProvider!, // The Service Provider's UserModel
+      'user': _serviceProvider!,
       'chatRoomId': chatRoomId,
     });
-    // Alternatively, using Navigator:
-    // Navigator.of(context).pushNamed(ChatRoom.routeName, arguments: {
-    //   'user': _serviceProvider!,
-    //   'chatRoomId': chatRoomId,
-    // });
+  }
+
+  Widget _buildSkeletonUI(BuildContext context) {
+    final theme = Theme.of(context);
+    return ListView(
+      padding: const EdgeInsets.all(16.0),
+      children: [
+        const Center(child: CircleAvatar(radius: 50)),
+        const SizedBox(height: 16),
+        Center(child: Container(height: 24, width: 200, color: Colors.transparent)), // Name
+        const SizedBox(height: 8),
+        Center(child: Container(height: 16, width: 150, color: Colors.transparent)), // Verification status
+        const SizedBox(height: 24),
+        Divider(color: theme.colorScheme.outline.withOpacity(0.1)),
+        const SizedBox(height: 16),
+
+        _buildDetailRow(context, Icons.email_outlined, 'Email', '          '),
+        _buildDetailRow(context, Icons.phone_outlined, 'Phone', '          '),
+
+        const SizedBox(height: 16),
+        _buildSectionTitle(context, 'Service Specializations'), // Skeleton title
+        Wrap(spacing: 8, runSpacing: 6, children: List.generate(3, (_) => const Chip(label: Text('            ')))), // Skeleton chips
+
+        const SizedBox(height: 16),
+        _buildSectionTitle(context, 'Primary Service Location'), // Skeleton title
+        _buildDetailRow(context, Icons.public_outlined, 'Country', '          '),
+        _buildDetailRow(context, Icons.location_city_outlined, 'County', '          '),
+        _buildDetailRow(context, Icons.location_on_outlined, 'Sub-County', '          '),
+
+        const SizedBox(height: 16),
+        _buildChipsSection(context, Icons.construction_outlined, 'Services Offered (Description)', List.generate(1, (_) => '                                        ')), // Skeleton text line
+        const SizedBox(height: 16),
+        _buildChipsSection(context, Icons.map_outlined, 'Service Areas (Description)', List.generate(1, (_) => '                                        ')), // Skeleton text line
+
+        const SizedBox(height: 32),
+        Container(height: 48, decoration: BoxDecoration(color: Colors.transparent, borderRadius: BorderRadius.circular(8))), // Button placeholder
+        const SizedBox(height: 12),
+        Container(height: 48, decoration: BoxDecoration(color: Colors.transparent, borderRadius: BorderRadius.circular(8))), // Button placeholder
+      ],
+    );
   }
 
 
@@ -176,32 +222,7 @@ class _ViewServiceProviderProfileScreenState extends State<ViewServiceProviderPr
       return Scaffold(
         backgroundColor: colorScheme.background,
         appBar: AppBar(title: const Text('Loading Profile...')),
-        // Basic Skeleton for the profile page
-        body: Skeletonizer(
-          enabled: true,
-          child: ListView(
-            padding: const EdgeInsets.all(16.0),
-            children: [
-              const CircleAvatar(radius: 50),
-              const SizedBox(height: 16),
-              Container(height: 24, width: 200, color: Colors.transparent), // Name
-              const SizedBox(height: 8),
-              Container(height: 16, width: 250, color: Colors.transparent), // Email
-              const SizedBox(height: 8),
-              Container(height: 16, width: 150, color: Colors.transparent), // Phone
-              const SizedBox(height: 24),
-              Container(height: 18, width: 100, color: Colors.transparent), // Section title
-              const SizedBox(height: 8),
-              Wrap(spacing: 8, children: List.generate(3, (_) => const Chip(label: Text('          ')))), // Chips
-              const SizedBox(height: 16),
-              Container(height: 18, width: 100, color: Colors.transparent), // Section title
-              const SizedBox(height: 8),
-              Wrap(spacing: 8, children: List.generate(2, (_) => const Chip(label: Text('          ')))), // Chips
-              const SizedBox(height: 24),
-              Container(height: 48, color: Colors.transparent), // Button
-            ],
-          ),
-        ),
+        body: Skeletonizer(enabled: true, child: _buildSkeletonUI(context)),
       );
     }
 
@@ -232,10 +253,9 @@ class _ViewServiceProviderProfileScreenState extends State<ViewServiceProviderPr
       backgroundColor: colorScheme.background,
       appBar: AppBar(
         title: Text(_serviceProvider!.name ?? 'Service Provider'),
-        // AppBar uses AppBarTheme
       ),
-      body: RefreshIndicator( // Added RefreshIndicator
-        onRefresh: _fetchServiceProviderDetails,
+      body: RefreshIndicator(
+        onRefresh: () => _fetchServiceProviderDetails(forceRefresh: true),
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
@@ -267,8 +287,8 @@ class _ViewServiceProviderProfileScreenState extends State<ViewServiceProviderPr
                   Text(
                     _serviceProvider!.isVerified == true ? 'Verified Provider' : 'Verification Pending',
                     style: textTheme.bodyMedium?.copyWith(
-                      color: _serviceProvider!.isVerified == true 
-                          ? Colors.green.shade700 
+                      color: _serviceProvider!.isVerified == true
+                          ? Colors.green.shade700
                           : colorScheme.onSurface.withOpacity(0.7),
                     ),
                   ),
@@ -276,8 +296,8 @@ class _ViewServiceProviderProfileScreenState extends State<ViewServiceProviderPr
                   Icon(
                      _serviceProvider!.isVerified == true ? Icons.verified_user_rounded : Icons.hourglass_top_rounded,
                      size: 16,
-                     color: _serviceProvider!.isVerified == true 
-                          ? Colors.green.shade700 
+                     color: _serviceProvider!.isVerified == true
+                          ? Colors.green.shade700
                           : colorScheme.onSurface.withOpacity(0.7),
                   ),
                 ],
@@ -285,17 +305,25 @@ class _ViewServiceProviderProfileScreenState extends State<ViewServiceProviderPr
             ),
             const SizedBox(height: 24),
             Divider(color: colorScheme.outline.withOpacity(0.5)),
-            const SizedBox(height: 16),
 
+            _buildSectionTitle(context, 'Contact Information'),
             _buildDetailRow(context, Icons.email_outlined, 'Email', _serviceProvider!.email),
             _buildDetailRow(context, Icons.phone_outlined, 'Phone', _serviceProvider!.phone),
-            
-            const SizedBox(height: 16),
-            _buildChipsSection(context, 'Services Offered', _serviceProvider!.servicesOffered),
-            const SizedBox(height: 16),
-            _buildChipsSection(context, 'Service Areas', _serviceProvider!.serviceAreas),
-            
-            // TODO: Display certifications if links are valid and clickable
+
+            _buildSectionTitle(context, 'Service Specializations'),
+            _buildChipsSection(context, Icons.category_outlined, 'Types', _serviceProvider!.serviceProviderTypes),
+
+            _buildSectionTitle(context, 'Primary Service Location'),
+            _buildDetailRow(context, Icons.public_outlined, 'Country', _serviceProvider!.spCountry),
+            _buildDetailRow(context, Icons.location_city_outlined, 'County / State', _serviceProvider!.spCounty),
+            if (_serviceProvider!.spSubCounty != null && _serviceProvider!.spSubCounty!.isNotEmpty)
+              _buildDetailRow(context, Icons.location_on_outlined, 'Sub-County / City', _serviceProvider!.spSubCounty),
+
+            _buildSectionTitle(context, 'Service Details'),
+            _buildChipsSection(context, Icons.construction_outlined, 'Services Offered (Description)', _serviceProvider!.servicesOffered),
+            _buildChipsSection(context, Icons.map_outlined, 'Service Areas (Description)', _serviceProvider!.serviceAreas),
+
+            // TODO: Display certifications (ListTile was better for URLs)
             // TODO: Display availability if structured and meaningful
 
             const SizedBox(height: 32),
@@ -303,7 +331,6 @@ class _ViewServiceProviderProfileScreenState extends State<ViewServiceProviderPr
               icon: const Icon(Icons.chat_bubble_outline_rounded),
               label: Text('Chat with ${_serviceProvider!.name?.split(" ").first ?? "Provider"}'),
               onPressed: _initiateChat,
-              // Style from ElevatedButtonThemeData
               style: theme.elevatedButtonTheme.style?.copyWith(
                 minimumSize: MaterialStateProperty.all(const Size(double.infinity, 48)),
               ),

@@ -13,7 +13,7 @@ class SpaceReviews extends StatelessWidget {
   Widget _buildRatingStars(BuildContext context, double rating, {double size = 16.0}) {
     final theme = Theme.of(context);
     // Using primary color for stars, but Colors.amber is also common and acceptable.
-    final starColor = theme.colorScheme.primary; 
+    final starColor = theme.colorScheme.primary;
     List<Widget> stars = [];
     int fullStars = rating.floor();
     bool halfStar = (rating - fullStars) >= 0.5;

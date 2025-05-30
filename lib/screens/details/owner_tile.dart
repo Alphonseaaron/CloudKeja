@@ -18,7 +18,7 @@ class OwnerTile extends StatelessWidget {
 
     if (userId == null || userId!.isEmpty) {
       // Optionally return a placeholder or an error message if userId is crucial and missing
-      return const SizedBox.shrink(); 
+      return const SizedBox.shrink();
     }
 
     return FutureBuilder<UserModel>(

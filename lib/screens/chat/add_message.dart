@@ -67,9 +67,9 @@ class _AddMessageState extends State<AddMessage> {
 
     return Container(
       padding: EdgeInsets.only(
-        left: 12.0, 
-        right: 8.0, 
-        top: 8.0, 
+        left: 12.0,
+        right: 8.0,
+        top: 8.0,
         bottom: MediaQuery.of(context).padding.bottom + 8.0 // Respect bottom safe area
       ),
       decoration: BoxDecoration(

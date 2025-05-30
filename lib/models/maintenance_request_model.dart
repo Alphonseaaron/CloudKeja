@@ -43,7 +43,7 @@ class MaintenanceRequestModel {
       // 'id' is usually the document ID and not stored as a field within the document itself.
     };
   }
-  
+
 
   // Static method to create an empty or dummy model for placeholders/skeletonizer
   static MaintenanceRequestModel empty() {

@@ -138,7 +138,7 @@ class _DetailsAppBarState extends State<DetailsAppBar> {
                     onTap: () async {
                       final authProvider = Provider.of<AuthProvider>(context, listen: false);
                       final wishlistProvider = Provider.of<WishlistProvider>(context, listen: false);
-                      
+
                       if (authProvider.user == null) { // Guard against null user
                         ScaffoldMessenger.of(context).showSnackBar(
                            SnackBar(content: Text('Please log in to add to wishlist', style: TextStyle(color: colorScheme.onError)), backgroundColor: colorScheme.error)
@@ -148,7 +148,7 @@ class _DetailsAppBarState extends State<DetailsAppBar> {
 
                       bool currentlyLiked = _isLiked();
                       await wishlistProvider.addToWishlist(widget.space.id!, currentlyLiked);
-                      
+
                       // Optimistically update the UI or wait for provider to notify
                       // For direct feedback, manually update the local state if AuthProvider doesn't auto-update UI
                       if (mounted) {

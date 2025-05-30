@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:skeletonizer/skeletonizer.dart'; 
-import 'package:intl/intl.dart'; 
-import 'package:cloudkeja/widgets/tiles/payment_history_tile.dart'; 
-import 'package:provider/provider.dart'; 
-import 'package:cloudkeja/providers/payment_provider.dart'; 
-import 'package:cloudkeja/models/payment_model.dart'; 
+import 'package:skeletonizer/skeletonizer.dart';
+import 'package:intl/intl.dart';
+import 'package:cloudkeja/widgets/tiles/payment_history_tile.dart';
+import 'package:provider/provider.dart';
+import 'package:cloudkeja/providers/payment_provider.dart';
+import 'package:cloudkeja/models/payment_model.dart';
 
 class UserPaymentHistoryScreen extends StatefulWidget {
   const UserPaymentHistoryScreen({Key? key}) : super(key: key);
@@ -196,10 +196,10 @@ class _UserPaymentHistoryScreenState extends State<UserPaymentHistoryScreen> {
                               Text('No Payments Found', style: textTheme.titleLarge?.copyWith(color: colorScheme.onSurface.withOpacity(0.8))),
                               const SizedBox(height: 8),
                               Text(
-                                _activeFilterLabel == 'All Time' 
+                                _activeFilterLabel == 'All Time'
                                   ? 'Your payment records will appear here.'
-                                  : 'No payments found for the selected period.', 
-                                textAlign: TextAlign.center, 
+                                  : 'No payments found for the selected period.',
+                                textAlign: TextAlign.center,
                                 style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface.withOpacity(0.6))
                               ),
                             ],
@@ -208,7 +208,7 @@ class _UserPaymentHistoryScreenState extends State<UserPaymentHistoryScreen> {
                       )
                     : ListView.builder(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        itemCount: _isLoading ? 5 : _payments.length, 
+                        itemCount: _isLoading ? 5 : _payments.length,
                         itemBuilder: (context, index) {
                           if (_isLoading) {
                             return PaymentHistoryTile(paymentData: PaymentModel.empty(), isSkeleton: true);

@@ -17,7 +17,7 @@ class UserMaintenanceHistoryScreen extends StatefulWidget {
 class _UserMaintenanceHistoryScreenState extends State<UserMaintenanceHistoryScreen> {
   bool _isLoading = true; // Start with loading true
   List<MaintenanceRequestModel> _maintenanceRequests = [];
-  
+
   String _selectedStatusFilter = 'All';
   DateTimeRange? _selectedDateFilter;
   String _activeDateFilterLabel = 'Any Date'; // For UI display of date filter
@@ -52,7 +52,7 @@ class _UserMaintenanceHistoryScreenState extends State<UserMaintenanceHistoryScr
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error fetching requests: ${e.toString()}', style: TextStyle(color: Theme.of(context).colorScheme.onError)), backgroundColor: Theme.of(context).colorScheme.error),
         );
-        _maintenanceRequests = []; 
+        _maintenanceRequests = [];
       }
     } finally {
       if (mounted) {
@@ -60,12 +60,12 @@ class _UserMaintenanceHistoryScreenState extends State<UserMaintenanceHistoryScr
       }
     }
   }
-  
+
   Future<void> _selectCustomDateRange() async {
     final theme = Theme.of(context);
     final picked = await showDateRangePicker(
       context: context,
-      firstDate: DateTime(DateTime.now().year - 5), 
+      firstDate: DateTime(DateTime.now().year - 5),
       lastDate: DateTime.now(),
       initialDateRange: _selectedDateFilter ?? DateTimeRange(start: DateTime.now().subtract(const Duration(days: 7)), end: DateTime.now()),
       builder: (context, child) {
@@ -183,7 +183,7 @@ class _UserMaintenanceHistoryScreenState extends State<UserMaintenanceHistoryScr
             // Maintenance Requests List
             Expanded(
               child: Skeletonizer(
-                enabled: _isLoading, 
+                enabled: _isLoading,
                 effect: ShimmerEffect(
                   baseColor: colorScheme.surfaceVariant.withOpacity(0.4),
                   highlightColor: colorScheme.surfaceVariant.withOpacity(0.8),
@@ -213,9 +213,9 @@ class _UserMaintenanceHistoryScreenState extends State<UserMaintenanceHistoryScr
                           ),
                         ),
                       )
-                    : ListView.builder( 
+                    : ListView.builder(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        itemCount: _isLoading ? 5 : _maintenanceRequests.length, 
+                        itemCount: _isLoading ? 5 : _maintenanceRequests.length,
                         itemBuilder: (context, index) {
                           if (_isLoading) {
                             return MaintenanceRequestTile(maintenanceRequest: MaintenanceRequestModel.empty());

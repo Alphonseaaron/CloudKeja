@@ -17,7 +17,7 @@ class SearchScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: colorScheme.background, // Themed background
       // Consider adding an AppBar if a back button or explicit title is needed
-      // appBar: AppBar(title: Text("Search Spaces")), 
+      // appBar: AppBar(title: Text("Search Spaces")),
       body: SafeArea( // Add SafeArea
         child: ListView(
           padding: const EdgeInsets.symmetric(vertical: 12.0), // Padding for the ListView
@@ -75,7 +75,7 @@ class SearchScreen extends StatelessWidget {
             // Removed Image.asset('assets/images/accent.png')
             // Using a simple Divider or nothing if section title is enough
             // Divider(height: 1, thickness: 1, indent: 16, endIndent: 16, color: colorScheme.outline.withOpacity(0.5)),
-            
+
             // Placeholder ListTiles for recent searches
             ...List.generate(
               4,

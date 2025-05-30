@@ -50,9 +50,9 @@ class TenancyProvider with ChangeNotifier {
           .collection('tenancies') // Assumed collection name for leases
           .where('tenantId', isEqualTo: currentUserUid)
           // Option 1: Using an 'isActive' flag (requires backend to manage this flag)
-          .where('isActive', isEqualTo: true) 
+          .where('isActive', isEqualTo: true)
           // Option 2: Filtering by date (more robust if 'isActive' isn't perfectly managed)
-          // .where('leaseEndDate', isGreaterThanOrEqualTo: Timestamp.now()) 
+          // .where('leaseEndDate', isGreaterThanOrEqualTo: Timestamp.now())
           .orderBy('leaseStartDate', descending: true) // Get the most recent lease if multiple somehow active
           .limit(1)
           .get();

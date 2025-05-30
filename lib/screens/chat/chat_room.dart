@@ -19,7 +19,7 @@ class ChatRoom extends StatelessWidget {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300), 
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
     }
@@ -36,22 +36,22 @@ class ChatRoom extends StatelessWidget {
     final chatRoomId = chatRoomData['chatRoomId'] as String;
 
     // Determine if the chat partner should have a verified badge
-    bool isChatPartnerVerified = user.isAdmin == true || 
+    bool isChatPartnerVerified = user.isAdmin == true ||
                                  (user.role == 'ServiceProvider' && user.isVerified == true);
 
     return Scaffold(
-      backgroundColor: colorScheme.background, 
+      backgroundColor: colorScheme.background,
       appBar: AppBar(
-        leading: IconButton( 
-          icon: const Icon(Icons.arrow_back), 
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
           tooltip: 'Back',
         ),
-        leadingWidth: 30, 
+        leadingWidth: 30,
         title: Row(
           children: [
             CircleAvatar(
-              radius: 20, 
+              radius: 20,
               backgroundColor: colorScheme.surfaceVariant,
               backgroundImage: (user.profile != null && user.profile!.isNotEmpty)
                   ? CachedNetworkImageProvider(user.profile!)
@@ -68,12 +68,12 @@ class ChatRoom extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Flexible( 
+                      Flexible(
                         child: Text(
                           user.name ?? 'Chat User',
                           overflow: TextOverflow.ellipsis,
                           style: textTheme.titleMedium?.copyWith(
-                            color: colorScheme.onSurface, 
+                            color: colorScheme.onSurface,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -84,12 +84,12 @@ class ChatRoom extends StatelessWidget {
                       ]
                     ],
                   ),
-                  if (user.phone != null && user.phone!.isNotEmpty) 
+                  if (user.phone != null && user.phone!.isNotEmpty)
                     Text(
                       user.phone!,
                       overflow: TextOverflow.ellipsis,
                       style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurface.withOpacity(0.7), 
+                        color: colorScheme.onSurface.withOpacity(0.7),
                       ),
                     ),
                 ],
@@ -100,12 +100,12 @@ class ChatRoom extends StatelessWidget {
         actions: [
           IconButton(
             splashRadius: 20,
-            icon: const Icon(Icons.call_outlined), 
+            icon: const Icon(Icons.call_outlined),
             tooltip: 'Call ${user.phone ?? ""}',
             onPressed: () async {
               if (user.phone != null && user.phone!.isNotEmpty) {
                 bool? res = await FlutterPhoneDirectCaller.callNumber(user.phone!);
-                if (res == false && context.mounted) { 
+                if (res == false && context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: Text('Could not make phone call to ${user.phone}.', style: TextStyle(color: colorScheme.onError)),
                     backgroundColor: colorScheme.error,
@@ -119,11 +119,11 @@ class ChatRoom extends StatelessWidget {
               }
             },
           ),
-          _MoreVertMenu(user: user), 
-          const SizedBox(width: 4), 
+          _MoreVertMenu(user: user),
+          const SizedBox(width: 4),
         ],
       ),
-      body: Column( 
+      body: Column(
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
@@ -131,11 +131,11 @@ class ChatRoom extends StatelessWidget {
                   .collection('chats')
                   .doc(chatRoomId)
                   .collection('messages')
-                  .orderBy('sentAt', descending: false) 
+                  .orderBy('sentAt', descending: false)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator()); 
+                  return const Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return Center(
@@ -149,18 +149,18 @@ class ChatRoom extends StatelessWidget {
                     ),
                   );
                 }
-                
+
                 WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
                 return ListView.builder(
                   controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0), 
+                  padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
                     final messageDoc = snapshot.data!.docs[index];
                     try {
                       final message = MessageModel.fromSnapshot(messageDoc);
-                       return ChatBubble(message: message); 
+                       return ChatBubble(message: message);
                     } catch (e) {
                       return ListTile(title: Text('Error loading message: $e', style: TextStyle(color: colorScheme.error)));
                     }
@@ -169,7 +169,7 @@ class ChatRoom extends StatelessWidget {
               },
             ),
           ),
-          AddMessage(chatRoomId: chatRoomId, recipientId: user.userId!), 
+          AddMessage(chatRoomId: chatRoomId, recipientId: user.userId!),
         ],
       ),
     );
@@ -177,22 +177,22 @@ class ChatRoom extends StatelessWidget {
 }
 
 class _MoreVertMenu extends StatelessWidget {
-  final UserModel user; 
+  final UserModel user;
   const _MoreVertMenu({Key? key, required this.user}) : super(key: key);
 
   static const List<String> _options = [
-    'View Profile', 
-    'Search Chat',  
-    'Mute Notifications', 
-    'Clear Chat', 
-    'Block User'  
+    'View Profile',
+    'Search Chat',
+    'Mute Notifications',
+    'Clear Chat',
+    'Block User'
   ];
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert_outlined), 
+      icon: const Icon(Icons.more_vert_outlined),
       tooltip: 'More options',
       onSelected: (String value) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -203,7 +203,7 @@ class _MoreVertMenu extends StatelessWidget {
         return _options.map((String choice) {
           return PopupMenuItem<String>(
             value: choice,
-            child: Text(choice, style: theme.textTheme.bodyMedium), 
+            child: Text(choice, style: theme.textTheme.bodyMedium),
           );
         }).toList();
       },

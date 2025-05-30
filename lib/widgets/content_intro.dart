@@ -32,7 +32,7 @@ class ContentIntro extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     // Placeholder for area if not available in model
-    final String areaText = space.area?.toString() ?? 'N/A'; 
+    final String areaText = space.area?.toString() ?? 'N/A';
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),

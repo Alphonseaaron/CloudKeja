@@ -32,7 +32,7 @@ class AdminDashboard extends StatefulWidget { // Changed to StatefulWidget for R
 }
 
 class _AdminDashboardState extends State<AdminDashboard> {
-  
+
   Future<void> _refreshData() async {
     // Re-fetch any data needed for this dashboard, e.g., recent spaces
     // This will trigger FutureBuilders to re-run their futures
@@ -95,7 +95,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       ),
     );
   }
-  
+
   Widget _buildSectionTitle(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 24.0, bottom: 12.0),
@@ -189,7 +189,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 }).toList(),
               ),
             ),
-            
+
             _buildSectionTitle(context, 'Recent Spaces'),
             FutureBuilder<List<SpaceModel>>(
               future: Provider.of<PostProvider>(context, listen: false).getSpaces(), // Re-fetches on rebuild if provider doesn't cache

@@ -1,114 +1,133 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // For formatting month names
 
-LineChartData mainData({bool isLoaded = false}) {
-  List<Color> gradientColors = [
-    const Color(0xffe68823),
-    const Color(0xffe68823),
-  ];
+// Renamed mainData to getThemedLineChartData for clarity and to accept parameters
+LineChartData getThemedLineChartData({
+  required BuildContext context, // To access Theme
+  required Map<String, double> monthlyIncomeData, // "YYYY-MM": amount
+  required bool isLoading,
+}) {
+  final theme = Theme.of(context);
+  final colorScheme = theme.colorScheme;
+  final textTheme = theme.textTheme;
+
+  List<FlSpot> spots = [];
+  List<String> monthLabels = []; // To store "MMM" labels for bottom titles
+
+  if (!isLoading && monthlyIncomeData.isNotEmpty) {
+    // Sort keys to ensure chronological order if not already sorted
+    var sortedKeys = monthlyIncomeData.keys.toList()..sort();
+
+    for (int i = 0; i < sortedKeys.length; i++) {
+      String key = sortedKeys[i]; // "YYYY-MM"
+      double income = monthlyIncomeData[key] ?? 0.0;
+      spots.add(FlSpot(i.toDouble(), income / 1000)); // X-axis as index, Y-axis as income in thousands
+
+      // Generate month labels from "YYYY-MM" keys
+      try {
+        DateTime date = DateFormat('yyyy-MM').parse(key);
+        monthLabels.add(DateFormat('MMM').format(date));
+      } catch (e) {
+        monthLabels.add(''); // Fallback if parsing fails
+      }
+    }
+  } else if (isLoading || monthlyIncomeData.isEmpty) {
+    // Show a flat line or minimal data points if loading or no data
+    // For 6 months, this would be 0 to 5 on x-axis
+    int numberOfMonthsToShow = monthlyIncomeData.isEmpty ? 6 : monthlyIncomeData.length;
+    if (numberOfMonthsToShow == 0 && isLoading) numberOfMonthsToShow = 6; // Default for loading skeleton
+
+    for (int i = 0; i < numberOfMonthsToShow; i++) {
+      spots.add(FlSpot(i.toDouble(), 0)); // Flat line at 0
+       // Generate month labels for skeleton view
+      DateTime monthDate = DateTime.now().subtract(Duration(days: (numberOfMonthsToShow - 1 - i) * 30));
+      monthLabels.add(DateFormat('MMM').format(monthDate));
+    }
+     if (monthLabels.isEmpty && numberOfMonthsToShow > 0) { // Ensure monthLabels has some values for titles
+        for (int i=0; i<numberOfMonthsToShow; ++i) monthLabels.add('...');
+    }
+  }
+
+  double minY = 0;
+  double maxY = 5; // Default max Y if no data
+  if (spots.isNotEmpty) {
+    minY = spots.map((spot) => spot.y).reduce((a, b) => a < b ? a : b);
+    maxY = spots.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
+    if (minY == maxY && minY == 0) { // All data is zero
+        maxY = 5; // Set a sensible default max Y
+    } else if (minY == maxY) { // All data points are the same non-zero value
+        minY = 0; // Start y-axis from 0
+        maxY = maxY * 1.5; // Add some padding
+    } else {
+        minY = 0; // Always start y-axis from 0 for income
+        maxY = maxY * 1.2; // Add 20% padding to max Y
+    }
+    if (maxY == 0) maxY = 5; // Ensure maxY is not 0 if all incomes are 0
+  }
+
+  double maxX = spots.isNotEmpty ? (spots.length - 1).toDouble() : 5.0; // Default if no spots
+  if (maxX < 1 && spots.length == 1) maxX = 1; // Ensure chart can draw if only one data point
 
   return LineChartData(
-    borderData: FlBorderData(
-      show: false,
-    ),
     gridData: FlGridData(
-        show: true,
-        horizontalInterval: 1.6,
-        getDrawingHorizontalLine: (value) {
-          return FlLine(
-            dashArray: const [5, 5],
-            color: const Color(0xff37434d).withOpacity(0.2),
-            strokeWidth: 9,
-          );
-        },
-        drawVerticalLine: false),
+      show: true,
+      drawVerticalLine: true,
+      horizontalInterval: maxY / (maxY > 10 ? 5 : (maxY > 2 ? maxY/2 : 1)), // Dynamic interval
+      verticalInterval: 1, // Show line for each month if possible
+      getDrawingHorizontalLine: (value) => FlLine(color: colorScheme.outline.withOpacity(0.2), strokeWidth: 0.5),
+      getDrawingVerticalLine: (value) => FlLine(color: colorScheme.outline.withOpacity(0.2), strokeWidth: 0.5),
+    ),
     titlesData: FlTitlesData(
       show: true,
-      rightTitles: SideTitles(showTitles: false),
-      topTitles: SideTitles(showTitles: false),
-      bottomTitles: SideTitles(
-        showTitles: true,
-        reservedSize: 5,
-        interval: 1,
-        getTextStyles: (context, value) => const TextStyle(
-            color: Color(0xff68737d), fontWeight: FontWeight.bold, fontSize: 8),
-        getTitles: (value) {
-          switch (value.toInt()) {
-            case 1:
-              return 'MAR';
-            case 4:
-              return 'JUN';
-            case 7:
-              return 'SEP';
-            case 10:
-              return 'OCT';
-          }
-          return '';
-        },
-        margin: 5,
-      ),
-      leftTitles: SideTitles(
-        showTitles: false,
-        interval: 1,
-        getTextStyles: (context, value) => const TextStyle(
-          color: Color(0xff67727d),
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
+      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      bottomTitles: AxisTitles(
+        sideTitles: SideTitles(
+          showTitles: true,
+          reservedSize: 30,
+          interval: 1, // Show label for each spot
+          getTitlesWidget: (value, meta) {
+            int index = value.toInt();
+            if (index >= 0 && index < monthLabels.length) {
+              return SideTitleWidget(
+                axisSide: meta.axisSide,
+                space: 8.0,
+                child: Text(monthLabels[index], style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+              );
+            }
+            return const SizedBox.shrink();
+          },
         ),
-        getTitles: (value) {
-          switch (value.toInt()) {
-            case 1:
-              return '10k';
-            case 3:
-              return '30k';
-            case 5:
-              return '50k';
-          }
-          return '';
-        },
-        reservedSize: 25,
-        margin: 12,
+      ),
+      leftTitles: AxisTitles(
+        sideTitles: SideTitles(
+          showTitles: true,
+          interval: maxY / (maxY > 10 ? 5 : (maxY > 2 ? maxY/2 : 1)), // Dynamic interval
+          getTitlesWidget: (value, meta) => Text(
+            '${value.toInt()}k', // Assuming Y is in thousands
+            style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+          ),
+          reservedSize: 42,
+        ),
       ),
     ),
+    borderData: FlBorderData(show: true, border: Border.all(color: colorScheme.outline.withOpacity(0.3))),
     minX: 0,
-    maxX: 11,
-    minY: 0,
-    maxY: 6,
+    maxX: maxX,
+    minY: minY,
+    maxY: maxY,
     lineTouchData: LineTouchData(
-      getTouchedSpotIndicator:
-          (LineChartBarData barData, List<int> spotIndexes) {
-        return spotIndexes.map((index) {
-          return TouchedSpotIndicatorData(
-            FlLine(
-              color: Colors.white.withOpacity(0.1),
-              strokeWidth: 2,
-              dashArray: [3, 3],
-            ),
-            FlDotData(
-              show: false,
-              getDotPainter: (spot, percent, barData, index) =>
-                  FlDotCirclePainter(
-                radius: 8,
-                color: [
-                  Colors.black,
-                  Colors.black,
-                ][index],
-                strokeWidth: 2,
-                strokeColor: Colors.black,
-              ),
-            ),
-          );
-        }).toList();
-      },
-      enabled: true,
+      enabled: !isLoading, // Disable touch if loading
       touchTooltipData: LineTouchTooltipData(
-        tooltipPadding: const EdgeInsets.all(8),
-        tooltipBgColor: Color(0xff2e3747).withOpacity(0.8),
+        tooltipBgColor: colorScheme.surfaceVariant.withOpacity(0.9),
         getTooltipItems: (touchedSpots) {
           return touchedSpots.map((touchedSpot) {
+            final monthIndex = touchedSpot.spotIndex;
+            String monthLabel = (monthIndex >= 0 && monthIndex < monthLabels.length) ? monthLabels[monthIndex] : '';
             return LineTooltipItem(
-              '\$${touchedSpot.y.round()}0.00',
-              const TextStyle(color: Colors.white, fontSize: 12.0),
+              '${monthLabel.isNotEmpty ? monthLabel + ": " : ""}KES ${(touchedSpot.y * 1000).toStringAsFixed(0)}',
+              textTheme.bodySmall!.copyWith(color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold),
             );
           }).toList();
         },
@@ -117,78 +136,30 @@ LineChartData mainData({bool isLoaded = false}) {
     ),
     lineBarsData: [
       LineChartBarData(
-        spots: isLoaded
-            ? const [
-                FlSpot(0, 3),
-                FlSpot(2.4, 2),
-                FlSpot(4.4, 3),
-                FlSpot(6.4, 3.1),
-                FlSpot(8, 4),
-                FlSpot(9.5, 4),
-                FlSpot(11, 5),
-              ]
-            : const [
-                FlSpot(0, 0),
-                FlSpot(2.4, 0),
-                FlSpot(4.4, 0),
-                FlSpot(6.4, 0),
-                FlSpot(8, 0),
-                FlSpot(9.5, 0),
-                FlSpot(11, 0)
-              ],
+        spots: spots,
         isCurved: true,
-        colors: gradientColors,
-        barWidth: 2,
+        gradient: LinearGradient(colors: [colorScheme.primary, colorScheme.primary.withOpacity(0.3)]),
+        barWidth: 3, // Slightly thicker line
+        isStrokeCapRound: true,
         dotData: FlDotData(
-          show: false,
+          show: spots.length < 15, // Show dots if not too many points
+          getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
+            radius: 3,
+            color: colorScheme.primary,
+            strokeWidth: 1,
+            strokeColor: colorScheme.surface, // Dot border to match chart background
+          )
         ),
         belowBarData: BarAreaData(
-            show: true,
-            gradientFrom: const Offset(0, 0),
-            gradientTo: const Offset(0, 1),
-            colors: [
-              Color(0xffe68823).withOpacity(0.1),
-              Color(0xffe68823).withOpacity(0),
-            ]),
-      ),
-      LineChartBarData(
-        spots: isLoaded
-            ? [
-                FlSpot(0, 4),
-                FlSpot(2.4, 3),
-                FlSpot(4.4, 5),
-                FlSpot(6.4, 3.8),
-                FlSpot(8, 3.8),
-                FlSpot(9.5, 5),
-                FlSpot(11, 5),
-              ]
-            : [
-                FlSpot(0, 0),
-                FlSpot(2.4, 0),
-                FlSpot(4.4, 0),
-                FlSpot(6.4, 0),
-                FlSpot(8, 0),
-                FlSpot(9.5, 0),
-                FlSpot(11, 0)
-              ],
-        isCurved: true,
-        colors: [
-          Color(0xff2972ff).withOpacity(0.5),
-          Color(0xff2972ff).withOpacity(0),
-        ],
-        barWidth: 2,
-        dotData: FlDotData(
-          show: false,
+          show: true,
+          gradient: LinearGradient(
+            colors: [colorScheme.primary.withOpacity(0.2), colorScheme.primary.withOpacity(0.0)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
         ),
-        belowBarData: BarAreaData(
-            show: true,
-            gradientFrom: Offset(0, 0),
-            gradientTo: Offset(0, 1),
-            colors: [
-              Colors.blue.withOpacity(0.1),
-              Colors.blue.withOpacity(0),
-            ]),
       ),
+      // Removed the second static LineChartBarData as per instructions for now
     ],
   );
 }

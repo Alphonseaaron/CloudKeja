@@ -104,7 +104,7 @@ class _ViewLeaseDetailsScreenState extends State<ViewLeaseDetailsScreen> {
       ),
     );
   }
-  
+
   Future<void> _downloadLeaseDocument() async {
     if (_leaseModel?.leaseDocumentUrl == null || _leaseModel!.leaseDocumentUrl!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -204,7 +204,7 @@ class _ViewLeaseDetailsScreenState extends State<ViewLeaseDetailsScreen> {
           _buildDetailRow(context, Icons.location_city_outlined, 'Property Address', lease.propertyAddress),
           if (lease.unitIdentifier != null && lease.unitIdentifier!.isNotEmpty)
             _buildDetailRow(context, Icons.apartment_outlined, 'Unit Identifier', lease.unitIdentifier),
-          
+
           _buildSectionTitle(context, 'Landlord Information'),
           _buildDetailRow(context, Icons.person_outline_rounded, 'Landlord Name', lease.landlordName),
           if (lease.landlordContact != null && lease.landlordContact!.isNotEmpty)
@@ -223,8 +223,8 @@ class _ViewLeaseDetailsScreenState extends State<ViewLeaseDetailsScreen> {
           const SizedBox(height: 32),
           if (lease.leaseDocumentUrl != null && lease.leaseDocumentUrl!.isNotEmpty)
             ElevatedButton.icon(
-              icon: _isDownloading 
-                  ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.onPrimary)) 
+              icon: _isDownloading
+                  ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.onPrimary))
                   : const Icon(Icons.download_for_offline_outlined),
               label: Text(_isDownloading ? 'Downloading...' : 'Download Lease Agreement'),
               onPressed: _isDownloading ? null : _downloadLeaseDocument,

@@ -15,7 +15,7 @@ class AppTheme {
       seedColor: kAppPrimaryColor,
       brightness: Brightness.light,
       // Override specific colors if needed, e.g.:
-      // surface: kAppSurfaceColor, 
+      // surface: kAppSurfaceColor,
       // background: kAppBackgroundColor,
       // error: kAppErrorColor,
       // onPrimary: Colors.white,
@@ -24,7 +24,7 @@ class AppTheme {
 
     // Define the TextTheme using GoogleFonts.ibmPlexSans for light theme
     final TextTheme baseLightTextTheme = GoogleFonts.ibmPlexSansTextTheme(
-      ThemeData.light().textTheme 
+      ThemeData.light().textTheme
     ).copyWith(
       displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: lightColorScheme.onBackground),
       displayMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: lightColorScheme.onBackground),
@@ -34,10 +34,10 @@ class AppTheme {
       titleSmall: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: lightColorScheme.onBackground),
       bodyLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: lightColorScheme.onBackground, height: 1.5),
       bodyMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: lightColorScheme.onBackground, height: 1.4),
-      labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: lightColorScheme.onPrimary), 
+      labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: lightColorScheme.onPrimary),
       bodySmall: TextStyle(fontSize: 12, fontWeight: FontWeight.normal, color: lightColorScheme.onBackground.withOpacity(0.7), height: 1.3),
       // caption: TextStyle(fontSize: 12, fontWeight: FontWeight.normal, color: lightColorScheme.onBackground.withOpacity(0.6)), // Example for caption
-    ).apply( 
+    ).apply(
       bodyColor: lightColorScheme.onBackground,
       displayColor: lightColorScheme.onBackground,
     );
@@ -45,7 +45,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       visualDensity: VisualDensity.adaptivePlatformDensity,
-      primaryColor: lightColorScheme.primary, 
+      primaryColor: lightColorScheme.primary,
       colorScheme: lightColorScheme,
       scaffoldBackgroundColor: lightColorScheme.background,
       dialogBackgroundColor: lightColorScheme.surface, // M3 uses surface for dialogs
@@ -54,11 +54,11 @@ class AppTheme {
       brightness: Brightness.light,
 
       appBarTheme: AppBarTheme(
-        backgroundColor: lightColorScheme.surface, 
+        backgroundColor: lightColorScheme.surface,
         foregroundColor: lightColorScheme.onSurface,
-        elevation: 0.5, 
+        elevation: 0.5,
         titleTextStyle: baseLightTextTheme.titleLarge?.copyWith(color: lightColorScheme.onSurface),
-        iconTheme: IconThemeData(color: lightColorScheme.onSurface, size: 24), 
+        iconTheme: IconThemeData(color: lightColorScheme.onSurface, size: 24),
       ),
 
       textTheme: baseLightTextTheme,
@@ -67,7 +67,7 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: lightColorScheme.primary,
           foregroundColor: lightColorScheme.onPrimary,
-          textStyle: baseLightTextTheme.labelLarge, 
+          textStyle: baseLightTextTheme.labelLarge,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14), // Increased vertical padding
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           elevation: 1.0,
@@ -90,7 +90,7 @@ class AppTheme {
           foregroundColor: lightColorScheme.primary,
           side: BorderSide(color: lightColorScheme.outline, width: 1.0), // Use outline color
           textStyle: baseLightTextTheme.labelLarge?.copyWith(
-            color: lightColorScheme.primary, 
+            color: lightColorScheme.primary,
             fontWeight: FontWeight.w600,
           ),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -100,7 +100,7 @@ class AppTheme {
 
       cardTheme: CardTheme(
         elevation: 1.0, // M3 often uses lower elevation for cards
-        color: lightColorScheme.surface, 
+        color: lightColorScheme.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16), // Standardized margin
       ),
@@ -118,7 +118,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: lightColorScheme.primary, width: 2.0), 
+          borderSide: BorderSide(color: lightColorScheme.primary, width: 2.0),
         ),
         labelStyle: baseLightTextTheme.bodyLarge?.copyWith(color: lightColorScheme.onSurface.withOpacity(0.7)),
         hintStyle: baseLightTextTheme.bodyMedium?.copyWith(color: lightColorScheme.onSurface.withOpacity(0.5)),
@@ -134,21 +134,21 @@ class AppTheme {
         contentTextStyle: baseLightTextTheme.bodyMedium?.copyWith(color: lightColorScheme.onSurface),
         elevation: 3.0,
       ),
-      
+
       chipTheme: ChipThemeData(
         backgroundColor: lightColorScheme.secondaryContainer.withOpacity(0.4),
         selectedColor: lightColorScheme.primary,
-        secondarySelectedColor: lightColorScheme.primary, 
+        secondarySelectedColor: lightColorScheme.primary,
         labelStyle: baseLightTextTheme.bodySmall?.copyWith(color: lightColorScheme.onSecondaryContainer),
         selectedLabelStyle: baseLightTextTheme.bodySmall?.copyWith(color: lightColorScheme.onPrimary),
         padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-        side: BorderSide.none, 
+        side: BorderSide.none,
         showCheckmark: true, // M3 often does show checkmark on selected FilterChips
         elevation: 0.0,
         pressElevation: 1.0,
       ),
-      
+
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: lightColorScheme.surface, // Or surfaceContainer for a bit of elevation feel
         indicatorColor: lightColorScheme.primaryContainer,
@@ -190,7 +190,7 @@ class AppTheme {
   // --- DARK THEME DEFINITION ---
   static ThemeData get darkTheme {
     final ColorScheme darkColorScheme = ColorScheme.fromSeed(
-      seedColor: kAppPrimaryColor, 
+      seedColor: kAppPrimaryColor,
       brightness: Brightness.dark,
       // Override to ensure good contrast and M3 feel:
       // primary: Colors.blue.shade300, // Lighter blue for dark theme
@@ -204,7 +204,7 @@ class AppTheme {
     );
 
     final TextTheme baseDarkTextTheme = GoogleFonts.ibmPlexSansTextTheme(
-      ThemeData.dark().textTheme 
+      ThemeData.dark().textTheme
     ).copyWith(
       displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: darkColorScheme.onBackground),
       displayMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: darkColorScheme.onBackground),
@@ -214,7 +214,7 @@ class AppTheme {
       titleSmall: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: darkColorScheme.onBackground),
       bodyLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: darkColorScheme.onBackground, height: 1.5),
       bodyMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: darkColorScheme.onBackground, height: 1.4),
-      labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: darkColorScheme.onPrimary), 
+      labelLarge: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: darkColorScheme.onPrimary),
       bodySmall: TextStyle(fontSize: 12, fontWeight: FontWeight.normal, color: darkColorScheme.onBackground.withOpacity(0.7), height: 1.3),
       // caption: TextStyle(fontSize: 12, fontWeight: FontWeight.normal, color: darkColorScheme.onBackground.withOpacity(0.6)),
     ).apply(
@@ -279,7 +279,7 @@ class AppTheme {
       ),
 
       cardTheme: CardTheme(
-        elevation: 1.0, 
+        elevation: 1.0,
         color: darkColorScheme.surfaceVariant, // surfaceVariant is often used for cards in dark M3
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -314,7 +314,7 @@ class AppTheme {
         contentTextStyle: baseDarkTextTheme.bodyMedium?.copyWith(color: darkColorScheme.onSurface),
         elevation: 3.0,
       ),
-      
+
       chipTheme: ChipThemeData(
         backgroundColor: darkColorScheme.secondaryContainer.withOpacity(0.6),
         selectedColor: darkColorScheme.primary, // Or secondary

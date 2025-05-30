@@ -69,7 +69,7 @@ class _MyDropDownState extends State<MyDropDown> {
             // Sort options alphabetically
             List<String> sortedOptions = List<String>.from(widget.options ?? []);
             sortedOptions.sort();
-            
+
             return DropDownOptions(
               options: sortedOptions,
               title: widget.hintText?.toUpperCase() ?? 'SELECT OPTION', // Title for the sheet

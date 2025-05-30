@@ -30,7 +30,7 @@ class _CategoriesState extends State<Categories> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     // ChipThemeData is fetched from the global theme (AppTheme.lightTheme)
-    // final chipTheme = theme.chipTheme; 
+    // final chipTheme = theme.chipTheme;
 
     return SizedBox(
       height: 48, // Adjusted height to comfortably fit chips with padding
