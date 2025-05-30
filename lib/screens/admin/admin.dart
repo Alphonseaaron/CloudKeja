@@ -146,7 +146,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         'icon': Icons.support_agent_outlined, // Changed from people_outline_outlined
         'title': 'Users\nSupport',
         'onPressed': () => Get.to(() => const ChatScreen()), // Assuming ChatScreen is general support
-        'color': Colors.orange.shade700, // A distinct color for support, can be from extended color scheme
+        'color': colorScheme.tertiary, // Changed from Colors.orange.shade700
       },
     ];
 

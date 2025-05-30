@@ -139,7 +139,13 @@ void actionSheet(BuildContext context, UserModel user, ThemeData theme) {
                 Divider(color: theme.dividerColor),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text("Service Provider Actions", style: textTheme.labelLarge?.copyWith(color: colorScheme.onSurfaceVariant)),
+                  child: Text(
+                    "Service Provider Actions",
+                    style: textTheme.titleSmall?.copyWith(
+                        color: colorScheme.secondary,
+                        fontWeight: FontWeight.w600
+                    ),
+                  ),
                 ),
                 ListTile(
                   dense: true,

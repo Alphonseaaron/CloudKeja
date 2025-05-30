@@ -80,6 +80,35 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
     });
   }
 
+  Widget _buildSkeletonTile(BuildContext context) {
+    final theme = Theme.of(context);
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundColor: theme.colorScheme.surfaceVariant.withOpacity(0.5), // Placeholder color
+      ),
+      title: Container(
+        height: 16,
+        width: MediaQuery.of(context).size.width * 0.3, // Shorter width
+        color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+        margin: const EdgeInsets.only(bottom: 4), // Add some margin like real text
+      ),
+      subtitle: Container(
+        height: 12,
+        width: MediaQuery.of(context).size.width * 0.5, // Medium width
+        color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+      ),
+      trailing: Container( // Placeholder for the chip
+        height: 24, // Approx height of a chip
+        width: 50,  // Approx width of a chip
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(8), // Chip-like radius
+        ),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0), // Match real tile
+    );
+  }
+
   Widget _buildFilterDropdowns(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
@@ -193,12 +222,7 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
                       itemCount: _isLoading ? 8 : _filteredUsers.length, // Show 8 skeleton items
                       itemBuilder: (context, index) {
                         if (_isLoading) {
-                          // Simple skeleton ListTile
-                          return ListTile(
-                            leading: const CircleAvatar(backgroundColor: Colors.transparent),
-                            title: Container(height: 16, width: 150, color: Colors.transparent),
-                            subtitle: Container(height: 12, width: 200, color: Colors.transparent),
-                          );
+                          return _buildSkeletonTile(context);
                         }
                         final user = _filteredUsers[index];
                         Widget? trailingWidget;
