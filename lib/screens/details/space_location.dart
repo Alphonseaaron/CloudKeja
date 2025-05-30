@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle; // For loading asset
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:marker_icon/marker_icon.dart';
 // import 'package:cloudkeja/helpers/constants.dart'; // kPrimaryColor replaced by theme
@@ -90,11 +91,23 @@ class _SpaceLocationState extends State<SpaceLocation> {
     }
   }
 
-  void _onMapCreated(GoogleMapController controller) {
+  void _onMapCreated(GoogleMapController controller) async {
     _mapController = controller;
     // If marker is already processed (e.g. location available on init), update map
     // The initialCameraPosition will handle the first view.
     // If location changes later, didUpdateWidget will handle camera movement.
+
+    // Load and apply custom map style
+    try {
+      // Using DefaultAssetBundle.of(context) is also an option if context is readily available here,
+      // but since _onMapCreated is a callback, ensuring context can be tricky without passing it.
+      // rootBundle is simpler here.
+      String style = await DefaultAssetBundle.of(context).loadString('assets/map_style.json');
+      await _mapController?.setMapStyle(style);
+    } catch (e) {
+      print('Error loading or setting map style: $e');
+      // Optionally, set a default style or do nothing if it fails
+    }
   }
 
   @override
