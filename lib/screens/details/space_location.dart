@@ -21,7 +21,7 @@ class SpaceLocation extends StatefulWidget {
 
 class _SpaceLocationState extends State<SpaceLocation> {
   // GlobalKey is not used, can be removed if not needed for other purposes.
-  // final GlobalKey globalKey = GlobalKey(); 
+  // final GlobalKey globalKey = GlobalKey();
   GoogleMapController? _mapController;
   final Set<Marker> _markers = {};
   bool _isMarkerReady = false; // To track if marker has been processed
@@ -148,7 +148,7 @@ class _SpaceLocationState extends State<SpaceLocation> {
                     zoom: 14, // Default zoom level
                   ),
                   // Lite mode can be an option for non-interactive maps
-                  // liteModeEnabled: true, 
+                  // liteModeEnabled: true,
                 ),
               ),
             ),

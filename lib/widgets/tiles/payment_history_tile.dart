@@ -49,7 +49,7 @@ class PaymentHistoryTile extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    
+
     final statusColor = _getColorForStatus(context, paymentData.status);
     final statusIcon = _getIconForStatus(context, paymentData.status);
 
@@ -74,7 +74,7 @@ class PaymentHistoryTile extends StatelessWidget {
         ),
         subtitle: Text(
           // Convert Timestamp to DateTime before formatting
-          DateFormat.yMMMd().add_jm().format(paymentData.date.toDate()), 
+          DateFormat.yMMMd().add_jm().format(paymentData.date.toDate()),
           style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurface.withOpacity(0.7)),
         ),
         trailing: Column(
@@ -85,7 +85,7 @@ class PaymentHistoryTile extends StatelessWidget {
               '${paymentData.currency} ${paymentData.amount.toStringAsFixed(2)}',
               style: textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: colorScheme.onSurface, 
+                color: colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 2),
@@ -100,7 +100,7 @@ class PaymentHistoryTile extends StatelessWidget {
         ),
         onTap: isSkeleton ? null : () { // Disable tap for skeleton items
           // TODO: Navigate to specific payment details screen if available
-          // Get.to(() => PaymentDetailsScreen(paymentId: paymentData.id)); 
+          // Get.to(() => PaymentDetailsScreen(paymentId: paymentData.id));
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Tapped on: ${paymentData.description}')),
           );

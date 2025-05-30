@@ -3,13 +3,16 @@ import 'package:get/route_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:cloudkeja/models/user_model.dart'; // For UserModel
 import 'package:cloudkeja/providers/auth_provider.dart';
+import 'package:cloudkeja/providers/tenant_analytics_provider.dart'; // For test tenant IDs
 import 'package:cloudkeja/screens/landlord/add_space.dart';
 import 'package:cloudkeja/screens/landlord/all_tenants_screen.dart';
 import 'package:cloudkeja/screens/landlord/finances/finance_overview_screen.dart';
-// import 'package:cloudkeja/screens/landlord/landlord_analytics.dart'; // Not used directly, FinanceOverviewScreen is
 import 'package:cloudkeja/screens/landlord/landlord_spaces.dart';
-import 'package:cloudkeja/screens/landlord/widgets/recent_tenants.dart'; // Already refactored
-import 'package:skeletonizer/skeletonizer.dart'; // For skeleton loading
+import 'package:cloudkeja/screens/landlord/widgets/recent_tenants.dart';
+import 'package:cloudkeja/screens/landlord/landlord_view_tenant_details_screen.dart';
+import 'package:skeletonizer/skeletonizer.dart';
+import 'package:showcaseview/showcaseview.dart';
+import 'package:cloudkeja/services/walkthrough_service.dart';
 
 class LandlordDashboard extends StatefulWidget {
   const LandlordDashboard({Key? key}) : super(key: key);
@@ -22,14 +25,33 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
   UserModel? _user;
   bool _isLoadingUser = true;
 
+  // GlobalKeys for ShowcaseView
+  final _balanceCardKey = GlobalKey();
+  final _actionButtonsRowKey = GlobalKey();
+  final _recentTenantsSectionKey = GlobalKey();
+
+  List<GlobalKey> _showcaseKeys = [];
+
   @override
   void initState() {
     super.initState();
+    _showcaseKeys = [
+      _balanceCardKey,
+      _actionButtonsRowKey,
+      _recentTenantsSectionKey,
+    ];
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      WalkthroughService.startShowcaseIfNeeded(
+        context: context,
+        walkthroughKey: 'landlordDashboardOverview_v1',
+        showcaseGlobalKeys: _showcaseKeys,
+      );
+    });
     _fetchUserData();
   }
 
   Future<void> _fetchUserData() async {
-    // Assuming getCurrentUser might involve an async call if user data is not readily available
     final user = await Provider.of<AuthProvider>(context, listen: false).getCurrentUser();
     if (mounted) {
       setState(() {
@@ -46,7 +68,7 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      elevation: 2.0, // Subtle elevation
+      elevation: 2.0,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -59,7 +81,7 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
               ),
             ),
             const SizedBox(height: 8),
-            Skeletonizer.zone( // Skeletonize only the balance text if user is loading
+            Skeletonizer.zone(
               enabled: _isLoadingUser || user == null,
               child: Text(
                 'KES ${user?.balance?.toStringAsFixed(2) ?? "0.00"}',
@@ -80,34 +102,34 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
     required IconData icon,
     required String title,
     required VoidCallback onPressed,
-    required Color iconContainerColor, // Base color for the icon container
-    required Color iconColor,          // Color for the icon itself
+    required Color iconContainerColor,
+    required Color iconColor,
   }) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
-    return Expanded( // Use Expanded to make buttons share space
-      child: InkWell( // Using InkWell for custom tap effect container
+    return Expanded(
+      child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(12.0), // For ripple effect
+        borderRadius: BorderRadius.circular(12.0),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: const EdgeInsets.all(16), // Increased padding for larger tap target
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: iconContainerColor.withOpacity(0.15), // Lighter, themed background
-                  borderRadius: BorderRadius.circular(12.0), // Consistent border radius
+                  color: iconContainerColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12.0),
                 ),
-                child: Icon(icon, color: iconContainerColor, size: 28), // Themed icon color
+                child: Icon(icon, color: iconContainerColor, size: 28),
               ),
               const SizedBox(height: 8),
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: textTheme.bodySmall?.copyWith(height: 1.2), // Improved line height for two-line text
+                style: textTheme.bodySmall?.copyWith(height: 1.2),
               ),
             ],
           ),
@@ -131,78 +153,152 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    // final textTheme = theme.textTheme; // Defined locally where needed
+    final textTheme = theme.textTheme;
 
-    // Action button definitions
+    // Common showcase text style
+    TextStyle? showcaseTitleStyle = textTheme.titleLarge?.copyWith(color: colorScheme.onPrimary);
+    TextStyle? showcaseDescStyle = textTheme.bodyMedium?.copyWith(color: colorScheme.onPrimary.withOpacity(0.9));
+
     final List<Map<String, dynamic>> actions = [
       {
         'icon': Icons.add_business_outlined,
         'title': 'List\nSpace',
         'onPressed': () => Get.to(() => const AddSpaceScreen()),
-        'color': colorScheme.primary, // Example: Use primary color
+        'color': colorScheme.primary,
       },
       {
         'icon': Icons.holiday_village_outlined,
         'title': 'View\nSpaces',
         'onPressed': () => Get.to(() => const LandlordSpaces()),
-        'color': colorScheme.secondary, // Example: Use secondary color
+        'color': colorScheme.secondary,
       },
       {
-        'icon': Icons.analytics_outlined, // Changed from show_chart
-        'title': 'View\nFinances', // Changed title for clarity
+        'icon': Icons.analytics_outlined,
+        'title': 'View\nFinances',
         'onPressed': () => Get.to(() => const FinanceOverviewScreen()),
-        'color': colorScheme.tertiary, // Example: Use tertiary color
+        'color': colorScheme.tertiary,
       },
       {
-        'icon': Icons.people_alt_outlined, // Changed from people_outline_outlined
-        'title': 'View\nTenants', // Changed title
-        'onPressed': () => Get.to(() => const AllTenantsScreen()),
-        'color': Colors.deepOrange.shade400, // Custom color if specific meaning
+        'icon': Icons.people_alt_outlined,
+        'title': 'All\nTenants', // Changed title to reflect actual navigation
+        'onPressed': () {
+          Get.to(() => const AllTenantsScreen());
+        },
+        'color': Colors.deepOrange.shade400,
       },
     ];
 
-    return Scaffold(
-      backgroundColor: colorScheme.background,
-      appBar: AppBar(
-        title: const Text('Landlord Dashboard'),
-        // AppBar uses AppBarTheme from AppTheme
-      ),
-      body: RefreshIndicator( // Added RefreshIndicator
-        onRefresh: () async {
-          setState(() { _isLoadingUser = true; });
-          await _fetchUserData(); 
-          // Also trigger refresh for RecentTenantsWidget if it has its own refresh logic
-        },
-        child: ListView(
-          padding: const EdgeInsets.symmetric(vertical: 8.0), // Overall padding for ListView
-          children: [
-            _buildBalanceSection(context, _user), // Pass user to handle skeleton internally
-            
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0), // Padding around the Row
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround, // Distribute space
-                crossAxisAlignment: CrossAxisAlignment.start, // Align items to top
-                children: actions.map((action) {
-                  return _buildActionButton(
-                    context: context,
-                    icon: action['icon'] as IconData,
-                    title: action['title'] as String,
-                    onPressed: action['onPressed'] as VoidCallback,
-                    iconContainerColor: action['color'] as Color,
-                    iconColor: action['color'] as Color, // Icon color same as container base
-                  );
-                }).toList(),
-              ),
+    return ShowCaseWidget(
+      onFinish: () {
+        WalkthroughService.markAsSeen('landlordDashboardOverview_v1');
+      },
+      builder: Builder(builder: (context) {
+        return Scaffold(
+          backgroundColor: colorScheme.background,
+          appBar: AppBar(
+            title: const Text('Landlord Dashboard'),
+          ),
+          body: RefreshIndicator(
+            onRefresh: () async {
+              setState(() { _isLoadingUser = true; });
+              await _fetchUserData();
+            },
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              children: [
+                Showcase(
+                  key: _balanceCardKey,
+                  title: 'Your Finances',
+                  description: 'Keep an eye on your account balance here. This is fetched from your user profile.',
+                  titleTextStyle: showcaseTitleStyle,
+                  descTextStyle: showcaseDescStyle,
+                  showcaseBackgroundColor: colorScheme.primary,
+                  child: _buildBalanceSection(context, _user),
+                ),
+
+                Showcase(
+                  key: _actionButtonsRowKey,
+                  title: 'Quick Actions',
+                  description: 'Use these buttons to quickly list new spaces, view your properties, manage finances, and see tenants.',
+                  titleTextStyle: showcaseTitleStyle,
+                  descTextStyle: showcaseDescStyle,
+                  showcaseBackgroundColor: colorScheme.primary,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: actions.map((action) {
+                        return _buildActionButton(
+                          context: context,
+                          icon: action['icon'] as IconData,
+                          title: action['title'] as String,
+                          onPressed: action['onPressed'] as VoidCallback,
+                          iconContainerColor: action['color'] as Color,
+                          iconColor: action['color'] as Color,
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+
+                // --- Test Navigation Buttons for Tenant Payment Metrics ---
+                // This section is intentionally NOT part of the walkthrough
+                _buildSectionTitle(context, 'Test Tenant Payment Metrics'),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Column(
+                    children: [
+                      ElevatedButton(
+                        child: const Text('View Good Payer Metrics (Test)'),
+                        onPressed: () => Get.to(() => const LandlordViewOfTenantDetailsScreen(tenantId: TenantAnalyticsProvider.goodPayerTestId)),
+                        style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 40)),
+                      ),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        child: const Text('View Bad Payer Metrics (Test)'),
+                        onPressed: () => Get.to(() => const LandlordViewOfTenantDetailsScreen(tenantId: TenantAnalyticsProvider.badPayerTestId)),
+                        style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 40)),
+                      ),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        child: const Text('View Mixed Payer Metrics (Test)'),
+                        onPressed: () => Get.to(() => const LandlordViewOfTenantDetailsScreen(tenantId: TenantAnalyticsProvider.mixedPayerTestId)),
+                        style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 40)),
+                      ),
+                       const SizedBox(height: 8),
+                      ElevatedButton( // Button for the original testTenant1 (default good payer)
+                        child: const Text('View Default Test Tenant Metrics'),
+                        onPressed: () => Get.to(() => const LandlordViewOfTenantDetailsScreen(tenantId: TenantAnalyticsProvider.defaultTestTenantId)),
+                        style: ElevatedButton.stylefrom(minimumSize: const Size(double.infinity, 40)),
+                      ),
+                    ],
+                  ),
+                ),
+                // --- End Test Navigation Buttons ---
+
+                Showcase(
+                  key: _recentTenantsSectionKey,
+                  title: 'Manage Tenants',
+                  description: 'See a list of your recent tenants. Tap on them for more details or actions.',
+                  titleTextStyle: showcaseTitleStyle,
+                  descTextStyle: showcaseDescStyle,
+                  showcaseBackgroundColor: colorScheme.primary,
+                  child: Column( // Wrap title and widget for single showcase item
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSectionTitle(context, 'Recent Tenants'),
+                      const RecentTenantsWidget(),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+              ],
             ),
-            
-            _buildSectionTitle(context, 'Recent Tenants'),
-            const RecentTenantsWidget(), // Already refactored, handles its own skeleton
-            
-            const SizedBox(height: 20), // Bottom padding
-          ],
-        ),
-      ),
+          ),
+        );
+      }),
     );
   }
 }

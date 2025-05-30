@@ -64,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
                       width: 99,
                       height: 4,
                       // Consider applying colorScheme.primary if it's an SVG or can be tinted
-                      // color: colorScheme.primary, 
+                      // color: colorScheme.primary,
                     ),
                   ],
                 ),

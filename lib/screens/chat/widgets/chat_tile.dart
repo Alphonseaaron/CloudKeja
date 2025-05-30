@@ -29,7 +29,7 @@ class ChatTile extends StatelessWidget {
         subtitle: Text('Error: User data missing', style: textTheme.bodySmall?.copyWith(color: colorScheme.error)),
       );
     }
-    
+
     final userToChatWith = chatModel.user!;
 
     return ListTile(

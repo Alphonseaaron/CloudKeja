@@ -46,7 +46,7 @@ class ChatScreenWidget extends StatelessWidget {
   static const routeName = '/chat-screen-widget'; // Not typically used for nested widgets
 
   const ChatScreenWidget({Key? key}) : super(key: key);
-  
+
   Widget _buildChatTileSkeleton(BuildContext context) {
     final theme = Theme.of(context);
     return ListTile( // Using ListTile structure for skeleton

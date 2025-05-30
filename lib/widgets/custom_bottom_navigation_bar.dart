@@ -83,7 +83,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
         destinations: _bottomBarItems.map((itemKey) {
           final String svgPath = _itemToSvgPath[itemKey]!;
           final bool isSelected = _bottomBarItems.indexOf(itemKey) == _selectedIndex;
-          
+
           // String? label; // If you want labels, define them here
           // switch (itemKey) {
           //   case 'home': label = 'Home'; break;

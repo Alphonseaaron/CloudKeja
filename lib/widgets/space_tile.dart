@@ -69,7 +69,7 @@ class _SpacerTileState extends State<SpacerTile> {
         }
       });
        // Optionally, trigger a refresh of user data in AuthProvider if needed elsewhere
-      // authProvider.getCurrentUser(); 
+      // authProvider.getCurrentUser();
     }
   }
 
@@ -82,7 +82,7 @@ class _SpacerTileState extends State<SpacerTile> {
     final cardTheme = theme.cardTheme;
 
     // Fallback to default CardTheme values if not fully specified
-    final cardShape = cardTheme.shape as RoundedRectangleBorder? ?? 
+    final cardShape = cardTheme.shape as RoundedRectangleBorder? ??
                       RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0));
     final cardBorderRadius = (cardShape.borderRadius as BorderRadius? ?? BorderRadius.circular(12.0));
 

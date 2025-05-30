@@ -40,7 +40,7 @@ class Details extends StatelessWidget {
       ),
     );
   }
-  
+
   // Helper for wrapping content sections
   Widget _buildSectionContent(Widget content) {
     return SliverToBoxAdapter(
@@ -71,7 +71,7 @@ class Details extends StatelessWidget {
               _buildSectionContent(const HouseInfo()), // Assumes HouseInfo has its own padding
               _buildSectionContent(OwnerTile(userId: space.ownerId)),
               _buildSectionContent(About(space: space)),
-              
+
               _buildSectionTitle(context, 'Reviews & Ratings'),
               _buildSectionContent(SpaceReviews(spaceId: space.id!)),
               SliverToBoxAdapter( // For the "Add Review" button
@@ -96,16 +96,16 @@ class Details extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               // SpaceLocation section (already includes its own title and padding)
               _buildSectionContent(SpaceLocation(
-                location: (space.location != null) 
-                  ? LatLng(space.location!.latitude, space.location!.longitude) 
+                location: (space.location != null)
+                  ? LatLng(space.location!.latitude, space.location!.longitude)
                   : null, // Handle null location gracefully
                 imageUrl: space.images?.first,
                 spaceName: space.spaceName,
               )),
-              
+
               const SliverToBoxAdapter(
                 child: SizedBox(height: 100), // Space for the floating action bar at the bottom
               ),
@@ -175,7 +175,7 @@ class Details extends StatelessWidget {
                       } else {
                         chatRoomId = '${space.ownerId}_${authProvider.user!.userId}';
                       }
-                      
+
                       // Fetch owner details for chat screen
                       UserModel? ownerDetails = await authProvider.getOwnerDetails(space.ownerId!);
                       if (ownerDetails != null) {

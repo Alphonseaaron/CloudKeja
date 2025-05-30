@@ -14,7 +14,7 @@ class PaymentSuccessfulScreen extends StatelessWidget {
     final textTheme = theme.textTheme;
 
     // A success color, can be defined in AppTheme or used directly
-    final Color successColor = Colors.green.shade700; 
+    final Color successColor = Colors.green.shade700;
 
     return Scaffold(
       backgroundColor: colorScheme.background, // Themed background

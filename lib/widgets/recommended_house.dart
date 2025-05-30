@@ -7,7 +7,7 @@ import 'package:provider/provider.dart'; // For Provider
 import 'package:get/route_manager.dart'; // Added for Get.to()
 
 // Note: CircleIconButton is not imported as its usage will be replaced.
-// import 'package:cloudkeja/widgets/circle_icon_button.dart'; 
+// import 'package:cloudkeja/widgets/circle_icon_button.dart';
 // import 'package:cloudkeja/helpers/constants.dart'; // kPrimaryColor will be replaced
 
 class RecommendedHouse extends StatelessWidget {
@@ -85,7 +85,7 @@ class _RecommendedHouseCardState extends State<_RecommendedHouseCard> {
       );
       return;
     }
-    
+
     await wishlistProvider.addToWishlist(widget.space.id!, _isFavorited);
 
     if (mounted) {

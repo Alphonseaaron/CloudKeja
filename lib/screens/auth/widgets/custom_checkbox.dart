@@ -40,7 +40,7 @@ class _CustomCheckboxState extends State<CustomCheckbox> {
         }
       },
       // VisualDensity can be used to make it slightly larger or smaller if needed
-      // visualDensity: VisualDensity.compact, 
+      // visualDensity: VisualDensity.compact,
       // splashRadius: 0, // To minimize splash if directly next to text
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap, // Reduces tap area to checkbox size
       // Active color and check color will be derived from the theme (colorScheme.primary)

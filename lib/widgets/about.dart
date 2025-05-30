@@ -13,7 +13,7 @@ class About extends StatelessWidget {
 
     return Padding(
       // Use M3 standard padding or adjust as per overall design language
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), 
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -30,7 +30,7 @@ class About extends StatelessWidget {
             style: textTheme.bodyMedium?.copyWith(
                 // color: colorScheme.onBackground.withOpacity(0.85), // Default from textTheme.apply
                 // Ensure line height is comfortable if text is long
-                height: 1.5, 
+                height: 1.5,
                 ),
           )
         ],

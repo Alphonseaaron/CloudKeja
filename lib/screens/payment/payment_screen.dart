@@ -48,7 +48,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       ),
     );
   }
-  
+
   Widget _buildLandlordDetailsSkeleton(BuildContext context) {
     final theme = Theme.of(context);
     return Skeletonizer(
@@ -154,7 +154,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
               padding: const EdgeInsets.symmetric(vertical: 12.0),
               child: SpaceTile(space: widget.space, isOwner: widget.space.ownerId == currentUser.userId),
             ),
-            
+
             Expanded(
               child: ListView( // Use ListView for potentially long content
                 children: [

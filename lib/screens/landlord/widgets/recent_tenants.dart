@@ -78,7 +78,7 @@ class RecentTenantsWidget extends StatelessWidget {
             child: Text('Error fetching tenants: ${snapshot.error}', style: TextStyle(color: colorScheme.error)),
           );
         }
-        
+
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Card(
             margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),

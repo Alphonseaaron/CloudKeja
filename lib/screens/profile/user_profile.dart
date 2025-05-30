@@ -12,7 +12,7 @@ import 'package:cloudkeja/providers/auth_provider.dart';
 import 'package:cloudkeja/providers/tenancy_provider.dart';
 import 'package:cloudkeja/screens/auth/login_page.dart'; // For logout navigation
 import 'package:cloudkeja/screens/profile/tenant_details_screen.dart';
-import 'package:cloudkeja/screens/user/user_payment_history_screen.dart'; 
+import 'package:cloudkeja/screens/user/user_payment_history_screen.dart';
 import 'package:cloudkeja/screens/user/user_maintenance_history_screen.dart'; // Import new screen
 import 'package:sliver_header_delegate/sliver_header_delegate.dart';
 import 'package:skeletonizer/skeletonizer.dart'; // For skeleton loading
@@ -86,16 +86,16 @@ class UserProfileScreen extends StatelessWidget {
                   SliverPersistentHeader(
                     pinned: true,
                     delegate: FlexibleHeaderDelegate(
-                      backgroundColor: colorScheme.primary, 
+                      backgroundColor: colorScheme.primary,
                       expandedHeight: size.height * 0.3,
                       background: MutableBackground(
-                        expandedWidget: Container(color: colorScheme.surfaceVariant), 
+                        expandedWidget: Container(color: colorScheme.surfaceVariant),
                         collapsedColor: colorScheme.primary,
                       ),
                       statusBarHeight: MediaQuery.of(context).padding.top,
                       children: [
                         FlexibleTextItem(
-                          text: 'Loading Profile...', 
+                          text: 'Loading Profile...',
                           expandedStyle: textTheme.titleLarge?.copyWith(color: colorScheme.onPrimary),
                           collapsedStyle: textTheme.titleMedium?.copyWith(color: colorScheme.onPrimary),
                           expandedAlignment: Alignment.bottomCenter,
@@ -107,8 +107,8 @@ class UserProfileScreen extends StatelessWidget {
                   ),
                   SliverList(
                     delegate: SliverChildListDelegate([
-                      _RecentUserSpaceSkeleton(theme: theme), 
-                      _UserProfileDetailsSkeleton(theme: theme), 
+                      _RecentUserSpaceSkeleton(theme: theme),
+                      _UserProfileDetailsSkeleton(theme: theme),
                       // Skeleton for list tiles
                       Padding(padding: const EdgeInsets.all(16), child: Column(children: List.generate(4, (_) => _buildListTileSkeleton(theme)))), // Increased to 4 for new tile
                     ]),
@@ -121,14 +121,14 @@ class UserProfileScreen extends StatelessWidget {
           if (snapshot.hasError) {
             return Center(child: Text('Error loading profile: ${snapshot.error}', style: textTheme.bodyLarge?.copyWith(color: colorScheme.error)));
           }
-          
+
           final user = snapshot.data;
 
           if (user == null) {
              return Center(child: Text('User data not available. Please try again.', style: textTheme.bodyLarge));
           }
 
-          return RefreshIndicator( 
+          return RefreshIndicator(
             onRefresh: () async {
               await Provider.of<AuthProvider>(context, listen: false).getCurrentUser(forceRefresh: true);
               await Provider.of<TenancyProvider>(context, listen: false).getUserTenancy(user, forceRefresh: true);
@@ -136,29 +136,29 @@ class UserProfileScreen extends StatelessWidget {
             child: CustomScrollView(
               slivers: [
                 SliverPersistentHeader(
-                  pinned: true, 
+                  pinned: true,
                   delegate: FlexibleHeaderDelegate(
-                    backgroundColor: colorScheme.surface, 
-                    expandedHeight: size.height * 0.3, 
+                    backgroundColor: colorScheme.surface,
+                    expandedHeight: size.height * 0.3,
                     background: MutableBackground(
                       expandedWidget: (user.profile != null && user.profile!.isNotEmpty)
                           ? CachedNetworkImage(
-                              imageUrl: user.profile!, 
+                              imageUrl: user.profile!,
                               fit: BoxFit.cover,
                               placeholder: (context, url) => Container(color: colorScheme.surfaceVariant),
                               errorWidget: (context, url, error) => Container(color: colorScheme.surfaceVariant, child: Icon(Icons.broken_image_outlined, size: 60, color: colorScheme.onSurfaceVariant)),
                             )
                           : Container(color: colorScheme.surfaceVariant, child: Icon(Icons.person_outline_rounded, size: 100, color: colorScheme.onSurfaceVariant)),
-                      collapsedColor: colorScheme.primary, 
+                      collapsedColor: colorScheme.primary,
                     ),
                     statusBarHeight: MediaQuery.of(context).padding.top,
                     children: [
                       FlexibleTextItem(
                         text: user.name ?? 'User Profile',
-                        expandedStyle: textTheme.headlineSmall?.copyWith(color: colorScheme.onPrimary, shadows: [Shadow(blurRadius: 2, color: Colors.black.withOpacity(0.5))]), 
-                        collapsedStyle: textTheme.titleLarge?.copyWith(color: colorScheme.onPrimary), 
+                        expandedStyle: textTheme.headlineSmall?.copyWith(color: colorScheme.onPrimary, shadows: [Shadow(blurRadius: 2, color: Colors.black.withOpacity(0.5))]),
+                        collapsedStyle: textTheme.titleLarge?.copyWith(color: colorScheme.onPrimary),
                         expandedAlignment: Alignment.bottomLeft,
-                        collapsedAlignment: Alignment.centerLeft, 
+                        collapsedAlignment: Alignment.centerLeft,
                         expandedPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         collapsedPadding: const EdgeInsets.symmetric(horizontal: 16),
                       ),
@@ -174,12 +174,12 @@ class UserProfileScreen extends StatelessWidget {
                     _buildListTile(context, 'Maintenance History', Icons.build_circle_outlined, () { // New Tile Added
                       Get.to(() => const UserMaintenanceHistoryScreen());
                     }),
-                    
+
                     // Tenancy Details (if user has tenancy)
-                    RecentUserSpace(user: user), 
-                    
+                    RecentUserSpace(user: user),
+
                     // About Me section
-                    UserProfileDetails(user: user), 
+                    UserProfileDetails(user: user),
 
                     // Logout Button
                     Padding(
@@ -189,7 +189,7 @@ class UserProfileScreen extends StatelessWidget {
                         label: Text('Logout', style: textTheme.labelLarge?.copyWith(color: colorScheme.onErrorContainer)),
                         onPressed: () async {
                           await Provider.of<AuthProvider>(context, listen: false).signOut();
-                          Get.offAll(() => const LoginPage()); 
+                          Get.offAll(() => const LoginPage());
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: colorScheme.errorContainer,
@@ -197,7 +197,7 @@ class UserProfileScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                     const SizedBox(height: 20), 
+                     const SizedBox(height: 20),
                   ]),
                 )
               ],
@@ -224,14 +224,14 @@ class RecentUserSpace extends StatelessWidget {
       future: Provider.of<TenancyProvider>(context, listen: false).getUserTenancy(user),
       builder: ((context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return _RecentUserSpaceSkeleton(theme: theme); 
+          return _RecentUserSpaceSkeleton(theme: theme);
         }
 
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const SizedBox.shrink(); 
+          return const SizedBox.shrink();
         }
-        final space = snapshot.data!.first; 
-        return Card( 
+        final space = snapshot.data!.first;
+        return Card(
           margin: const EdgeInsets.all(16.0),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
@@ -264,14 +264,14 @@ class RecentUserSpace extends StatelessWidget {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    Expanded( 
+                    Expanded(
                       child: ElevatedButton(
                         onPressed: () => showUserPaymentDialog(context, space),
                         child: const Text('Make Payment'),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    if (space.needsAttention == true) 
+                    if (space.needsAttention == true)
                       Chip(
                         label: Text('Needs Attention', style: textTheme.labelSmall?.copyWith(color: colorScheme.onErrorContainer)),
                         backgroundColor: colorScheme.errorContainer,
@@ -323,7 +323,7 @@ class UserProfileDetails extends StatelessWidget {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
-    return Card( 
+    return Card(
       margin: const EdgeInsets.all(16.0),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -349,16 +349,16 @@ class UserProfileDetails extends StatelessWidget {
 }
 
 // --- UserPaymentDialog Widget (already themed) ---
-void showUserPaymentDialog(BuildContext context, SpaceModel space) { 
+void showUserPaymentDialog(BuildContext context, SpaceModel space) {
   showDialog(
     context: context,
-    builder: (ctx) => Dialog( 
+    builder: (ctx) => Dialog(
       child: UserPaymentDialog(space: space),
     ),
   );
 }
 
-class UserPaymentDialog extends StatefulWidget { 
+class UserPaymentDialog extends StatefulWidget {
   const UserPaymentDialog({Key? key, required this.space}) : super(key: key);
   final SpaceModel space;
 
@@ -367,8 +367,8 @@ class UserPaymentDialog extends StatefulWidget {
 }
 
 class _UserPaymentDialogState extends State<UserPaymentDialog> {
-  String? _selectedPaymentOption; 
-  String? _selectedPaymentMethod; 
+  String? _selectedPaymentOption;
+  String? _selectedPaymentMethod;
   bool _isProcessingPayment = false;
 
   @override
@@ -380,10 +380,10 @@ class _UserPaymentDialogState extends State<UserPaymentDialog> {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.all(20.0), 
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min, 
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -402,7 +402,7 @@ class _UserPaymentDialogState extends State<UserPaymentDialog> {
 
             Text('Payment For', style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
-            MyDropDown( 
+            MyDropDown(
               selectedOption: (val) => setState(() => _selectedPaymentOption = val),
               options: const ['Total Due Amount', 'Custom Amount'],
               hintText: 'Amount to pay',
@@ -413,19 +413,19 @@ class _UserPaymentDialogState extends State<UserPaymentDialog> {
             const SizedBox(height: 8),
             MyDropDown(
               selectedOption: (val) => setState(() => _selectedPaymentMethod = val),
-              options: const ['Mpesa'], 
+              options: const ['Mpesa'],
               hintText: 'Select payment method',
             ),
             const SizedBox(height: 20),
 
             _buildSummaryRow(context, 'Amount Due:', 'KES ${widget.space.price?.toStringAsFixed(0) ?? '0'}'),
             const SizedBox(height: 8),
-            
+
             Divider(color: colorScheme.outline.withOpacity(0.5), height: 20),
             _buildSummaryRow(context, 'Total to Pay:', 'KES ${widget.space.price?.toStringAsFixed(0) ?? '0'}', isTotal: true),
             const SizedBox(height: 24),
 
-            Align( 
+            Align(
               alignment: Alignment.centerRight,
               child: ElevatedButton(
                 onPressed: _isProcessingPayment ? null : () async {
@@ -436,10 +436,10 @@ class _UserPaymentDialogState extends State<UserPaymentDialog> {
                   setState(() => _isProcessingPayment = true);
                   try {
                     await mpesaPayment(
-                      amount: widget.space.price!.toDouble(), 
+                      amount: widget.space.price!.toDouble(),
                       phone: user!.phone!,
                     );
-                    Navigator.of(context).pop(true); 
+                    Navigator.of(context).pop(true);
                   } catch (e) {
                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Payment failed: $e', style: TextStyle(color: colorScheme.onError)), backgroundColor: colorScheme.error,));
                   } finally {
@@ -448,7 +448,7 @@ class _UserPaymentDialogState extends State<UserPaymentDialog> {
                     }
                   }
                 },
-                child: _isProcessingPayment 
+                child: _isProcessingPayment
                     ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2.5, color: colorScheme.onPrimary))
                     : const Text('Confirm & Pay'),
               ),
@@ -485,7 +485,7 @@ class _RecentUserSpaceSkeleton extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(height: 20, width: 150, color: Colors.transparent), 
+            Container(height: 20, width: 150, color: Colors.transparent),
             const SizedBox(height: 12),
             ListTile(
               contentPadding: EdgeInsets.zero,
@@ -503,7 +503,7 @@ class _RecentUserSpaceSkeleton extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            Row(children: [Expanded(child: Container(height: 40, color: Colors.transparent))]), 
+            Row(children: [Expanded(child: Container(height: 40, color: Colors.transparent))]),
           ],
         ),
       ),
@@ -519,12 +519,12 @@ class _UserProfileDetailsSkeleton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(children: [
-        const CircleAvatar(radius: 11, backgroundColor: Colors.transparent), 
+        const CircleAvatar(radius: 11, backgroundColor: Colors.transparent),
         const SizedBox(width: 16),
         Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(height: 10, width: 80, color: Colors.transparent), 
+          Container(height: 10, width: 80, color: Colors.transparent),
           const SizedBox(height: 4),
-          Container(height: 12, width: 150, color: Colors.transparent), 
+          Container(height: 12, width: 150, color: Colors.transparent),
         ]),
       ]),
     );
@@ -536,7 +536,7 @@ class _UserProfileDetailsSkeleton extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(height: 20, width: 120, color: Colors.transparent), 
+          Container(height: 20, width: 120, color: Colors.transparent),
           const SizedBox(height: 12),
           _detailWidgetSkeleton(context),
           Divider(color: theme.colorScheme.outline.withOpacity(0.2), height: 20),

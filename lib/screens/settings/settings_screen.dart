@@ -20,6 +20,7 @@ import 'package:cloudkeja/screens/settings/wishlist_screen.dart';
 import 'package:cloudkeja/screens/service_provider/dashboard_page.dart'; // For Service Provider Dashboard
 import 'package:cloudkeja/screens/service_provider/profile_management_page.dart'; // For Service Provider Profile Link
 import 'package:cloudkeja/screens/service_provider/view_service_provider_profile_screen.dart'; // Import for testing
+import 'package:cloudkeja/services/walkthrough_service.dart'; // Import WalkthroughService
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -78,18 +79,18 @@ class SettingsScreen extends StatelessWidget {
 
   void _showThemeSelectionDialog(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final currentThemeMode = themeProvider.themeMode; 
+    final currentThemeMode = themeProvider.themeMode;
 
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Choose Theme'), 
+          title: const Text('Choose Theme'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               RadioListTile<ThemeMode>(
-                title: const Text('Light'), 
+                title: const Text('Light'),
                 value: ThemeMode.light,
                 groupValue: currentThemeMode,
                 onChanged: (ThemeMode? value) {
@@ -131,29 +132,29 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context); 
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.background, 
+      backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
-        title: const Text('Settings & Preferences'), 
+        title: const Text('Settings & Preferences'),
       ),
       body: FutureBuilder<UserModel>(
         future: Provider.of<AuthProvider>(context, listen: false).getCurrentUser(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData && snapshot.connectionState != ConnectionState.done) { 
-            return LoadingEffect.getSearchLoadingScreen(context); 
+          if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData && snapshot.connectionState != ConnectionState.done) {
+            return LoadingEffect.getSearchLoadingScreen(context);
           }
           if (snapshot.hasError) {
             return Center(child: Text('Error loading user data.', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.error)));
           }
 
-          final user = snapshot.data; 
+          final user = snapshot.data;
 
           return ListView(
-            padding: const EdgeInsets.symmetric(vertical: 12.0), 
+            padding: const EdgeInsets.symmetric(vertical: 12.0),
             children: [
-              if (user != null) ...[ 
+              if (user != null) ...[
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   child: Row(
@@ -201,10 +202,10 @@ class SettingsScreen extends StatelessWidget {
               _buildListTile(
                 context,
                 'App Theme',
-                Icons.brightness_6_outlined, 
+                Icons.brightness_6_outlined,
                 () => _showThemeSelectionDialog(context),
               ),
-              
+
               // My Chats Tile (General Setting for logged-in users)
               if (user != null) // Ensure user is logged in to see My Chats
                 _buildListTile(
@@ -222,7 +223,7 @@ class SettingsScreen extends StatelessWidget {
                   'Test View SP Profile (Dev)',
                   Icons.person_search_outlined,
                   () {
-                    const String testServiceProviderId = 'test_service_provider_id_123'; 
+                    const String testServiceProviderId = 'test_service_provider_id_123';
                     if (testServiceProviderId == 'test_service_provider_id_123') {
                        ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Placeholder ID used. Update for real testing.')),
@@ -233,7 +234,7 @@ class SettingsScreen extends StatelessWidget {
                 ),
 
 
-              if (user != null) ...[ 
+              if (user != null) ...[
                 _buildListTile(
                   context,
                   user.isLandlord == true ? 'Landlord Dashboard' : 'Become a Landlord',
@@ -266,14 +267,52 @@ class SettingsScreen extends StatelessWidget {
                     () => Get.to(() => const ServiceProviderProfilePage()),
                   ),
                 ],
-                
-                if (user.isAdmin == true)
+
+                if (user.isAdmin == true) ...[
                   _buildListTile(
                     context,
                     'Admin Panel',
                     Icons.admin_panel_settings_outlined,
                     () => Get.to(() => const Admin()),
                   ),
+                  // Developer Options Section
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0).copyWith(top: 20.0),
+                    child: Text(
+                      'Developer Options',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.7),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  _buildListTile(
+                    context,
+                    'Reset HomeScreen Walkthrough',
+                    Icons.replay_circle_filled_outlined,
+                    () async {
+                      await WalkthroughService.resetSeen('homeScreenWalkthrough');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('HomeScreen walkthrough reset.')),
+                      );
+                    },
+                  ),
+                  _buildListTile(
+                    context,
+                    'Reset All Walkthroughs',
+                    Icons.replay_outlined,
+                    () async {
+                      await WalkthroughService.resetAllSeenWalkthroughs();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('All walkthroughs reset.')),
+                      );
+                    },
+                  ),
+                  Padding( // Divider after dev options
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Divider(height: 24, color: theme.dividerColor),
+                  ),
+                ],
 
                 _buildListTile(context, 'Change Password', Icons.lock_reset_outlined, () {
                   Get.to(() => ChangePassword());
@@ -281,8 +320,8 @@ class SettingsScreen extends StatelessWidget {
                 _buildListTile(context, 'My Wishlist', Icons.favorite_border_outlined, () {
                   Get.to(() => const WishlistScreen());
                 }),
-                
-                const SizedBox(height: 20), 
+
+                const SizedBox(height: 20),
                 _buildListTile(context, 'Logout', Icons.exit_to_app_outlined, () async {
                   await Provider.of<AuthProvider>(context, listen: false).signOut();
                   Get.offAll(() => const LoginPage());

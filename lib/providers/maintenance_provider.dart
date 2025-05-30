@@ -28,13 +28,13 @@ class MaintenanceProvider with ChangeNotifier {
     if (targetUserId == null) {
       // Not logged in, or no specific user ID provided when required
       debugPrint('MaintenanceProvider: User not logged in or targetUserId is null.');
-      return []; 
+      return [];
     }
 
     // Caching logic could be added here if needed:
-    // if (!forceRefresh && 
-    //     _userMaintenanceRequests != null && 
-    //     _lastFetchTime != null && 
+    // if (!forceRefresh &&
+    //     _userMaintenanceRequests != null &&
+    //     _lastFetchTime != null &&
     //     DateTime.now().difference(_lastFetchTime!) < const Duration(minutes: 5) && // Example: 5-minute cache
     //     _lastFetchedUserId == targetUserId &&
     //     _lastStatusFilter == statusFilter &&
@@ -67,7 +67,7 @@ class MaintenanceProvider with ChangeNotifier {
       final requests = snapshot.docs
           .map((doc) => MaintenanceRequestModel.fromSnapshot(doc))
           .toList();
-      
+
       // Update cache if implementing caching
       // _userMaintenanceRequests = requests;
       // _lastFetchTime = DateTime.now();

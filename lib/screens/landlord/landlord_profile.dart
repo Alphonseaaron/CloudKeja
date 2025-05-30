@@ -46,7 +46,7 @@ class _LandlordProfileState extends State<LandlordProfile> {
       ),
     );
   }
-  
+
   // Placeholder for listings skeleton
   Widget _buildListingsSkeleton(BuildContext context) {
     final theme = Theme.of(context);
@@ -97,7 +97,7 @@ class _LandlordProfileState extends State<LandlordProfile> {
                           widget.user.profile!,
                           fit: BoxFit.cover,
                           // Add error builder for network image
-                          errorBuilder: (context, error, stackTrace) => 
+                          errorBuilder: (context, error, stackTrace) =>
                             Container(color: colorScheme.surfaceVariant, child: Icon(Icons.person, size: 100, color: colorScheme.onSurfaceVariant)),
                         )
                       : Container(color: colorScheme.surfaceVariant, child: Icon(Icons.person, size: 100, color: colorScheme.onSurfaceVariant)),
@@ -106,8 +106,8 @@ class _LandlordProfileState extends State<LandlordProfile> {
               SliverList(
                 delegate: SliverChildListDelegate([
                   // UserProfileDetails is already refactored and themed
-                  UserProfileDetails(user: widget.user), 
-                  
+                  UserProfileDetails(user: widget.user),
+
                   _buildSectionTitle(context, 'Listings by ${widget.user.name?.split(' ').first ?? 'this Landlord'}'),
                   FutureBuilder<List<SpaceModel>>(
                     future: _landlordSpacesFuture,
@@ -171,7 +171,7 @@ class _LandlordProfileState extends State<LandlordProfile> {
                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('You cannot chat with yourself.', style: TextStyle(color: colorScheme.onError)), backgroundColor: colorScheme.error));
                      return;
                    }
-                  
+
                   // Simplified chat room ID logic
                   String chatRoomId;
                   if (currentUser.userId!.compareTo(widget.user.userId!) > 0) {
@@ -182,7 +182,7 @@ class _LandlordProfileState extends State<LandlordProfile> {
 
                   // The user model for the landlord is already available in widget.user
                   Get.to(() => ChatRoom(), arguments: { // Using Get.to for navigation
-                    'user': widget.user, 
+                    'user': widget.user,
                     'chatRoomId': chatRoomId,
                   });
                 },

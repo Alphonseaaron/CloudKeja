@@ -32,8 +32,8 @@ class ChatProvider with ChangeNotifier {
   Future<void> sendMessage(
       // Parameters are: the ID of the person receiving the message,
       // the ID of the person sending the message, and the message object itself.
-      String toUserId, 
-      String fromUserId, 
+      String toUserId,
+      String fromUserId,
       MessageModel messageDetails) async { // Renamed message to messageDetails for clarity
 
     // 1. Standardized Chat Room ID Calculation
@@ -88,7 +88,7 @@ class ChatProvider with ChangeNotifier {
         return; // Or throw e;
       }
     }
-    
+
     // Update latestMessage text based on content
     String latestMessageText = messageData['message'] as String;
     if (latestMessageText.isEmpty && mediaUrl.isNotEmpty) {
@@ -133,7 +133,7 @@ class ChatProvider with ChangeNotifier {
   //////////////////////////////////////////////////////
   /// GET CHATS (getChats method)
   /// This method needs to be consistent with the new chatRoomId logic.
-  /// It should query based on the user's ID being present in either 
+  /// It should query based on the user's ID being present in either
   /// 'initiator' or 'receiver' field if we stick to those,
   /// OR more robustly, query where 'participants' array contains uid.
   Future<List<ChatTileModel>> getChats(String uid) async {
@@ -193,7 +193,7 @@ class ChatProvider with ChangeNotifier {
         processedChatRoomIds.add(element.id);
       }
     }
-    
+
     // Sort all collected chats by time
     users.sort((a, b) {
       if (a.time == null && b.time == null) return 0;
@@ -201,7 +201,7 @@ class ChatProvider with ChangeNotifier {
       if (b.time == null) return -1;
       return b.time!.compareTo(a.time!);
     });
-    
+
     _contactedUsers = users; // Update local cache
     notifyListeners(); // Notify UI to update
     return _contactedUsers;
@@ -220,7 +220,7 @@ class ChatProvider with ChangeNotifier {
         .where('name', isLessThanOrEqualTo: '${searchTerm.trim()}\uf8ff') // Standard way to do prefix search
         .limit(10) // Limit results for performance
         .get();
-        
+
     // Additional query for phone number if needed, or combine if possible with OR (requires composite index)
     // final phoneResults = await FirebaseFirestore.instance.collection('users')
     //     .where('phone', isGreaterThanOrEqualTo: searchTerm.trim())
@@ -231,7 +231,7 @@ class ChatProvider with ChangeNotifier {
 
 
     // Using a Set to avoid duplicate users if name and phone search yield same user
-    Set<String> foundUserIds = {}; 
+    Set<String> foundUserIds = {};
 
     for (var e in results.docs) {
       if (!foundUserIds.contains(e.id)) {
@@ -239,7 +239,7 @@ class ChatProvider with ChangeNotifier {
          foundUserIds.add(e.id);
       }
     }
-    
+
     // For simplicity, not merging phone results here to avoid complexity with duplicate handling without proper IDs from search.
     // The above name search is generally sufficient for user lookup.
 

@@ -25,8 +25,8 @@ class ChatBubble extends StatelessWidget {
     final Alignment bubbleAlignment = isMe ? Alignment.centerRight : Alignment.centerLeft;
     final Color bubbleColor = isMe ? colorScheme.primary : colorScheme.surfaceVariant;
     final Color textColor = isMe ? colorScheme.onPrimary : colorScheme.onSurfaceVariant;
-    final Color timestampColor = isMe 
-        ? colorScheme.onPrimary.withOpacity(0.8) 
+    final Color timestampColor = isMe
+        ? colorScheme.onPrimary.withOpacity(0.8)
         : colorScheme.onSurfaceVariant.withOpacity(0.7);
 
     final BorderRadius bubbleBorderRadius = isMe
