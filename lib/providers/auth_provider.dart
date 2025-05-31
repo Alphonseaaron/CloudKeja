@@ -54,4 +54,16 @@ class AuthProvider with ChangeNotifier {
     await usersRef.doc(user.userId).update(user.toJson());
     notifyListeners();
   }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email.trim());
+    } on FirebaseAuthException catch (e) {
+      // Handle specific errors or rethrow a generic one
+      // For example, you could throw e.message or a custom error string
+      throw Exception('Error sending password reset email: ${e.message}');
+    } catch (e) {
+      throw Exception('An unexpected error occurred. Please try again.');
+    }
+  }
 }

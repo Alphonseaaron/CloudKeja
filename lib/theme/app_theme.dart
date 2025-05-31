@@ -187,6 +187,123 @@ class AppTheme {
     );
   }
 
+  // --- Cupertino Text Styles ---
+  // Using GoogleFonts.ibmPlexSans for consistency, but with Cupertino typical sizes/weights.
+  // Colors use CupertinoDynamicColor or direct CupertinoColors for adaptability.
+
+  static TextStyle get cupertinoNavTitleTextStyle {
+    // For nav bar titles. Typically bold.
+    return GoogleFonts.ibmPlexSans(
+      fontSize: 17,
+      fontWeight: FontWeight.w600, // Bold in Cupertino terms
+      color: CupertinoColors.label, // Adapts to light/dark
+    );
+  }
+
+  static TextStyle get cupertinoDefaultTextStyle {
+    // Default text for body content.
+    return GoogleFonts.ibmPlexSans(
+      fontSize: 17,
+      fontWeight: FontWeight.normal,
+      color: CupertinoColors.label, // Adapts
+      height: 1.2, // Typical line height
+    );
+  }
+
+  static TextStyle get cupertinoSecondaryTextStyle {
+    // For subtitles or less prominent text.
+    return GoogleFonts.ibmPlexSans(
+      fontSize: 15,
+      fontWeight: FontWeight.normal,
+      color: CupertinoColors.secondaryLabel, // Adapts
+      height: 1.2,
+    );
+  }
+
+  static TextStyle get cupertinoActionTextStyle {
+    // For tappable actions like buttons or links in lists.
+    // Using our app's primary color for consistency.
+    // We need to ensure this color works well on both light/dark backgrounds or use CupertinoDynamicColor.
+    return GoogleFonts.ibmPlexSans(
+      fontSize: 17,
+      fontWeight: FontWeight.normal,
+      color: kAppPrimaryColor, // This is a static color, might need adjustment for dark mode if not using dynamic.
+                               // Or use CupertinoColors.activeBlue / systemBlue
+    );
+  }
+
+  // A version of action text style that resolves dynamically
+  static TextStyle get cupertinoDynamicActionTextStyle {
+    return GoogleFonts.ibmPlexSans(
+      fontSize: 17,
+      fontWeight: FontWeight.normal,
+      color: const CupertinoDynamicColor.withBrightness(
+        color: kAppPrimaryColor, // Light mode: App's primary blue
+        darkColor: Color(0xFF0A84FF), // Dark mode: iOS system blue (slightly brighter)
+      ),
+    );
+  }
+
+
+  static TextStyle get cupertinoTabBarTextStyle {
+    // For tab bar item labels. Typically smaller.
+    return GoogleFonts.ibmPlexSans(
+      fontSize: 10,
+      fontWeight: FontWeight.normal,
+      // Tab bar label color is usually handled by the tab bar itself based on active/inactive state
+      // but providing a base color from Cupertino set is fine.
+      color: CupertinoColors.inactiveGray, // Example, will be overridden by tab bar active/inactive states
+    );
+  }
+
+  // --- Cupertino Themes ---
+  static CupertinoThemeData get cupertinoThemeLight {
+    return CupertinoThemeData(
+      brightness: Brightness.light,
+      primaryColor: kAppPrimaryColor, // App's primary blue
+      primaryContrastingColor: CupertinoColors.white,
+      scaffoldBackgroundColor: CupertinoColors.systemGroupedBackground, // Common light mode background
+      barBackgroundColor: CupertinoColors.systemGrey6.withOpacity(0.85), // Translucent light nav bar
+      textTheme: CupertinoTextThemeData(
+        textStyle: cupertinoDefaultTextStyle,
+        actionTextStyle: cupertinoDynamicActionTextStyle, // Use dynamic one
+        navTitleTextStyle: cupertinoNavTitleTextStyle,
+        navLargeTitleTextStyle: GoogleFonts.ibmPlexSans(fontSize: 34, fontWeight: FontWeight.bold, color: CupertinoColors.label),
+        pickerTextStyle: GoogleFonts.ibmPlexSans(fontSize: 21, fontWeight: FontWeight.normal, color: CupertinoColors.label),
+        dateTimePickerTextStyle: GoogleFonts.ibmPlexSans(fontSize: 21, fontWeight: FontWeight.normal, color: CupertinoColors.label),
+        tabLabelTextStyle: cupertinoTabBarTextStyle,
+        navActionTextStyle: cupertinoDynamicActionTextStyle, // For nav bar buttons
+        // Other styles can be customized as needed
+      ),
+    );
+  }
+
+  static CupertinoThemeData get cupertinoThemeDark {
+    // Define a slightly brighter blue for dark mode if needed, or use kAppPrimaryColor
+    const Color darkPrimaryColor = Color(0xFF0A84FF); // iOS system blue for dark mode
+
+    return CupertinoThemeData(
+      brightness: Brightness.dark,
+      primaryColor: darkPrimaryColor,
+      primaryContrastingColor: CupertinoColors.black, // Contrasting for the darkPrimaryColor if it's light
+      scaffoldBackgroundColor: CupertinoColors.black, // Common dark mode background (true black)
+      barBackgroundColor: CupertinoColors.systemGrey.withOpacity(0.85), // Translucent dark nav bar
+      textTheme: CupertinoTextThemeData(
+        // For dark theme, ensure text styles use colors that are legible on dark backgrounds.
+        // CupertinoColors.label, .secondaryLabel etc. handle this automatically.
+        // For custom colors like kAppPrimaryColor in actionTextStyle, dynamic resolution is key.
+        textStyle: cupertinoDefaultTextStyle, // Will resolve to light text on dark bg
+        actionTextStyle: cupertinoDynamicActionTextStyle, // Will resolve to brighter blue
+        navTitleTextStyle: cupertinoNavTitleTextStyle, // Will resolve to light text
+        navLargeTitleTextStyle: GoogleFonts.ibmPlexSans(fontSize: 34, fontWeight: FontWeight.bold, color: CupertinoColors.label), // Will resolve to light text
+        pickerTextStyle: GoogleFonts.ibmPlexSans(fontSize: 21, fontWeight: FontWeight.normal, color: CupertinoColors.label),
+        dateTimePickerTextStyle: GoogleFonts.ibmPlexSans(fontSize: 21, fontWeight: FontWeight.normal, color: CupertinoColors.label),
+        tabLabelTextStyle: cupertinoTabBarTextStyle,
+        navActionTextStyle: cupertinoDynamicActionTextStyle,
+      ),
+    );
+  }
+
   // --- DARK THEME DEFINITION ---
   static ThemeData get darkTheme {
     final ColorScheme darkColorScheme = ColorScheme.fromSeed(
