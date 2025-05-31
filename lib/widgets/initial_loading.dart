@@ -3,8 +3,8 @@ import 'package:get/route_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:cloudkeja/helpers/loading_effect.dart';
 import 'package:cloudkeja/providers/auth_provider.dart';
-import 'package:cloudkeja/screens/admin/admin.dart';
-import 'package:cloudkeja/screens/home/my_nav.dart';
+import 'package:cloudkeja/screens/admin/admin.dart'; // AdminDashboard is now in admin.dart
+import 'package:cloudkeja/screens/home/my_nav_material.dart'; // Updated import
 
 class InitialLoadingScreen extends StatefulWidget {
   const InitialLoadingScreen({Key? key}) : super(key: key);
@@ -24,9 +24,9 @@ class _InitialLoadingScreenState extends State<InitialLoadingScreen> {
           .getCurrentUser();
 
       if (user.isAdmin!) {
-        Get.off(() => const AdminDashboard());
+        Get.offAll(() => const AdminDashboard()); // Used Get.offAll
       } else {
-        Get.off(() => const MainPage());
+        Get.offAll(() => const MyNavMaterial()); // Changed to MyNavMaterial and used Get.offAll
       }
     });
   }
@@ -34,7 +34,7 @@ class _InitialLoadingScreenState extends State<InitialLoadingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: LoadingEffect.getSearchLoadingScreen(context),
+      body: LoadingEffect.getSearchLoadingScreen(context), // This loading effect should be theme-aware
     );
   }
 }

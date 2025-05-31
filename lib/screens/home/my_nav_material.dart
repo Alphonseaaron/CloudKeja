@@ -8,14 +8,14 @@ import 'package:cloudkeja/screens/notifications/notifications_screen.dart';
 import 'package:cloudkeja/screens/settings/settings_screen.dart';
 import 'package:cloudkeja/widgets/custom_bottom_navigation_bar.dart'; // Refactored to use M3 NavigationBar
 
-class MainPage extends StatefulWidget {
-  const MainPage({Key? key}) : super(key: key);
+class MyNavMaterial extends StatefulWidget { // Renamed from MainPage
+  const MyNavMaterial({Key? key}) : super(key: key); // Renamed constructor
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<MyNavMaterial> createState() => _MyNavMaterialState(); // Renamed state class
 }
 
-class _MainPageState extends State<MainPage> {
+class _MyNavMaterialState extends State<MyNavMaterial> { // Renamed state class
   // Define the pages for the navigation bar
   final List<Widget> _pages = const [
     Home(),
@@ -30,7 +30,7 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     // Fetch initial data here instead of in the build method
-    // Ensure this doesn't trigger multiple times unnecessarily if MainPage itself is rebuilt.
+    // Ensure this doesn't trigger multiple times unnecessarily if MyNavMaterial itself is rebuilt.
     // Using addPostFrameCallback to ensure context is available for Provider.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) { // Check if the widget is still in the tree
