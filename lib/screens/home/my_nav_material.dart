@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloudkeja/providers/auth_provider.dart';
 import 'package:cloudkeja/providers/location_provider.dart';
-import 'package:cloudkeja/screens/home/home.dart';
+import 'package:cloudkeja/screens/home/home.dart'; // Updated import to HomeScreen router
 import 'package:cloudkeja/screens/maps_screen/maps_screen.dart';
 import 'package:cloudkeja/screens/notifications/notifications_screen.dart';
 import 'package:cloudkeja/screens/settings/settings_screen.dart';
@@ -18,10 +18,10 @@ class MyNavMaterial extends StatefulWidget { // Renamed from MainPage
 class _MyNavMaterialState extends State<MyNavMaterial> { // Renamed state class
   // Define the pages for the navigation bar
   final List<Widget> _pages = const [
-    Home(),
-    MapsScreen(), // Assuming this is the intended second screen
+    HomeScreen(), // Changed to HomeScreen router
+    MapsScreen(),
     NotificationsScreen(),
-    SettingsScreen(), // Assuming this is for user profile/settings
+    SettingsScreen(),
   ];
 
   int _selectedIndex = 0;

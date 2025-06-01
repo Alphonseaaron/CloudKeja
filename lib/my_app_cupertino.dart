@@ -9,7 +9,8 @@ import 'package:cloudkeja/theme/app_theme.dart'; // Import AppTheme
 // import 'package:cloudkeja/screens/auth/cupertino_login_page_stub.dart'; // Will use LoginPage router
 import 'package:cloudkeja/screens/auth/login_page.dart'; // Import the LoginPage router
 // import 'package:cloudkeja/screens/home/cupertino_main_navigation_stub.dart'; // No longer needed
-import 'package:cloudkeja/screens/home/my_nav_cupertino.dart'; // Import MyNavCupertino
+// import 'package:cloudkeja/screens/home/my_nav_cupertino.dart'; // MyNavCupertino is loaded by AppInitialLoadingRouter
+import 'package:cloudkeja/widgets/initial_loading.dart'; // Import AppInitialLoadingRouter
 
 class MyAppCupertino extends StatelessWidget {
   const MyAppCupertino({Key? key}) : super(key: key);
@@ -54,10 +55,10 @@ class MyAppCupertino extends StatelessWidget {
           }
           if (snapshot.hasData) {
             // User is logged in
-            // TODO: Replace with CupertinoInitialLoadingScreen if that's created,
+            // TODO: Replace with CupertinoInitialLoadingScreen if that's created, -> This is now done via AppInitialLoadingRouter
             // similar to how MyAppMaterial uses InitialLoadingScreen.
             // For now, directly to main navigation.
-            return const MyNavCupertino(); // Changed to MyNavCupertino
+            return const AppInitialLoadingRouter(); // Changed to AppInitialLoadingRouter
           } else {
             // User is not logged in
             return const LoginPage(); // Changed to LoginPage router

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:cloudkeja/theme/app_theme.dart'; // To access AppTheme for colors if needed directly
-import 'package:cloudkeja/screens/home/cupertino_home_page_stub.dart';
+// import 'package:cloudkeja/screens/home/cupertino_home_page_stub.dart'; // Replaced by HomeScreen router
+import 'package:cloudkeja/screens/home/home.dart'; // Import HomeScreen router
 import 'package:cloudkeja/screens/maps/cupertino_maps_page_stub.dart';
 import 'package:cloudkeja/screens/notifications/cupertino_notifications_page_stub.dart';
 import 'package:cloudkeja/screens/settings/cupertino_settings_page_stub.dart';
@@ -44,7 +45,7 @@ class MyNavCupertino extends StatelessWidget {
         switch (index) {
           case 0:
             returnValue = CupertinoTabView(builder: (context) {
-              return const CupertinoHomePageStub();
+              return const HomeScreen(); // Changed to HomeScreen router
             });
             break;
           case 1:
@@ -64,7 +65,7 @@ class MyNavCupertino extends StatelessWidget {
             break;
           default: // Should ideally not be reached
             returnValue = CupertinoTabView(builder: (context) {
-              return const CupertinoHomePageStub();
+              return const HomeScreen(); // Changed to HomeScreen router
             });
             break;
         }

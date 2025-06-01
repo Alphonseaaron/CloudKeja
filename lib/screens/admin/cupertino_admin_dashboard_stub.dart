@@ -1,16 +1,16 @@
 import 'package:flutter/cupertino.dart';
 
-class CupertinoHomePageStub extends StatelessWidget {
-  const CupertinoHomePageStub({super.key});
+class CupertinoAdminDashboardStub extends StatelessWidget {
+  const CupertinoAdminDashboardStub({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: Text('Home'),
+        middle: Text('Admin Dashboard - Cupertino'),
       ),
       child: Center(
-        child: Text('Cupertino Home Content'),
+        child: Text('Cupertino Admin Dashboard Stub'),
       ),
     );
   }

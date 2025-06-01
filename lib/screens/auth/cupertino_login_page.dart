@@ -2,7 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart'; // For TextInputType and SnackBar (can be replaced with Cupertino alternatives later if needed)
 import 'package:provider/provider.dart';
 import 'package:cloudkeja/providers/auth_provider.dart';
-import 'package:cloudkeja/screens/auth/register_page.dart'; // For navigation to RegisterPage
+import 'package:cloudkeja/screens/auth/register_page.dart'; // For navigation to RegisterPage router
+import 'package:cloudkeja/screens/auth/forgot_password_page.dart'; // Import ForgotPasswordPage router
 import 'package:get/get.dart'; // For Get.to for navigation
 
 class CupertinoLoginPage extends StatefulWidget {
@@ -140,15 +141,7 @@ class _CupertinoLoginPageState extends State<CupertinoLoginPage> {
             const SizedBox(height: 16),
             CupertinoButton(
               onPressed: () {
-                // TODO: Navigate to CupertinoForgotPasswordPage (once created)
-                // For now, can show a dialog or do nothing
-                showCupertinoDialog(
-                    context: context,
-                    builder: (ctx) => CupertinoAlertDialog(
-                          title: const Text('Forgot Password?'),
-                          content: const Text('This feature is coming soon for Cupertino.'),
-                          actions: [CupertinoDialogAction(child: const Text('OK'), onPressed: () => Navigator.pop(ctx))],
-                        ));
+                Get.to(() => const ForgotPasswordPage()); // Navigate to ForgotPasswordPage router
               },
               child: const Text('Forgot Password?'),
             ),
