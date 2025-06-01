@@ -7,7 +7,7 @@ import 'package:cloudkeja/screens/auth/register_page.dart';
 import 'package:cloudkeja/screens/auth/widgets/custom_checkbox.dart';
 import 'package:cloudkeja/screens/auth/widgets/primary_button.dart';
 import 'package:cloudkeja/widgets/initial_loading.dart';
-import 'package:cloudkeja/screens/auth/forgot_password_page_material.dart'; // Import ForgotPasswordPageMaterial
+import 'package:cloudkeja/screens/auth/forgot_password_page.dart'; // Import ForgotPasswordPage router
 
 // import 'theme.dart'; // Old theme file, colors and styles will come from AppTheme
 
@@ -130,7 +130,7 @@ class _LoginPageMaterialState extends State<LoginPageMaterial> { // Renamed stat
                     ),
                     TextButton(
                       onPressed: () {
-                        Get.to(() => const ForgotPasswordPageMaterial());
+                        Get.to(() => const ForgotPasswordPage()); // Navigate to ForgotPasswordPage router
                       },
                       child: Text(
                         'Forgot password?',
