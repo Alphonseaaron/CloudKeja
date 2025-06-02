@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart'; // For navigation if needed for search results
-// Import SearchResultsScreenCupertino if it exists, or prepare for its creation
-// import 'package:cloudkeja/screens/search/search_results_screen_cupertino.dart';
+import 'package:cloudkeja/screens/search/search_results_screen.dart'; // Import Material SearchResultsScreen
 
 class SearchScreenCupertino extends StatefulWidget {
   const SearchScreenCupertino({super.key});
@@ -23,19 +22,9 @@ class _SearchScreenCupertinoState extends State<SearchScreenCupertino> {
   void _onSearchSubmitted(String value) {
     final searchTerm = value.trim();
     if (searchTerm.isNotEmpty) {
-      // TODO: Update recent searches list
-      // TODO: Navigate to Cupertino Search Results Screen
-      // Get.to(() => SearchResultsScreenCupertino(searchText: searchTerm));
+      // TODO: Update recent searches list (persisting logic)
       print('Cupertino Search Submitted: $searchTerm');
-      // For now, just pop or show a placeholder for results
-       if (Get.isSnackbarOpen) Get.closeCurrentSnackbar();
-       Get.snackbar(
-          'Search Submitted (Cupertino)',
-          'Term: $searchTerm. Navigation to results not yet implemented.',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: CupertinoColors.activeGreen,
-          colorText: CupertinoColors.white,
-        );
+      Get.to(() => SearchResultsScreen(searchText: searchTerm)); // Navigate to Material SearchResultsScreen
     }
   }
 

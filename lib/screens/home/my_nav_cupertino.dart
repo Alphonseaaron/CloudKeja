@@ -2,8 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:cloudkeja/theme/app_theme.dart'; // To access AppTheme for colors if needed directly
 // import 'package:cloudkeja/screens/home/cupertino_home_page_stub.dart'; // Replaced by HomeScreen router
 import 'package:cloudkeja/screens/home/home.dart'; // Import HomeScreen router
-import 'package:cloudkeja/screens/maps/cupertino_maps_page_stub.dart';
-import 'package:cloudkeja/screens/notifications/cupertino_notifications_page_stub.dart';
+// import 'package:cloudkeja/screens/maps/cupertino_maps_page_stub.dart'; // Replaced by MapsRouter
+import 'package:cloudkeja/screens/maps/maps_router.dart'; // Import MapsRouter
+// import 'package:cloudkeja/screens/notifications/cupertino_notifications_page_stub.dart'; // Replaced by NotificationsRouter
+import 'package:cloudkeja/screens/notifications/notifications_router.dart'; // Import router
 // import 'package:cloudkeja/screens/settings/cupertino_settings_page_stub.dart'; // Replaced by SettingsScreen router
 import 'package:cloudkeja/screens/settings/settings_screen.dart'; // Import SettingsScreen router
 
@@ -51,12 +53,12 @@ class MyNavCupertino extends StatelessWidget {
             break;
           case 1:
             returnValue = CupertinoTabView(builder: (context) {
-              return const CupertinoMapsPageStub();
+              return const MapsRouter(); // Use MapsRouter
             });
             break;
           case 2:
             returnValue = CupertinoTabView(builder: (context) {
-              return const CupertinoNotificationsPageStub();
+              return const NotificationsRouter(); // Use NotificationsRouter
             });
             break;
           case 3:

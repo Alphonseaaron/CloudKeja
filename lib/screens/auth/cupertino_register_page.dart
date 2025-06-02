@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart' show SnackBar, Colors; // For SnackBar, Colors (can be replaced)
+// import 'package:flutter/material.dart' show SnackBar, Colors; // SnackBar replaced
+import 'package:flutter/material.dart' show Colors; // Assuming Colors might still be used somewhere, otherwise remove.
 import 'package:provider/provider.dart';
 import 'package:cloudkeja/providers/auth_provider.dart';
 import 'package:cloudkeja/models/user_model.dart';
@@ -34,6 +35,8 @@ class _CupertinoRegisterPageState extends State<CupertinoRegisterPage> {
   String _selectedRole = 'Tenant'; // Default role
   List<String> _selectedServiceTypes = [];
   bool _agreedToTerms = false;
+  bool _passwordVisible = false; // Added for password visibility
+  bool _confirmPasswordVisible = false; // Added for confirm password visibility
 
   final Map<String, String> _roles = {
     'Tenant': 'Tenant',
@@ -169,16 +172,40 @@ class _CupertinoRegisterPageState extends State<CupertinoRegisterPage> {
     TextInputAction? textInputAction,
     FocusNode? focusNode,
     void Function(String)? onSubmitted,
+    bool isPassword = false, // Added to identify password fields
+    bool isConfirmPassword = false, // Added to identify confirm password field
   }) {
+    // Determine current visibility state based on which password field it is
+    bool currentVisibility = isPassword ? _passwordVisible : (isConfirmPassword ? _confirmPasswordVisible : false);
+
     return CupertinoTextField(
       controller: controller,
       placeholder: placeholder,
-      obscureText: obscureText,
+      obscureText: (isPassword || isConfirmPassword) ? !currentVisibility : obscureText,
       keyboardType: keyboardType,
       prefix: prefixIcon != null ? Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
         child: Icon(prefixIcon, size: 22, color: CupertinoColors.placeholderText),
       ) : null,
+      suffix: (isPassword || isConfirmPassword) // Add suffix only for password fields
+          ? CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: Icon(
+                currentVisibility ? CupertinoIcons.eye_slash_fill : CupertinoIcons.eye_fill,
+                size: 24,
+                color: CupertinoColors.inactiveGray,
+              ),
+              onPressed: () {
+                setState(() {
+                  if (isPassword) {
+                    _passwordVisible = !_passwordVisible;
+                  } else if (isConfirmPassword) {
+                    _confirmPasswordVisible = !_confirmPasswordVisible;
+                  }
+                });
+              },
+            )
+          : null,
       padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
       decoration: BoxDecoration(
         border: Border.all(color: CupertinoColors.inactiveGray.withOpacity(0.4), width: 0.5),
@@ -232,9 +259,9 @@ class _CupertinoRegisterPageState extends State<CupertinoRegisterPage> {
               const SizedBox(height: 12),
               _buildTextField(controller: _emailController, placeholder: 'Email Address', prefixIcon: CupertinoIcons.mail, keyboardType: TextInputType.emailAddress, autocorrect: false, textInputAction: TextInputAction.next),
               const SizedBox(height: 12),
-              _buildTextField(controller: _passwordController, placeholder: 'Password', prefixIcon: CupertinoIcons.lock_fill, obscureText: true, textInputAction: TextInputAction.next),
+              _buildTextField(controller: _passwordController, placeholder: 'Password', prefixIcon: CupertinoIcons.lock_fill, textInputAction: TextInputAction.next, isPassword: true),
               const SizedBox(height: 12),
-              _buildTextField(controller: _confirmPasswordController, placeholder: 'Confirm Password', prefixIcon: CupertinoIcons.lock_fill, obscureText: true, textInputAction: TextInputAction.done, onSubmitted: (_) => _handleRegister()),
+              _buildTextField(controller: _confirmPasswordController, placeholder: 'Confirm Password', prefixIcon: CupertinoIcons.lock_fill, textInputAction: TextInputAction.done, onSubmitted: (_) => _handleRegister(), isConfirmPassword: true),
 
               if (_selectedRole == 'ServiceProvider') ...[
                 const SizedBox(height: 20),
@@ -252,10 +279,24 @@ class _CupertinoRegisterPageState extends State<CupertinoRegisterPage> {
                       // setState(() => _selectedServiceTypes = result); // This would be for a real selection page
                     }
                     // For stub, we just navigate. If you want to test selection, modify the stub.
-                    // For now, we'll just show a message that it's a stub.
-                     ScaffoldMessenger.of(context).showSnackBar(
-                       const SnackBar(content: Text('Service Type selection is a stub for now.'))
-                     );
+                    // For now, we show a CupertinoAlertDialog to indicate it's a stub.
+                    if (mounted) { // Check mounted before showing dialog
+                      showCupertinoDialog<void>(
+                        context: context,
+                        builder: (BuildContext context) => CupertinoAlertDialog(
+                          title: const Text('Information'),
+                          content: const Text('Service Type selection is a stub for now and will be implemented later.'),
+                          actions: <CupertinoDialogAction>[
+                            CupertinoDialogAction(
+                              child: const Text('OK'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    }
                   },
                 ),
                 const SizedBox(height: 12),
@@ -292,7 +333,7 @@ class _CupertinoRegisterPageState extends State<CupertinoRegisterPage> {
                     child: Text(
                       _errorMessage!,
                       textAlign: TextAlign.center,
-                      style: theme.textTheme.tabLabelTextStyle.copyWith(color: CupertinoColors.destructiveRed, fontSize: 14),
+                      style: theme.textTheme.caption1TextStyle.copyWith(color: CupertinoColors.destructiveRed, fontSize: 14), // Consistent error style
                     ),
                   ),
                 ),

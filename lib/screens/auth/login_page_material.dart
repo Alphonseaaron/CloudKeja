@@ -25,6 +25,8 @@ class _LoginPageMaterialState extends State<LoginPageMaterial> { // Renamed stat
   String? _email;
   String? _password;
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false; // Added for loading state
+  String? _errorMessage; // Added for inline error messages
 
   void _togglePasswordVisibility() {
     setState(() {
@@ -40,6 +42,12 @@ class _LoginPageMaterialState extends State<LoginPageMaterial> { // Renamed stat
 
     return Scaffold(
       backgroundColor: colorScheme.background, // Use theme background color
+      appBar: AppBar( // Added AppBar for consistency
+        title: const Text('Log In'),
+        elevation: 0, // Optional: for a flatter look matching Cupertino
+        backgroundColor: colorScheme.background, // Match background
+        foregroundColor: colorScheme.onBackground, // Ensure text is visible
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0), // Consistent horizontal padding
@@ -47,29 +55,7 @@ class _LoginPageMaterialState extends State<LoginPageMaterial> { // Renamed stat
             key: _formKey,
             child: ListView( // Using ListView for scrollability on smaller screens
               children: [
-                const SizedBox(height: 40), // Top spacing
-                // Page Title Section
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Login to your\naccount',
-                      style: textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onBackground,
-                      ),
-                    ),
-                    const SizedBox(height: 8), // Reduced space to accent
-                    Image.asset( // This accent image might need to be theme-aware or replaced
-                      'assets/images/accent.png',
-                      width: 99,
-                      height: 4,
-                      // Consider applying colorScheme.primary if it's an SVG or can be tinted
-                      // color: colorScheme.primary,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 48), // Adjusted top spacing after AppBar addition
 
                 // Email TextFormField
                 TextFormField(
@@ -139,29 +125,50 @@ class _LoginPageMaterialState extends State<LoginPageMaterial> { // Renamed stat
                     ),
                   ],
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16), // Reduced space a bit
+
+                // Error Message Display
+                if (_errorMessage != null && _errorMessage!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0), // Spacing before button
+                    child: Text(
+                      _errorMessage!,
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
+                    ),
+                  ),
 
                 // Login Button
                 CustomPrimaryButton( // Uses themed ElevatedButton internally
                   textValue: 'Login',
+                  isLoading: _isLoading, // Pass loading state
                   onTap: () async {
                     if (_formKey.currentState!.validate()) {
-                      // Perform login
+                      setState(() {
+                        _isLoading = true;
+                        _errorMessage = null;
+                      });
                       try {
-                        // Show loading indicator
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Logging in...')),
-                        );
                         await Provider.of<AuthProvider>(context, listen: false)
                             .logIn(_email!, _password!);
-                        Get.offAll(() => const InitialLoadingScreen()); // Use offAll to clear auth stack
+                        // Navigation is handled by StreamBuilder or will remain on this page if login fails
+                        // Forcing Get.offAll might be too aggressive if login silently fails without exception
+                        // Let auth provider state changes handle navigation.
+                        // If successful, MyApp's StreamBuilder should navigate away.
+                        // If an error occurs, it's caught below.
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(e.toString(), style: TextStyle(color: colorScheme.onError)),
-                            backgroundColor: colorScheme.error,
-                          ),
-                        );
+                        if (mounted) {
+                           setState(() {
+                            // Extract a user-friendly message if possible
+                            _errorMessage = e.toString().replaceFirst('Exception: ', '').replaceFirst('HttpException: ', '');
+                          });
+                        }
+                      } finally {
+                        if (mounted) {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        }
                       }
                     }
                   },

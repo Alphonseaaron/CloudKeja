@@ -8,6 +8,7 @@ class CustomPrimaryButton extends StatelessWidget {
   final double? minWidth;
   final double? minHeight;
   final EdgeInsetsGeometry? padding;
+  final bool isLoading; // Added isLoading parameter
 
   const CustomPrimaryButton({
     Key? key,
@@ -18,6 +19,7 @@ class CustomPrimaryButton extends StatelessWidget {
     this.minWidth, // Default will be from theme or intrinsic
     this.minHeight, // Default will be from theme (typically 40-56dp)
     this.padding,
+    this.isLoading = false, // Default to false
   }) : super(key: key);
 
   @override
@@ -48,7 +50,16 @@ class CustomPrimaryButton extends StatelessWidget {
         // Ensure the text style's color is correctly applied if overridden
         textStyle: MaterialStateProperty.all(effectiveTextStyle?.copyWith(color: effectiveTextColor)),
       ),
-      child: Text(textValue),
+      child: isLoading
+          ? SizedBox(
+              width: 24, // Adjust size as needed
+              height: 24, // Adjust size as needed
+              child: CircularProgressIndicator(
+                strokeWidth: 3.0, // Adjust thickness
+                valueColor: AlwaysStoppedAnimation<Color>(effectiveTextColor), // Use effective text color for indicator
+              ),
+            )
+          : Text(textValue),
     );
   }
 }

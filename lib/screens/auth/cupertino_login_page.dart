@@ -18,6 +18,7 @@ class _CupertinoLoginPageState extends State<CupertinoLoginPage> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   String? _errorMessage;
+  bool _passwordVisible = false; // Added for password visibility
 
   Future<void> _handleLogin() async {
     if (!mounted) return;
@@ -103,16 +104,31 @@ class _CupertinoLoginPageState extends State<CupertinoLoginPage> {
             CupertinoTextField(
               controller: _passwordController,
               placeholder: 'Password',
-              obscureText: true,
+              obscureText: !_passwordVisible, // Changed to use state variable
               textInputAction: TextInputAction.done,
               prefix: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
                 child: Icon(CupertinoIcons.lock_fill, size: 24),
               ),
+              suffix: CupertinoButton( // Added suffix for visibility toggle
+                padding: EdgeInsets.zero,
+                child: Icon(
+                  _passwordVisible ? CupertinoIcons.eye_slash_fill : CupertinoIcons.eye_fill,
+                  size: 24,
+                  color: CupertinoColors.inactiveGray, // Standard icon color
+                ),
+                onPressed: () {
+                  setState(() {
+                    _passwordVisible = !_passwordVisible;
+                  });
+                },
+              ),
               padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+              // This custom decoration is kept for app-wide visual consistency,
+              // harmonizing with Material text fields or by team preference.
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: CupertinoColors.inactiveGray.withOpacity(0.5),
+                  color: CupertinoColors.inactiveGray.withOpacity(0.5), // Subtle border
                   width: 1.0,
                 ),
                 borderRadius: BorderRadius.circular(8.0),
@@ -134,7 +150,8 @@ class _CupertinoLoginPageState extends State<CupertinoLoginPage> {
                   child: Text(
                     _errorMessage!,
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.tabLabelTextStyle.copyWith(color: CupertinoColors.destructiveRed),
+                    // Changed to a more appropriate text style for errors
+                    style: theme.textTheme.caption1TextStyle.copyWith(color: CupertinoColors.destructiveRed, fontSize: 14),
                   ),
                 ),
               ),
