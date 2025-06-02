@@ -1,107 +1,63 @@
 import 'package:flutter/material.dart';
-// import 'package:flutter_svg/svg.dart'; // Not used
-import 'package:get/route_manager.dart';
+import 'package:flutter/cupertino.dart'; // Required for ObstructingPreferredSizeWidget if CustomCupertinoAppBar uses it
 import 'package:provider/provider.dart';
-import 'package:cloudkeja/models/user_model.dart';
-import 'package:cloudkeja/providers/auth_provider.dart';
-import 'package:cloudkeja/screens/chat/chat_screen.dart';
-import 'package:cloudkeja/screens/profile/user_profile.dart';
-import 'package:cloudkeja/screens/settings/settings_screen.dart'; // Import SettingsScreen
+import 'package:cloudkeja/services/platform_service.dart';
+import 'package:cloudkeja/widgets/custom_material_app_bar.dart';
+import 'package:cloudkeja/widgets/custom_cupertino_app_bar.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const CustomAppBar({Key? key}) : super(key: key);
+  final String titleText;
+  final bool showUserProfileLeading;
+  final VoidCallback? onUserProfileTap;
+  final String? userProfileImageUrl; // For user avatar in leading
+  final bool showChatAction;
+  final bool showSettingsAction;
+
+  const CustomAppBar({
+    Key? key,
+    required this.titleText,
+    this.showUserProfileLeading = true, // Default for Material
+    this.onUserProfileTap,
+    this.userProfileImageUrl,
+    this.showChatAction = true,
+    this.showSettingsAction = true,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Access theme for icon colors, etc., if not directly handled by AppBarTheme
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final platformService = Provider.of<PlatformService>(context, listen: false);
 
-    return AppBar(
-      // The AppBarTheme from main AppTheme will handle background, elevation, etc.
-      // No need to set them here unless specifically overriding.
-      leadingWidth: 70, // Adjusted to give avatar some space
-      leading: Padding(
-        padding: const EdgeInsets.only(left: 16.0), // Standard padding for leading items
-        child: Center(
-          child: FutureBuilder<UserModel>(
-            future: Provider.of<AuthProvider>(context, listen: false).getCurrentUser(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
-                // Show a placeholder or loading indicator if desired, but keep it small
-                return CircleAvatar(
-                  radius: 20,
-                  backgroundColor: colorScheme.surfaceVariant, // Theme-aware placeholder BG
-                );
-              }
-              if (snapshot.hasData && snapshot.data?.profile != null) {
-                return GestureDetector(
-                  onTap: () {
-                    Get.to(() => const UserProfileScreen());
-                  },
-                  child: CircleAvatar(
-                    radius: 20,
-                    backgroundImage: NetworkImage(snapshot.data!.profile!),
-                    backgroundColor: colorScheme.surfaceVariant, // Fallback BG
-                  ),
-                );
-              }
-              // Fallback to local asset if no data or no profile URL
-              return GestureDetector(
-                onTap: () {
-                  Get.to(() => const UserProfileScreen());
-                },
-                child: CircleAvatar(
-                  radius: 20,
-                  backgroundImage: const AssetImage('assets/images/avatar.png'),
-                  backgroundColor: colorScheme.surfaceVariant, // Fallback BG
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-      actions: [
-        IconButton(
-          onPressed: () {
-            Get.to(() => const ChatScreen());
-          },
-          icon: Icon(
-            Icons.chat_bubble_outline, // Material Design icon
-            color: colorScheme.onSurface, // Explicitly use theme color
-          ),
-          tooltip: 'Chats',
-        ),
-        IconButton( // Added Settings Icon Button
-          onPressed: () {
-            Get.to(() => const SettingsScreen());
-          },
-          icon: Icon(
-            Icons.settings_outlined,
-            color: colorScheme.onSurface,
-          ),
-          tooltip: 'Settings',
-        ),
-        IconButton( // This is the single, correct Chat icon
-          onPressed: () {
-            Get.to(() => const ChatScreen());
-          },
-          icon: Icon(
-            Icons.chat_bubble_outline, // Material Design icon
-            color: colorScheme.onSurface, // Explicitly use theme color
-          ),
-          tooltip: 'Chats',
-        ),
-        const SizedBox(width: 8), // Add a bit of spacing for the last action
-      ],
-      title: Text( // Added Title
-        'Home',
-        // style: theme.appBarTheme.titleTextStyle, // Uses global AppBarTheme style
-      ),
-      centerTitle: false, // Align title to the start, common for Material
-    );
+    if (platformService.useCupertino) {
+      return CustomCupertinoAppBar(
+        titleText: titleText,
+        showUserProfileLeading: showUserProfileLeading, // Pass down
+        onUserProfileTap: onUserProfileTap,
+        userProfileImageUrl: userProfileImageUrl,
+        showChatAction: showChatAction,
+        showSettingsAction: showSettingsAction,
+      );
+    } else {
+      return CustomMaterialAppBar(
+        titleText: titleText,
+        showUserProfileLeading: showUserProfileLeading,
+        onUserProfileTap: onUserProfileTap,
+        userProfileImageUrl: userProfileImageUrl,
+        showChatAction: showChatAction,
+        showSettingsAction: showSettingsAction,
+      );
+    }
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight); // Standard AppBar height
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight); 
+  // Both CustomMaterialAppBar and CustomCupertinoAppBar are designed to use kToolbarHeight
+  // so the router can consistently return this.
+  // If CustomCupertinoAppBar needed a different height (e.g. kMinInteractiveDimensionCupertino),
+  // this getter would need to check the platform:
+  // return Size.fromHeight(
+  //   PlatformService.useCupertino // (this would need static access or instance from Provider if used here)
+  //       ? kMinInteractiveDimensionCupertino 
+  //       : kToolbarHeight
+  // );
+  // But for this task, kToolbarHeight is used for both for simplicity and consistency.
 }
