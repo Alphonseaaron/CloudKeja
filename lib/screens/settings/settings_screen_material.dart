@@ -137,7 +137,7 @@ class SettingsScreenMaterial extends StatelessWidget {
     return Scaffold(
       backgroundColor: theme.colorScheme.background,
       appBar: AppBar(
-        title: const Text('Settings & Preferences'),
+        title: const Text('Settings'), // Changed title
       ),
       body: FutureBuilder<UserModel>(
         future: Provider.of<AuthProvider>(context, listen: false).getCurrentUser(),
@@ -243,12 +243,7 @@ class SettingsScreenMaterial extends StatelessWidget {
                     if (user.isLandlord == true) {
                       Get.to(() => const LandlordDashboard());
                     } else {
-                      showDialog(
-                        context: context,
-                        builder: (ctx) => Dialog(
-                          child: SingleChildScrollView(child: RequestLandlord()),
-                        ),
-                      );
+                      Get.to(() => const RequestLandlord()); // Changed to full page navigation
                     }
                   },
                 ),

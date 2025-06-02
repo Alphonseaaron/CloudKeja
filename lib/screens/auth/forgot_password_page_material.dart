@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cloudkeja/providers/auth_provider.dart';
+import 'package:cloudkeja/screens/auth/widgets/primary_button.dart'; // Import CustomPrimaryButton
 
 class ForgotPasswordPageMaterial extends StatefulWidget {
   const ForgotPasswordPageMaterial({super.key});
@@ -98,14 +99,11 @@ class _ForgotPasswordPageMaterialState extends State<ForgotPasswordPageMaterial>
                 onFieldSubmitted: (_) => _isLoading ? null : _handleSendResetLink(),
               ),
               const SizedBox(height: 24),
-              if (_isLoading)
-                const Center(child: CircularProgressIndicator())
-              else
-                ElevatedButton(
-                  onPressed: _handleSendResetLink,
-                  child: const Text('Send Reset Link'),
-                  // Style from ElevatedButtonTheme in AppTheme
-                ),
+              CustomPrimaryButton( // Replaced ElevatedButton
+                textValue: 'Send Reset Link',
+                isLoading: _isLoading,
+                onTap: _handleSendResetLink,
+              ),
               if (_feedbackMessage != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),

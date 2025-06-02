@@ -6,6 +6,7 @@ import 'package:cloudkeja/models/user_model.dart';
 import 'package:cloudkeja/providers/auth_provider.dart';
 import 'package:cloudkeja/screens/chat/chat_screen.dart';
 import 'package:cloudkeja/screens/profile/user_profile.dart';
+import 'package:cloudkeja/screens/settings/settings_screen.dart'; // Import SettingsScreen
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({Key? key}) : super(key: key);
@@ -71,14 +72,33 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
           tooltip: 'Chats',
         ),
+        IconButton( // Added Settings Icon Button
+          onPressed: () {
+            Get.to(() => const SettingsScreen());
+          },
+          icon: Icon(
+            Icons.settings_outlined,
+            color: colorScheme.onSurface,
+          ),
+          tooltip: 'Settings',
+        ),
+        IconButton( // This is the single, correct Chat icon
+          onPressed: () {
+            Get.to(() => const ChatScreen());
+          },
+          icon: Icon(
+            Icons.chat_bubble_outline, // Material Design icon
+            color: colorScheme.onSurface, // Explicitly use theme color
+          ),
+          tooltip: 'Chats',
+        ),
         const SizedBox(width: 8), // Add a bit of spacing for the last action
       ],
-      // The title would go here if needed:
-      // title: Text(
-      //   'Page Title',
-      //   style: theme.appBarTheme.titleTextStyle, // Uses global AppBarTheme style
-      // ),
-      // centerTitle: true, // Or false, based on design
+      title: Text( // Added Title
+        'Home',
+        // style: theme.appBarTheme.titleTextStyle, // Uses global AppBarTheme style
+      ),
+      centerTitle: false, // Align title to the start, common for Material
     );
   }
 

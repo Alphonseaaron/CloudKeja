@@ -3,8 +3,29 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/route_manager.dart';
 import 'package:cloudkeja/screens/search/search_results_screen.dart';
 
-class SearchScreenMaterial extends StatelessWidget {
+class SearchScreenMaterial extends StatefulWidget { // Changed to StatefulWidget
   const SearchScreenMaterial({Key? key}) : super(key: key);
+
+  @override
+  State<SearchScreenMaterial> createState() => _SearchScreenMaterialState();
+}
+
+class _SearchScreenMaterialState extends State<SearchScreenMaterial> { // Added State class
+  late TextEditingController _searchController;
+  // Mock data for recent searches, similar to Cupertino version for consistency
+  final List<String> _recentSearches = List.generate(4, (index) => 'Sample Recent Search M ${index + 1}');
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,8 +37,11 @@ class SearchScreenMaterial extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: colorScheme.background, // Themed background
-      // Consider adding an AppBar if a back button or explicit title is needed
-      // appBar: AppBar(title: Text("Search Spaces")),
+      appBar: AppBar( // Added AppBar
+        title: const Text("Search Properties"),
+        elevation: 0, // Optional: for a flatter look
+        // backgroundColor: colorScheme.background, // Optional: if specific color needed
+      ),
       body: SafeArea( // Add SafeArea
         child: ListView(
           padding: const EdgeInsets.symmetric(vertical: 12.0), // Padding for the ListView
@@ -32,10 +56,12 @@ class SearchScreenMaterial extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   child: TextFormField(
-                    autofocus: true, // Often good for a dedicated search screen
+                    controller: _searchController, // Use controller
+                    autofocus: true,
                     onFieldSubmitted: (val) {
                       if (val.trim().isNotEmpty) {
-                        Get.off(() => SearchResultsScreen(searchText: val.trim()));
+                        // TODO: Update recent searches list (persisting logic)
+                        Get.to(() => SearchResultsScreen(searchText: val.trim()));
                       }
                     },
                     decoration: InputDecoration(
@@ -77,19 +103,22 @@ class SearchScreenMaterial extends StatelessWidget {
             // Divider(height: 1, thickness: 1, indent: 16, endIndent: 16, color: colorScheme.outline.withOpacity(0.5)),
 
             // Placeholder ListTiles for recent searches
-            ...List.generate(
-              4,
-              (index) => ListTile(
-                leading: Icon(Icons.history_outlined, color: colorScheme.onSurfaceVariant.withOpacity(0.8)), // Changed icon
-                title: Text('Search term ${index + 1}', style: textTheme.bodyMedium), // Example text
-                trailing: Icon(Icons.north_west_outlined, color: colorScheme.onSurfaceVariant.withOpacity(0.8)), // Changed icon
+            ..._recentSearches.map((term) { // Use _recentSearches list
+              return ListTile(
+                leading: Icon(Icons.history_outlined, color: colorScheme.onSurfaceVariant.withOpacity(0.8)),
+                title: Text(term, style: textTheme.bodyMedium),
+                trailing: Icon(Icons.north_west_outlined, color: colorScheme.onSurfaceVariant.withOpacity(0.8)),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
                 onTap: () {
-                  // TODO: Populate search field with this term and submit
-                  // Get.off(() => SearchResultsScreen(searchText: 'Search term ${index + 1}'));
+                  _searchController.text = term;
+                  _searchController.selection = TextSelection.fromPosition(TextPosition(offset: term.length)); // Move cursor to end
+                  // Optionally trigger search directly:
+                  // if (term.trim().isNotEmpty) {
+                  //   Get.to(() => SearchResultsScreen(searchText: term.trim()));
+                  // }
                 },
-              ),
-            )
+              );
+            }).toList(),
           ],
         ),
       ),

@@ -26,16 +26,19 @@ class _RegisterPageMaterialState extends State<RegisterPageMaterial> { // Rename
   String? _name, _idnumber, _email, _password, _phone, _passwordConfirmation;
   String? _selectedRole;
   List<XFile>? _certificationFiles;
-  String? _servicesOfferedText; // Detailed text description of services
-  String? _serviceAreasText;     // Detailed text description of service areas
+  // String? _servicesOfferedText; // Replaced by controller
+  // String? _serviceAreasText;     // Replaced by controller
 
   // New state variables for SP types and location
   List<String> _selectedServiceTypes = [];
   late TextEditingController _spCountryController;
   late TextEditingController _spCountyController;
   late TextEditingController _spSubCountyController;
+  late TextEditingController _spServicesOfferedController; // Added controller
+  late TextEditingController _spServiceAreasController;   // Added controller
 
   bool _isLoading = false;
+  String? _errorMessage; // Added for inline error messages
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -44,6 +47,8 @@ class _RegisterPageMaterialState extends State<RegisterPageMaterial> { // Rename
     _spCountryController = TextEditingController(text: 'Kenya'); // Default country
     _spCountyController = TextEditingController();
     _spSubCountyController = TextEditingController();
+    _spServicesOfferedController = TextEditingController(); // Initialize
+    _spServiceAreasController = TextEditingController();   // Initialize
   }
 
   @override
@@ -51,6 +56,8 @@ class _RegisterPageMaterialState extends State<RegisterPageMaterial> { // Rename
     _spCountryController.dispose();
     _spCountyController.dispose();
     _spSubCountyController.dispose();
+    _spServicesOfferedController.dispose(); // Dispose
+    _spServiceAreasController.dispose();   // Dispose
     // Dispose other controllers if any were manually created and not part of form fields that handle their own.
     super.dispose();
   }
@@ -72,37 +79,37 @@ class _RegisterPageMaterialState extends State<RegisterPageMaterial> { // Rename
   }
 
   Future<void> _handleRegister() async {
-    final scaffoldMessenger = ScaffoldMessenger.of(context); // For SnackBar context
-    final theme = Theme.of(context); // For SnackBar styling
+    // final scaffoldMessenger = ScaffoldMessenger.of(context); // No longer needed for all errors
+    // final theme = Theme.of(context); // No longer needed for all errors
+    setState(() { // Clear previous error messages
+      _errorMessage = null;
+    });
 
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      setState(() => _errorMessage = 'Please fix the errors in the form.'); // Generic message, specific errors are in TextFormField validators
+      return;
+    }
     if (!_termsAccepted) {
-      scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: Text('Please accept the Terms & Conditions.', style: TextStyle(color: theme.colorScheme.onError)),
-          backgroundColor: theme.colorScheme.error,
-        ),
-      );
+      setState(() => _errorMessage = 'Please accept the Terms & Conditions.');
       return;
     }
 
     // Specific validation for Service Provider role
     if (_selectedRole == 'ServiceProvider') {
       if (_selectedServiceTypes.isEmpty) {
-        scaffoldMessenger.showSnackBar(SnackBar(content: Text('Please select at least one service type.', style: TextStyle(color: theme.colorScheme.onError)), backgroundColor: theme.colorScheme.error));
+        setState(() => _errorMessage = 'Please select at least one service type for Service Providers.');
         return;
       }
       if (_spCountryController.text.trim().isEmpty || _spCountyController.text.trim().isEmpty) {
-         scaffoldMessenger.showSnackBar(SnackBar(content: Text('Country and County are required for Service Providers.', style: TextStyle(color: theme.colorScheme.onError)), backgroundColor: theme.colorScheme.error));
+         setState(() => _errorMessage = 'Country and County are required for Service Providers.');
         return;
       }
        if ((_certificationFiles == null || _certificationFiles!.isEmpty)) {
-         scaffoldMessenger.showSnackBar(SnackBar(content: Text('Please upload at least one certification for Service Provider.', style: TextStyle(color: theme.colorScheme.onError)), backgroundColor: theme.colorScheme.error,));
-         return; // No need to set isLoading = false here as it's done in finally
+         setState(() => _errorMessage = 'Please upload at least one certification for Service Provider.');
+         return;
       }
       // servicesOfferedText and serviceAreasText are already validated by TextFormField validators
     }
-
 
     setState(() => _isLoading = true);
 
@@ -134,27 +141,34 @@ class _RegisterPageMaterialState extends State<RegisterPageMaterial> { // Rename
             certificationUrls.add(downloadUrl);
           }
         } catch (e) {
-          scaffoldMessenger.showSnackBar(SnackBar(content: Text('Error uploading certifications: $e', style: TextStyle(color: theme.colorScheme.onError)), backgroundColor: theme.colorScheme.error));
-          setState(() => _isLoading = false); // Reset loading on error BEFORE returning
+          if (mounted) {
+            setState(() {
+              _errorMessage = 'Error uploading certifications: ${e.toString().replaceFirst('Exception: ', '')}';
+              _isLoading = false;
+            });
+          }
           return;
         }
       } // Else, certifications might not be mandatory if validation above is removed/changed
 
       user = user.copyWith( // Use copyWith to update the user model
         certifications: certificationUrls,
-        servicesOffered: _servicesOfferedText?.split(',').map((e) => e.trim()).where((s) => s.isNotEmpty).toList() ?? [],
-        serviceAreas: _serviceAreasText?.split(',').map((e) => e.trim()).where((s) => s.isNotEmpty).toList() ?? [],
+        servicesOffered: _spServicesOfferedController.text.split(',').map((e) => e.trim()).where((s) => s.isNotEmpty).toList() ?? [],
+        serviceAreas: _spServiceAreasController.text.split(',').map((e) => e.trim()).where((s) => s.isNotEmpty).toList() ?? [],
         availabilitySchedule: {'monday': '9am-5pm', 'tuesday': '9am-5pm', 'wednesday': '9am-5pm', 'thursday': '9am-5pm', 'friday': '9am-5pm'}, // Default
       );
     }
 
     try {
       await Provider.of<AuthProvider>(context, listen: false).signUp(user);
-      Get.offAll(() => const MyNavMaterial()); // Updated to MyNavMaterial
+      // Let StreamBuilder handle navigation on success
+      // Get.offAll(() => const MyNavMaterial()); // Updated to MyNavMaterial
     } catch (error) {
-      scaffoldMessenger.showSnackBar(
-        SnackBar(content: Text(error.toString(), style: TextStyle(color: theme.colorScheme.onError)), backgroundColor: theme.colorScheme.error),
-      );
+      if (mounted) {
+        setState(() {
+          _errorMessage = error.toString().replaceFirst('Exception: ', '').replaceFirst('HttpException: ', '');
+        });
+      }
     } finally {
        if (mounted) {
         setState(() => _isLoading = false);
@@ -171,6 +185,12 @@ class _RegisterPageMaterialState extends State<RegisterPageMaterial> { // Rename
 
     return Scaffold(
       backgroundColor: colorScheme.background,
+      appBar: AppBar( // Added AppBar
+        title: const Text('Create Account'),
+        elevation: 0,
+        backgroundColor: colorScheme.background,
+        foregroundColor: colorScheme.onBackground,
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -178,16 +198,7 @@ class _RegisterPageMaterialState extends State<RegisterPageMaterial> { // Rename
             key: _formKey,
             child: ListView(
               children: [
-                const SizedBox(height: 30), // Reduced top spacing
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Register new\naccount', style: textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onBackground)),
-                    const SizedBox(height: 8),
-                    Image.asset('assets/images/accent.png', width: 99, height: 4, color: colorScheme.primary), // Themed accent
-                  ],
-                ),
-                const SizedBox(height: 24), // Reduced spacing
+                const SizedBox(height: 24), // Adjusted top spacing after AppBar
 
                 TextFormField(onChanged: (val) => _name = val, validator: (val) => (val == null || val.isEmpty) ? 'Please enter your full names' : null, decoration: const InputDecoration(hintText: 'Full Names', prefixIcon: Icon(Icons.person_outline))),
                 const SizedBox(height: 16),
@@ -222,9 +233,9 @@ class _RegisterPageMaterialState extends State<RegisterPageMaterial> { // Rename
                     // title: "Select your service types", // Optional title within widget
                   ),
                   const SizedBox(height: 16),
-                  TextFormField(controller: _servicesOfferedController, validator: (val) => (_selectedRole == 'ServiceProvider' && (val == null || val.isEmpty)) ? 'Describe services offered' : null, decoration: const InputDecoration(hintText: 'Briefly describe services (e.g., Kitchen plumbing, AC maintenance)', prefixIcon: Icon(Icons.description_outlined)), maxLines: 2),
+                  TextFormField(controller: _spServicesOfferedController, validator: (val) => (_selectedRole == 'ServiceProvider' && (val == null || val.isEmpty)) ? 'Describe services offered' : null, decoration: const InputDecoration(hintText: 'Briefly describe services (e.g., Kitchen plumbing, AC maintenance)', prefixIcon: Icon(Icons.description_outlined)), maxLines: 2),
                   const SizedBox(height: 16),
-                  TextFormField(controller: _serviceAreasText, validator: (val) => (_selectedRole == 'ServiceProvider' && (val == null || val.isEmpty)) ? 'Enter service areas' : null, decoration: const InputDecoration(hintText: 'Main service areas (e.g., Downtown, West Suburbs)', prefixIcon: Icon(Icons.map_outlined)), maxLines: 2),
+                  TextFormField(controller: _spServiceAreasController, validator: (val) => (_selectedRole == 'ServiceProvider' && (val == null || val.isEmpty)) ? 'Enter service areas' : null, decoration: const InputDecoration(hintText: 'Main service areas (e.g., Downtown, West Suburbs)', prefixIcon: Icon(Icons.map_outlined)), maxLines: 2),
                   const SizedBox(height: 16),
 
                   Padding(
@@ -260,8 +271,19 @@ class _RegisterPageMaterialState extends State<RegisterPageMaterial> { // Rename
                     Expanded(child: RichText(text: TextSpan(text: 'By creating an account, you agree to our ', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onBackground.withOpacity(0.8)), children: [TextSpan(text: 'Terms & Conditions', style: textTheme.bodyMedium?.copyWith(color: colorScheme.primary, fontWeight: FontWeight.w600))]))),
                   ],
                 ),
-                const SizedBox(height: 24),
-                _isLoading ? const Center(child: CircularProgressIndicator()) : CustomPrimaryButton(textValue: 'Register', onTap: _handleRegister),
+                const SizedBox(height: 16), // Space before error message
+
+                if (_errorMessage != null && _errorMessage!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: Text(
+                      _errorMessage!,
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
+                    ),
+                  ),
+
+                CustomPrimaryButton(textValue: 'Register', isLoading: _isLoading, onTap: _handleRegister),
                 const SizedBox(height: 24),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,

@@ -183,18 +183,8 @@ class SettingsScreenCupertino extends StatelessWidget {
                           if (user.isLandlord == true) {
                             Get.to(() => const LandlordDashboard());
                           } else {
-                            // Using Cupertino dialog for RequestLandlord, assuming it's a simple form
-                            Get.dialog(CupertinoAlertDialog(
-                              title: const Text('Become a Landlord'),
-                              content: SingleChildScrollView(child: RequestLandlord()), // Ensure RequestLandlord is suitable for dialog
-                              actions: <CupertinoDialogAction>[
-                                CupertinoDialogAction(
-                                  child: const Text('Cancel'),
-                                  onPressed: () => Get.back(),
-                                ),
-                                // Add a submit if RequestLandlord has its own submission logic
-                              ],
-                            ));
+                            // Navigate to RequestLandlord as a full page
+                            Get.to(() => const RequestLandlord());
                           }
                         },
                       ),

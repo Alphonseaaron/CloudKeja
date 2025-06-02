@@ -94,6 +94,7 @@ class _CupertinoForgotPasswordPageState extends State<CupertinoForgotPasswordPag
                 child: Icon(CupertinoIcons.mail, size: 24, color: CupertinoColors.placeholderText),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+              // This custom decoration is kept for app-wide visual consistency.
               decoration: BoxDecoration(
                 border: Border.all(
                   color: CupertinoColors.inactiveGray.withOpacity(0.5),
@@ -117,8 +118,9 @@ class _CupertinoForgotPasswordPageState extends State<CupertinoForgotPasswordPag
                 child: Text(
                   _feedbackMessage!,
                   textAlign: TextAlign.center,
-                  style: theme.textTheme.tabLabelTextStyle.copyWith( // tabLabelTextStyle is small by default
-                    fontSize: 14, // Explicitly set a slightly larger size for feedback
+                  // Consistent feedback style with other auth pages
+                  style: theme.textTheme.caption1TextStyle.copyWith(
+                    fontSize: 14,
                     color: _isSuccess ? CupertinoColors.systemGreen : CupertinoColors.destructiveRed,
                   ),
                 ),

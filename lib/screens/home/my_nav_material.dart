@@ -3,10 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:cloudkeja/providers/auth_provider.dart';
 import 'package:cloudkeja/providers/location_provider.dart';
 import 'package:cloudkeja/screens/home/home.dart'; // Updated import to HomeScreen router
-import 'package:cloudkeja/screens/maps_screen/maps_screen.dart';
-import 'package:cloudkeja/screens/notifications/notifications_screen.dart';
+// import 'package:cloudkeja/screens/maps_screen/maps_screen.dart'; // Replaced by MapsRouter
+import 'package:cloudkeja/screens/maps/maps_router.dart'; // Import MapsRouter
+// import 'package:cloudkeja/screens/notifications/notifications_screen.dart'; // Replaced by NotificationsRouter
+import 'package:cloudkeja/screens/notifications/notifications_router.dart'; // Import router
 import 'package:cloudkeja/screens/settings/settings_screen.dart';
-import 'package:cloudkeja/widgets/custom_bottom_navigation_bar.dart'; // Refactored to use M3 NavigationBar
 
 class MyNavMaterial extends StatefulWidget { // Renamed from MainPage
   const MyNavMaterial({Key? key}) : super(key: key); // Renamed constructor
@@ -19,8 +20,8 @@ class _MyNavMaterialState extends State<MyNavMaterial> { // Renamed state class
   // Define the pages for the navigation bar
   final List<Widget> _pages = const [
     HomeScreen(), // Changed to HomeScreen router
-    MapsScreen(),
-    NotificationsScreen(),
+    MapsRouter(), // Use MapsRouter
+    NotificationsRouter(), // Use NotificationsRouter
     SettingsScreen(),
   ];
 
@@ -54,10 +55,29 @@ class _MyNavMaterialState extends State<MyNavMaterial> { // Renamed state class
         index: _selectedIndex,
         children: _pages,
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(
-        onSelected: _onItemTapped,
-        // The CustomBottomNavigationBar has been refactored to use M3's NavigationBar
-        // and should adhere to NavigationBarThemeData from AppTheme.
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.map),
+            label: 'Map',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications),
+            label: 'Notifications',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
+        ],
+        // Theming for colors and selected/unselected items will be handled by
+        // the global NavigationBarThemeData in AppTheme.
       ),
     );
   }

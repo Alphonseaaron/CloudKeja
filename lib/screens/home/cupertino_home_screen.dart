@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart'; // For Icons in search bar, can be replaced
+// import 'package:flutter/material.dart'; // For Icons in search bar, can be replaced - Replaced
 import 'package:provider/provider.dart';
 import 'package:get/get.dart';
 
@@ -11,6 +11,7 @@ import 'package:cloudkeja/screens/search/search_screen.dart'; // Router for sear
 import 'package:cloudkeja/screens/search_sp/search_sp_screen.dart'; // Router for SP search
 import 'package:cloudkeja/screens/details/details.dart'; // For navigation to Details (will be router later)
 import 'package:cloudkeja/screens/home/view_all_screen.dart'; // For "See All"
+import 'package:cloudkeja/screens/settings/settings_screen.dart'; // Import for Settings
 import 'package:intl/intl.dart'; // For currency formatting
 
 
@@ -147,7 +148,7 @@ class _CupertinoHomeScreenState extends State<CupertinoHomeScreen> {
           ),
           child: Row(
             children: [
-              Icon(CupertinoIcons.search, color: CupertinoColors.secondaryLabel.resolveFrom(context), size: 20),
+              Icon(CupertinoIcons.search, color: CupertinoColors.secondaryLabel.resolveFrom(context), size: 20), // Changed to CupertinoIcons.search
               const SizedBox(width: 8),
               Text(
                 'Search properties, locations...',
@@ -192,8 +193,16 @@ class _CupertinoHomeScreenState extends State<CupertinoHomeScreen> {
 
   Widget _buildCupertinoRecommended(BuildContext context, List<SpaceModel> spaces) {
     final theme = CupertinoTheme.of(context);
-    if (spaces.isEmpty && !_isLoading) { // Only show "no spaces" if not loading and actually empty
-        return const SizedBox.shrink(); // Or a small message if preferred
+    if (spaces.isEmpty && !_isLoading) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40.0),
+        child: Center(
+          child: Text(
+            'No recommendations available right now.',
+            style: theme.textTheme.textStyle.copyWith(color: CupertinoColors.secondaryLabel),
+          ),
+        ),
+      );
     }
 
     return Column(
@@ -230,8 +239,16 @@ class _CupertinoHomeScreenState extends State<CupertinoHomeScreen> {
 
   Widget _buildCupertinoBestOffers(BuildContext context, List<SpaceModel> spaces) {
      final theme = CupertinoTheme.of(context);
-      if (spaces.isEmpty && !_isLoading) {
-        return const SizedBox.shrink();
+    if (spaces.isEmpty && !_isLoading) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40.0),
+        child: Center(
+          child: Text(
+            'No special offers available currently.',
+            style: theme.textTheme.textStyle.copyWith(color: CupertinoColors.secondaryLabel),
+          ),
+        ),
+      );
     }
 
     return Column(
@@ -280,9 +297,15 @@ class _CupertinoHomeScreenState extends State<CupertinoHomeScreen> {
     // final theme = CupertinoTheme.of(context); // Defined locally if needed
 
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Home'),
-        // TODO: Add settings/profile icon button to trailing if needed
+      navigationBar: CupertinoNavigationBar(
+        middle: const Text('Home'),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: const Icon(CupertinoIcons.settings, size: 24), // Standard icon size for nav bar actions
+          onPressed: () {
+            Get.to(() => const SettingsScreen()); // Navigate to SettingsScreen router
+          },
+        ),
       ),
       child: SafeArea(
         child: RefreshIndicator.adaptive( // Use .adaptive for Cupertino style pull-down
