@@ -14,14 +14,14 @@ import 'package:cloudkeja/models/space_model.dart';
 import 'package:cloudkeja/providers/post_provider.dart';
 import 'package:cloudkeja/screens/landlord/widgets/add_on_map.dart';
 
-class AddSpaceScreen extends StatefulWidget {
-  const AddSpaceScreen({Key? key}) : super(key: key);
+class AddSpaceScreenMaterial extends StatefulWidget { // Renamed class
+  const AddSpaceScreenMaterial({Key? key}) : super(key: key); // Renamed constructor
 
   @override
-  _AddSpaceScreenState createState() => _AddSpaceScreenState();
+  _AddSpaceScreenMaterialState createState() => _AddSpaceScreenMaterialState(); // Renamed state class
 }
 
-class _AddSpaceScreenState extends State<AddSpaceScreen> {
+class _AddSpaceScreenMaterialState extends State<AddSpaceScreenMaterial> { // Renamed state class
   LatLng? propertyLocation;
   File? coverImage;
   List<File> imageFiles = [];

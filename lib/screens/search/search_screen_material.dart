@@ -57,7 +57,7 @@ class _SearchScreenMaterialState extends State<SearchScreenMaterial> { // Added 
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   child: TextFormField(
                     controller: _searchController, // Use controller
-                    autofocus: true,
+                    autofocus: true, 
                     onFieldSubmitted: (val) {
                       if (val.trim().isNotEmpty) {
                         // TODO: Update recent searches list (persisting logic)

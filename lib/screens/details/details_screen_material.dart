@@ -18,12 +18,13 @@ import 'package:cloudkeja/screens/details/space_reviews.dart';
 import 'package:cloudkeja/screens/payment/payment_screen.dart';
 import 'package:cloudkeja/widgets/about.dart';
 import 'package:cloudkeja/widgets/content_intro.dart';
-import 'package:cloudkeja/widgets/details_app_bar.dart';
+// import 'package:cloudkeja/widgets/details_app_bar.dart'; // Replaced by DetailsAppBarRouter
+import 'package:cloudkeja/widgets/details_app_bar_router.dart'; // Import the router
 import 'package:cloudkeja/widgets/house_info.dart';
 
-class Details extends StatelessWidget {
+class DetailsScreenMaterial extends StatelessWidget { // Renamed class
   final SpaceModel space;
-  const Details({
+  const DetailsScreenMaterial({ // Renamed constructor
     Key? key,
     required this.space,
   }) : super(key: key);
@@ -62,9 +63,8 @@ class Details extends StatelessWidget {
         children: [
           CustomScrollView(
             slivers: [
-              // DetailsAppBar is not a true SliverAppBar, so it's treated as regular content.
-              // If it were a SliverAppBar, it would integrate with CustomScrollView's scrolling.
-              _buildSectionContent(DetailsAppBar(space: space)),
+              // Use DetailsAppBarRouter now
+              _buildSectionContent(DetailsAppBarRouter(space: space)),
               _buildSectionContent(const SizedBox(height: 16)), // Spacing after app bar
               _buildSectionContent(ContentIntro(space: space)),
               _buildSectionContent(const SizedBox(height: 16)),

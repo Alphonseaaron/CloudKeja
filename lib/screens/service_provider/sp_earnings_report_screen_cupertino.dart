@@ -78,7 +78,7 @@ class _SPEarningsReportScreenCupertinoState extends State<SPEarningsReportScreen
       _controller.setCustomDateRange(picked, newLabel);
     }
   }
-
+  
   Future<void> _showDateFilterActionSheet() async {
     final cupertinoTheme = CupertinoTheme.of(context);
     await showCupertinoModalPopup<void>(
@@ -166,8 +166,8 @@ class _SPEarningsReportScreenCupertinoState extends State<SPEarningsReportScreen
           Text(title, style: cupertinoTheme.textTheme.tabLabelTextStyle.copyWith(color: CupertinoColors.secondaryLabel.resolveFrom(context)), textAlign: TextAlign.center),
           const SizedBox(height: 4),
           Text(
-            _controller.isLoading && value.contains("0.00") ? "..." : value,
-            style: cupertinoTheme.textTheme.navTitleTextStyle.copyWith(fontWeight: FontWeight.bold, fontSize: 18, color: iconColor),
+            _controller.isLoading && value.contains("0.00") ? "..." : value, 
+            style: cupertinoTheme.textTheme.navTitleTextStyle.copyWith(fontWeight: FontWeight.bold, fontSize: 18, color: iconColor), 
             textAlign: TextAlign.center
           ),
         ],
@@ -260,7 +260,7 @@ class _SPEarningsReportScreenCupertinoState extends State<SPEarningsReportScreen
                       ? Center(child: Text("Not enough data for chart", style: cupertinoTheme.textTheme.tabLabelTextStyle))
                       : LineChart(getSPEarningsChartData(context: context, monthlyEarningsMap: _controller.monthlyChartData, isLoading: _controller.isLoading)),
                 ),
-
+                
                 // Earnings Breakdown Title
                  Padding(
                   padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 8.0),

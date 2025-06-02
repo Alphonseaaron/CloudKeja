@@ -9,13 +9,13 @@ import 'package:cloudkeja/helpers/constants.dart';
 import 'package:cloudkeja/models/user_model.dart';
 import 'package:cloudkeja/providers/auth_provider.dart';
 
-class EditProfileScreen extends StatefulWidget {
-  EditProfileScreen({Key? key}) : super(key: key);
+class EditProfileScreenMaterial extends StatefulWidget { // Renamed class
+  EditProfileScreenMaterial({Key? key}) : super(key: key); // Renamed constructor
   @override
-  _EditProfileScreenState createState() => _EditProfileScreenState();
+  _EditProfileScreenMaterialState createState() => _EditProfileScreenMaterialState(); // Renamed state class
 }
 
-class _EditProfileScreenState extends State<EditProfileScreen> {
+class _EditProfileScreenMaterialState extends State<EditProfileScreenMaterial> { // Renamed state class
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();

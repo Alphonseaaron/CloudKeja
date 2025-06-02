@@ -8,12 +8,13 @@ import 'package:cloudkeja/helpers/loading_effect.dart'; // Themed loading effect
 import 'package:cloudkeja/providers/auth_provider.dart'; // Not directly used in this build, but good for context
 import 'package:cloudkeja/models/chat_provider.dart'; // For ChatTileModel and provider
 import 'package:cloudkeja/screens/chat/chat_screen_search.dart';
-import 'package:cloudkeja/screens/chat/widgets/chat_tile.dart'; // Will be themed separately
+// import 'package:cloudkeja/screens/chat/widgets/chat_tile.dart'; // Replaced by chat_tile_material.dart
+import 'package:cloudkeja/screens/chat/widgets/chat_tile_material.dart'; // Use ChatTileMaterial
 import 'package:skeletonizer/skeletonizer.dart'; // For skeleton loading of chat list
 
-class ChatScreen extends StatelessWidget {
-  const ChatScreen({Key? key}) : super(key: key);
-  static const routeName = '/chat';
+class ChatScreenMaterial extends StatelessWidget { // Renamed class
+  const ChatScreenMaterial({Key? key}) : super(key: key); // Renamed constructor
+  static const routeName = '/chat'; // This route name might need to be for the router if this screen is not directly navigated to
 
   @override
   Widget build(BuildContext context) {
@@ -37,15 +38,15 @@ class ChatScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: const ChatScreenWidget(),
+      body: const ChatScreenWidgetMaterial(), // Use renamed widget
     );
   }
 }
 
-class ChatScreenWidget extends StatelessWidget {
-  static const routeName = '/chat-screen-widget'; // Not typically used for nested widgets
+class ChatScreenWidgetMaterial extends StatelessWidget { // Renamed class
+  static const routeName = '/chat-screen-widget-material'; // Adjusted route name for clarity
 
-  const ChatScreenWidget({Key? key}) : super(key: key);
+  const ChatScreenWidgetMaterial({Key? key}) : super(key: key); // Renamed constructor
 
   Widget _buildChatTileSkeleton(BuildContext context) {
     final theme = Theme.of(context);
@@ -151,8 +152,8 @@ class ChatScreenWidget extends StatelessWidget {
         return ListView.separated(
           padding: const EdgeInsets.symmetric(vertical: 8.0), // Padding for the list
           itemCount: contacts.length,
-          itemBuilder: (context, index) => ChatTile( // ChatTile will be themed next
-            roomId: contacts[index].chatRoomId!,
+          itemBuilder: (context, index) => ChatTileMaterial( // Use ChatTileMaterial
+            // roomId is part of chatModel in ChatTileMaterial's version
             chatModel: contacts[index],
           ),
           separatorBuilder: (context, index) => Divider(

@@ -32,7 +32,7 @@ class _CupertinoMapsPageStubState extends State<CupertinoMapsPageStub> {
     // Consider FutureBuilder for location if it's critical for first paint.
     Provider.of<LocationProvider>(context, listen: false).getCurrentLocation();
   }
-
+  
   @override
   void dispose() {
     _searchController.dispose();
@@ -100,7 +100,7 @@ class _CupertinoMapsPageStubState extends State<CupertinoMapsPageStub> {
       }
     }
   }
-
+  
   void _onSearchSubmitted(String val) async {
     if (val.trim().isEmpty) return;
     try {

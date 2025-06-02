@@ -8,9 +8,9 @@ import 'package:cloudkeja/providers/auth_provider.dart';
 // import 'dart:ui' as ui; // No longer needed for custom painter
 import 'package:cloudkeja/models/message_model.dart';
 
-class ChatBubble extends StatelessWidget {
+class ChatBubbleMaterial extends StatelessWidget { // Renamed class
   final MessageModel message;
-  const ChatBubble({Key? key, required this.message}) : super(key: key); // Corrected constructor
+  const ChatBubbleMaterial({Key? key, required this.message}) : super(key: key); // Renamed constructor
 
   @override
   Widget build(BuildContext context) {

@@ -49,7 +49,7 @@ class SPEarningsReportController extends ChangeNotifier {
       _allFetchedJobs = await _jobProvider.fetchSPJobHistory(
         dateFilter: _selectedDateFilter,
         forceRefresh: forceRefresh,
-        statusFilter: null,
+        statusFilter: null, 
       );
       _processFetchedJobsAndPrepareChartData();
     } catch (e) {
@@ -100,16 +100,16 @@ class SPEarningsReportController extends ChangeNotifier {
        var sortedKeys = data.keys.toList()..sort();
        return { for (var k in sortedKeys) k : data[k]! };
     }
-
+    
     DateTime firstJobDate = currentEarningsJobs.map((j) => j.dateCompleted).reduce((a,b) => a.isBefore(b) ? a : b);
     DateTime lastJobDate = currentEarningsJobs.map((j) => j.dateCompleted).reduce((a,b) => a.isAfter(b) ? a : b);
 
     DateTime chartStartDate = DateTime(lastJobDate.year, lastJobDate.month - (numberOfMonths - 1), 1);
     if(firstJobDate.isBefore(chartStartDate)) {
-        data.clear();
+        data.clear(); 
          for (int i = 0; i < numberOfMonths; i++) {
             DateTime monthDate = DateTime(lastJobDate.year, lastJobDate.month - i, 1);
-            if (monthDate.isBefore(firstJobDate) && i > 0 && data.length >= numberOfMonths) break;
+            if (monthDate.isBefore(firstJobDate) && i > 0 && data.length >= numberOfMonths) break; 
             String monthKey = DateFormat('yyyy-MM').format(monthDate);
             data[monthKey] = 0.0;
         }
@@ -141,7 +141,7 @@ class SPEarningsReportController extends ChangeNotifier {
     notifyListeners();
     fetchEarningsData();
   }
-
+  
   // New state for PDF generation
   bool _isGeneratingPdf = false;
   String? _pdfGenerationError;
@@ -168,13 +168,13 @@ class SPEarningsReportController extends ChangeNotifier {
       // UserReportPdfApi.generateSPJobHistoryPdf might need to be adapted if it's not exactly for earnings
       // or a new method like generateSPEarningsPdf should be created in UserReportPdfApi.
       // For this step, we'll assume generateSPJobHistoryPdf is suitable.
-
+      
       // TODO: Ensure UserReportPdfApi.generateSPJobHistoryPdf exists and matches this signature,
       // or create UserReportPdfApi.generateSPEarningsPdf(jobs: _earningsJobs, serviceProvider: currentUser, filterDateRange: _selectedDateFilter)
       // For now, using a placeholder name that seems more appropriate for earnings.
       // This assumes UserReportPdfApi has such a method or it will be added.
       // If UserReportPdfApi.generateSPJobHistoryPdf is used, ensure its parameters match.
-
+      
       // This call is speculative based on the class name UserReportPdfApi and common report needs.
       // The actual method in UserReportPdfApi for SP Earnings might be different (e.g. generateSPEarningsPdf).
       // The file read earlier showed generateSPJobHistoryPdf and generateUserPaymentHistoryPdf.
@@ -184,7 +184,7 @@ class SPEarningsReportController extends ChangeNotifier {
         currentSP: currentUser, // Needs UserModel of the SP
         filterDateRange: _selectedDateFilter,
       );
-
+      
       if (pdfFile != null) {
         await PdfApi.openFile(pdfFile); // Helper from UserReportPdfApi's context
       }

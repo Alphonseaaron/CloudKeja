@@ -126,7 +126,7 @@ class _CupertinoLoginPageState extends State<CupertinoLoginPage> {
               padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
               // This custom decoration is kept for app-wide visual consistency,
               // harmonizing with Material text fields or by team preference.
-              decoration: BoxDecoration(
+              decoration: BoxDecoration( 
                 border: Border.all(
                   color: CupertinoColors.inactiveGray.withOpacity(0.5), // Subtle border
                   width: 1.0,

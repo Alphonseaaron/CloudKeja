@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/route_manager.dart'; // For Get.to and Get.offAll
-import 'package:cloudkeja/screens/admin/all_landlords.dart';
-import 'package:cloudkeja/screens/admin/alll_users_screen.dart'; // Corrected typo from 'alll_users_screen' to 'all_users_screen' if that's the actual filename
+// import 'package:cloudkeja/screens/admin/all_landlords.dart'; // Replaced by router
+// import 'package:cloudkeja/screens/admin/alll_users_screen.dart'; // Replaced by router
+import 'package:cloudkeja/screens/admin/all_landlords_screen_router.dart'; // Import router
+import 'package:cloudkeja/screens/admin/all_users_screen_router.dart';   // Import router
 import 'package:cloudkeja/screens/auth/login_page.dart';
 import 'package:cloudkeja/screens/chat/chat_screen.dart'; // Assuming ChatScreen is suitable or will be adapted
 
@@ -85,13 +87,13 @@ class CupertinoAdminDashboardStub extends StatelessWidget {
                   context,
                   title: 'Manage Users',
                   leadingIcon: CupertinoIcons.group_solid,
-                  onTap: () => Get.to(() => const AllUsersScreen()),
+                  onTap: () => Get.to(() => const AllUsersScreenRouter()), // Use router
                 ),
                 _buildNavigationTile(
                   context,
                   title: 'Manage Landlords',
                   leadingIcon: CupertinoIcons.house_alt_fill,
-                  onTap: () => Get.to(() => const AllLandlordsScreen()),
+                  onTap: () => Get.to(() => const AllLandlordsScreenRouter()), // Use router
                 ),
                 _buildNavigationTile(
                   context,
