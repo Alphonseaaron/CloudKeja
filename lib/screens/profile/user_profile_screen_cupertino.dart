@@ -15,8 +15,9 @@ import 'package:cloudkeja/screens/user/user_payment_history_screen.dart'; // Ass
 import 'package:cloudkeja/screens/user/user_maintenance_history_screen.dart'; // Assuming adaptive or routed
 import 'package:cloudkeja/screens/profile/tenant_details_screen.dart'; // Assuming adaptive or routed
 // TODO: Replace mpesa_helper and MyDropDown with Cupertino alternatives if UserPaymentDialog is adapted for Cupertino
-import 'package:cloudkeja/helpers/mpesa_helper.dart';
-import 'package:cloudkeja/helpers/my_dropdown.dart';
+// import 'package:cloudkeja/helpers/mpesa_helper.dart'; // mpesa_helper is used by UserPaymentDialogCupertinoContent
+// import 'package:cloudkeja/helpers/my_dropdown.dart'; // MyDropDown is used by UserPaymentDialogCupertinoContent and is adaptive
+import 'package:cloudkeja/widgets/dialogs/user_payment_dialog_cupertino_content.dart'; // Added
 
 
 class UserProfileScreenCupertino extends StatefulWidget {
@@ -111,18 +112,53 @@ class _UserProfileScreenCupertinoState extends State<UserProfileScreenCupertino>
     );
   }
 
-  // TODO: Adapt UserPaymentDialog for Cupertino or create a Cupertino equivalent
   void _showCupertinoPaymentDialog(BuildContext context, SpaceModel space) {
-     showCupertinoDialog(
-        context: context,
-        builder: (ctx) => CupertinoAlertDialog(
+    showCupertinoDialog<bool>( // Expect a boolean result
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return CupertinoAlertDialog(
           title: const Text('Make Payment'),
-          content: UserPaymentDialog(space: space), // Using Material dialog content for now
-          actions: [
-            CupertinoDialogAction(child: const Text("Cancel"), onPressed: ()=> Navigator.pop(ctx), isDestructiveAction: true,),
-            // UserPaymentDialog has its own pay button.
+          content: UserPaymentDialogCupertinoContent(space: space), // Use the new Cupertino content
+          actions: <CupertinoDialogAction>[
+            CupertinoDialogAction(
+              child: const Text('Cancel'),
+              isDestructiveAction: true,
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false); // Pop with false indicating cancellation
+              },
+            )
+            // "Confirm & Pay" is now inside UserPaymentDialogCupertinoContent
           ],
-        ));
+        );
+      },
+    ).then((paymentSuccessful) {
+      // After the dialog is popped, handle the result
+      if (paymentSuccessful == true) {
+        showCupertinoDialog(
+          context: context, // Use the original screen's context
+          builder: (BuildContext alertContext) => CupertinoAlertDialog(
+            title: const Text('Payment Successful'),
+            content: const Text('Your payment has been processed.'),
+            actions: <CupertinoDialogAction>[
+              CupertinoDialogAction(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.of(alertContext).pop();
+                  _loadUserData(forceRefresh: true); // Refresh data after successful payment
+                },
+              )
+            ],
+          ),
+        );
+      } else if (paymentSuccessful == false && mounted) { 
+        // Optional: Handle explicit cancellation if needed, though often just closing is fine.
+        // If UserPaymentDialogCupertinoContent pops with `false` for failure, handle here.
+        // Currently, it shows its own error or pops with true for success.
+        // This 'else if' might not be hit if UserPaymentDialogCupertinoContent handles all its errors internally
+        // and only pops 'true' for success or is dismissed (null result).
+        // For now, this handles explicit cancellation from the AlertDialog's own cancel button.
+      }
+    });
   }
 
 
@@ -231,9 +267,15 @@ class _UserProfileScreenCupertinoState extends State<UserProfileScreenCupertino>
                             title: Text('Rent Due', style: cupertinoTheme.textTheme.textStyle),
                             additionalInfo: Text('KES ${space.price?.toStringAsFixed(0) ?? '0'}', style: cupertinoTheme.textTheme.tabLabelTextStyle),
                           ),
-                          CupertinoButton.filled(
-                            child: const Text('Make Payment'),
-                            onPressed: () => _showCupertinoPaymentDialog(context, space),
+                          Padding( // Add padding around the button to match typical list item padding
+                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: CupertinoButton.filled(
+                                child: const Text('Make Payment'),
+                                onPressed: () => _showCupertinoPaymentDialog(context, space),
+                              ),
+                            ),
                           )
                         ],
                       );

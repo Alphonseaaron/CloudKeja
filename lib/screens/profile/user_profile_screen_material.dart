@@ -359,20 +359,23 @@ void showUserPaymentDialog(BuildContext context, SpaceModel space) {
   showDialog(
     context: context,
     builder: (ctx) => Dialog(
-      child: UserPaymentDialog(space: space),
+      // Ensure UserPaymentDialogMaterialContent is used if renaming is done in place
+      child: UserPaymentDialogMaterialContent(space: space), 
     ),
   );
 }
 
-class UserPaymentDialog extends StatefulWidget {
-  const UserPaymentDialog({Key? key, required this.space}) : super(key: key);
+// Renamed to UserPaymentDialogMaterialContent
+class UserPaymentDialogMaterialContent extends StatefulWidget { 
+  const UserPaymentDialogMaterialContent({Key? key, required this.space}) : super(key: key);
   final SpaceModel space;
 
   @override
-  State<UserPaymentDialog> createState() => _UserPaymentDialogState();
+  State<UserPaymentDialogMaterialContent> createState() => _UserPaymentDialogMaterialContentState(); // Renamed state class
 }
 
-class _UserPaymentDialogState extends State<UserPaymentDialog> {
+// Renamed state class
+class _UserPaymentDialogMaterialContentState extends State<UserPaymentDialogMaterialContent> { 
   String? _selectedPaymentOption;
   String? _selectedPaymentMethod;
   bool _isProcessingPayment = false;
@@ -456,7 +459,7 @@ class _UserPaymentDialogState extends State<UserPaymentDialog> {
                 },
                 child: _isProcessingPayment
                     ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2.5, color: colorScheme.onPrimary))
-                    : const Text('Confirm & Pay'),
+                    : const Text('Confirm & Pay'), // Already ElevatedButton
               ),
             )
           ],
