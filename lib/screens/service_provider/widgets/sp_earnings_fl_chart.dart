@@ -7,9 +7,39 @@ LineChartData getSPEarningsChartData({
   required Map<String, double> monthlyEarningsMap, // "YYYY-MM": totalEarningsForMonth
   required bool isLoading, // To show loading state on chart
 }) {
-  final theme = Theme.of(context);
-  final colorScheme = theme.colorScheme;
-  final textTheme = theme.textTheme;
+  // Platform detection
+  final TargetPlatform platform = Theme.of(context).platform;
+  final bool isCupertino = platform == TargetPlatform.iOS || platform == TargetPlatform.macOS;
+
+  // Theme access
+  final materialTheme = Theme.of(context);
+  final cupertinoTheme = CupertinoTheme.of(context); // Ensure this context can resolve CupertinoTheme
+
+  // Colors and TextStyles based on platform
+  final Color gridColor = isCupertino
+      ? CupertinoColors.systemGrey4.resolveFrom(context).withOpacity(0.5)
+      : materialTheme.colorScheme.outline.withOpacity(0.2);
+  final Color borderColor = isCupertino
+      ? CupertinoColors.systemGrey3.resolveFrom(context)
+      : materialTheme.colorScheme.outline.withOpacity(0.3);
+  final TextStyle labelTextStyle = isCupertino
+      ? cupertinoTheme.textTheme.tabLabelTextStyle.copyWith(color: CupertinoColors.secondaryLabel.resolveFrom(context))
+      : materialTheme.textTheme.bodySmall!.copyWith(color: materialTheme.colorScheme.onSurfaceVariant);
+  final Color tooltipBgColor = isCupertino
+      ? CupertinoColors.systemGrey.withOpacity(0.9) // A darker grey for tooltip
+      : materialTheme.colorScheme.surfaceContainerHighest.withOpacity(0.9);
+  final TextStyle tooltipTextStyle = isCupertino
+      ? cupertinoTheme.textTheme.caption1.copyWith(color: CupertinoColors.white, fontWeight: FontWeight.bold)
+      : materialTheme.textTheme.bodySmall!.copyWith(color: materialTheme.colorScheme.onSurface, fontWeight: FontWeight.bold);
+  final List<Color> lineGradientColors = isCupertino
+      ? [cupertinoTheme.primaryColor, cupertinoTheme.primaryColor.withOpacity(0.3)]
+      : [materialTheme.colorScheme.primary, materialTheme.colorScheme.primary.withOpacity(0.3)];
+  final List<Color> belowBarGradientColors = isCupertino
+      ? [cupertinoTheme.primaryColor.withOpacity(0.2), cupertinoTheme.primaryColor.withOpacity(0.0)]
+      : [materialTheme.colorScheme.primary.withOpacity(0.2), materialTheme.colorScheme.primary.withOpacity(0.0)];
+  final Color dotColor = isCupertino ? cupertinoTheme.primaryColor : materialTheme.colorScheme.primary;
+  final Color dotStrokeColor = isCupertino ? cupertinoTheme.scaffoldBackgroundColor : materialTheme.colorScheme.surface;
+
 
   List<FlSpot> spots = [];
   List<String> monthLabels = []; // "MMM" format for X-axis
@@ -65,10 +95,10 @@ LineChartData getSPEarningsChartData({
     gridData: FlGridData(
       show: true,
       drawVerticalLine: true,
-      horizontalInterval: maxY > 0 ? maxY / 5 : 1, // Dynamic interval, avoid division by zero
+      horizontalInterval: maxY > 0 ? maxY / 5 : 1,
       verticalInterval: 1,
-      getDrawingHorizontalLine: (value) => FlLine(color: colorScheme.outline.withOpacity(0.2), strokeWidth: 0.5),
-      getDrawingVerticalLine: (value) => FlLine(color: colorScheme.outline.withOpacity(0.2), strokeWidth: 0.5),
+      getDrawingHorizontalLine: (value) => FlLine(color: gridColor, strokeWidth: 0.5),
+      getDrawingVerticalLine: (value) => FlLine(color: gridColor, strokeWidth: 0.5),
     ),
     titlesData: FlTitlesData(
       show: true,
@@ -85,7 +115,7 @@ LineChartData getSPEarningsChartData({
               return SideTitleWidget(
                 axisSide: meta.axisSide,
                 space: 8.0,
-                child: Text(monthLabels[index], style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+                child: Text(monthLabels[index], style: labelTextStyle),
               );
             }
             return const SizedBox.shrink();
@@ -95,16 +125,13 @@ LineChartData getSPEarningsChartData({
       leftTitles: AxisTitles(
         sideTitles: SideTitles(
           showTitles: true,
-          interval: maxY > 0 ? maxY / 5 : 1, // Dynamic interval
-          getTitlesWidget: (value, meta) => Text(
-            '${value.toInt()}k', // Assuming Y is in thousands
-            style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
-          ),
+          interval: maxY > 0 ? maxY / 5 : 1,
+          getTitlesWidget: (value, meta) => Text('${value.toInt()}k', style: labelTextStyle),
           reservedSize: 42,
         ),
       ),
     ),
-    borderData: FlBorderData(show: true, border: Border.all(color: colorScheme.outline.withOpacity(0.3))),
+    borderData: FlBorderData(show: true, border: Border.all(color: borderColor)),
     minX: 0,
     maxX: maxX,
     minY: minY,
@@ -112,14 +139,14 @@ LineChartData getSPEarningsChartData({
     lineTouchData: LineTouchData(
       enabled: !isLoading,
       touchTooltipData: LineTouchTooltipData(
-        tooltipBgColor: colorScheme.surfaceContainerHighest.withOpacity(0.9), // Changed to surfaceContainerHighest
+        tooltipBgColor: tooltipBgColor,
         getTooltipItems: (touchedSpots) {
           return touchedSpots.map((touchedSpot) {
             final monthIndex = touchedSpot.spotIndex;
             String monthLabel = (monthIndex >= 0 && monthIndex < monthLabels.length) ? monthLabels[monthIndex] : '';
             return LineTooltipItem(
               '${monthLabel.isNotEmpty ? monthLabel + ": " : ""}KES ${(touchedSpot.y * 1000).toStringAsFixed(0)}',
-              textTheme.bodySmall!.copyWith(color: colorScheme.onSurface, fontWeight: FontWeight.bold), // Use onSurface for tooltip text
+              tooltipTextStyle,
             );
           }).toList();
         },
@@ -130,22 +157,22 @@ LineChartData getSPEarningsChartData({
       LineChartBarData(
         spots: spots,
         isCurved: true,
-        gradient: LinearGradient(colors: [colorScheme.primary, colorScheme.primary.withOpacity(0.3)]),
+        gradient: LinearGradient(colors: lineGradientColors),
         barWidth: 3,
         isStrokeCapRound: true,
         dotData: FlDotData(
-          show: spots.length < 15 && spots.any((s) => s.y > 0), // Show dots if not too many and not flat zero line
+          show: spots.length < 15 && spots.any((s) => s.y > 0),
           getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
             radius: 3,
-            color: colorScheme.primary,
+            color: dotColor,
             strokeWidth: 1,
-            strokeColor: colorScheme.surface,
+            strokeColor: dotStrokeColor,
           )
         ),
         belowBarData: BarAreaData(
           show: true,
           gradient: LinearGradient(
-            colors: [colorScheme.primary.withOpacity(0.2), colorScheme.primary.withOpacity(0.0)],
+            colors: belowBarGradientColors,
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
