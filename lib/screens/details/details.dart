@@ -187,7 +187,7 @@ class Details extends StatelessWidget {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Could not load owner details for chat.', style: TextStyle(color: colorScheme.onError)), backgroundColor: colorScheme.error));
                       }
                     },
-                    icon: Icon(CupertinoIcons.text_bubble, color: colorScheme.onPrimaryContainer), // Consider Material Icons.chat_bubble_outline
+                    icon: Icon(Icons.chat_bubble_outline_rounded, color: colorScheme.onPrimaryContainer), // Changed to Material icon
                     // style: IconButton.styleFrom(
                     //   backgroundColor: colorScheme.primaryContainer, // M3 filledTonal uses this
                     //   foregroundColor: colorScheme.onPrimaryContainer,
