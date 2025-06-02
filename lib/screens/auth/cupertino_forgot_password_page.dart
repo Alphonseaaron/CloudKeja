@@ -95,7 +95,7 @@ class _CupertinoForgotPasswordPageState extends State<CupertinoForgotPasswordPag
               ),
               padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
               // This custom decoration is kept for app-wide visual consistency.
-              decoration: BoxDecoration(
+              decoration: BoxDecoration( 
                 border: Border.all(
                   color: CupertinoColors.inactiveGray.withOpacity(0.5),
                   width: 1.0,
@@ -119,8 +119,8 @@ class _CupertinoForgotPasswordPageState extends State<CupertinoForgotPasswordPag
                   _feedbackMessage!,
                   textAlign: TextAlign.center,
                   // Consistent feedback style with other auth pages
-                  style: theme.textTheme.caption1TextStyle.copyWith(
-                    fontSize: 14,
+                  style: theme.textTheme.caption1TextStyle.copyWith( 
+                    fontSize: 14, 
                     color: _isSuccess ? CupertinoColors.systemGreen : CupertinoColors.destructiveRed,
                   ),
                 ),

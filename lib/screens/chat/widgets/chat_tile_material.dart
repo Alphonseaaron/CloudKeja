@@ -9,11 +9,11 @@ import 'package:cloudkeja/models/chat_provider.dart'; // For ChatTileModel
 import 'package:cloudkeja/models/user_model.dart';
 import 'package:cloudkeja/screens/chat/chat_room.dart';
 
-class ChatTile extends StatelessWidget {
+class ChatTileMaterial extends StatelessWidget { // Renamed class
   // final String roomId; // roomId is part of chatModel
   final ChatTileModel chatModel;
 
-  const ChatTile({Key? key, required this.chatModel}) : super(key: key);
+  const ChatTileMaterial({Key? key, required this.chatModel}) : super(key: key); // Renamed constructor
 
   @override
   Widget build(BuildContext context) {

@@ -11,6 +11,7 @@ import 'package:cloudkeja/models/user_model.dart';
 import 'package:cloudkeja/providers/auth_provider.dart';
 import 'package:cloudkeja/providers/tenancy_provider.dart';
 import 'package:cloudkeja/screens/auth/login_page.dart'; // For logout navigation
+import 'package:cloudkeja/screens/profile/edit_profile_screen_router.dart'; // Import router
 import 'package:cloudkeja/screens/profile/tenant_details_screen.dart';
 import 'package:cloudkeja/screens/user/user_payment_history_screen.dart';
 import 'package:cloudkeja/screens/user/user_maintenance_history_screen.dart'; // Import new screen
@@ -18,8 +19,8 @@ import 'package:sliver_header_delegate/sliver_header_delegate.dart';
 import 'package:skeletonizer/skeletonizer.dart'; // For skeleton loading
 import 'package:cached_network_image/cached_network_image.dart'; // For profile image
 
-class UserProfileScreen extends StatelessWidget {
-  const UserProfileScreen({Key? key}) : super(key: key);
+class UserProfileScreenMaterial extends StatelessWidget { // Renamed class
+  const UserProfileScreenMaterial({Key? key}) : super(key: key); // Renamed constructor
 
   // Helper method for creating themed ListTiles, similar to SettingsScreen
   Widget _buildListTile(
@@ -168,6 +169,11 @@ class UserProfileScreen extends StatelessWidget {
                 SliverList(
                   delegate: SliverChildListDelegate([
                     // General User Actions section
+                     // Added Edit Profile tile if it's the current user's profile
+                    if (widget.userId == null || widget.userId == user.userId) // Assuming UserProfileScreenMaterial can take optional userId
+                       _buildListTile(context, 'Edit Profile', Icons.edit_outlined, () {
+                         Get.to(() => EditProfileScreenRouter(user: user));
+                       }),
                     _buildListTile(context, 'Payment History', Icons.receipt_long_outlined, () {
                       Get.to(() => const UserPaymentHistoryScreen());
                     }),

@@ -5,9 +5,12 @@ import 'package:provider/provider.dart';
 // import 'package:cloudkeja/helpers/loading_effect.dart'; // Replaced by Skeletonizer
 import 'package:cloudkeja/models/space_model.dart'; // For displaying results
 import 'package:cloudkeja/models/property_filter_state_model.dart'; // For filter state
-import 'package:cloudkeja/widgets/filters/property_filters_modal.dart'; // The modal
+// import 'package:cloudkeja/widgets/filters/property_filters_modal.dart'; // The Material modal
 import 'package:cloudkeja/config/app_config.dart'; // For kBedroomOptions, kBathroomOptions
 import 'package:cloudkeja/providers/post_provider.dart';
+import 'package:cloudkeja/services/platform_service.dart'; // Import PlatformService
+import 'package:cloudkeja/screens/search/property_filters_screen_cupertino.dart'; // Import Cupertino filters screen
+import 'package:cloudkeja/widgets/filters/property_filters_modal.dart'; // Import Material modal (still needed for Material path)
 import 'package:cloudkeja/screens/search/search_screen.dart'; // To navigate back to search input
 import 'package:cloudkeja/widgets/space_tile.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -218,20 +221,30 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                   ),
                   tooltip: 'Filter Results',
                   onPressed: () async {
-                    final result = await showModalBottomSheet<PropertyFilterStateModel>(
-                      context: context,
-                      isScrollControlled: true, // Allows modal to be taller
-                      backgroundColor: Colors.transparent,
-                      builder: (ctx) => PropertyFiltersModal(initialFilters: _activeFilters),
-                    );
+                    PropertyFilterStateModel? result;
+                    if (PlatformService.useCupertino) {
+                      result = await Navigator.of(context).push<PropertyFilterStateModel>(
+                        CupertinoPageRoute(builder: (ctx) => PropertyFiltersScreenCupertino(initialFilters: _activeFilters)),
+                      );
+                    } else {
+                      result = await showModalBottomSheet<PropertyFilterStateModel>(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (ctx) => PropertyFiltersModal(initialFilters: _activeFilters),
+                      );
+                    }
+
                     if (result != null) {
                       setState(() {
                         _activeFilters = result;
                       });
                       _fetchSearchResults(); // Trigger re-fetch
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Filters applied! (Backend filtering is placeholder)', duration: Duration(seconds: 1),))
-                      );
+                      if (mounted) { // Check mounted before showing SnackBar (Material context)
+                         ScaffoldMessenger.of(context).showSnackBar(
+                           const SnackBar(content: Text('Filters applied!'), duration: Duration(seconds: 1))
+                         );
+                      }
                     }
                   },
                 ),

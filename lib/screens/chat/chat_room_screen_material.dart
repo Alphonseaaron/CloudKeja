@@ -5,15 +5,22 @@ import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 // import 'package:cloudkeja/helpers/constants.dart'; // kPrimaryColor replaced by theme
 import 'package:cloudkeja/models/message_model.dart';
 import 'package:cloudkeja/models/user_model.dart';
-import 'package:cloudkeja/screens/chat/add_message.dart'; // Will be themed separately if needed
-import 'package:cloudkeja/screens/chat/widgets/chat_bubble.dart'; // Will be themed separately if needed
+import 'package:cloudkeja/screens/chat/add_message.dart'; // TODO: Needs platform adaptation or router
+import 'package:cloudkeja/screens/chat/widgets/chat_bubble_material.dart'; // Use ChatBubbleMaterial
 // import 'package:url_launcher/url_launcher.dart'; // Not used in this snippet
 
-class ChatRoom extends StatelessWidget {
-  static const routeName = '/chat-room';
+class ChatRoomScreenMaterial extends StatelessWidget { 
+  // static const String routeName = '/chat-room-material'; // Route name now handled by router
   final ScrollController _scrollController = ScrollController();
 
-  ChatRoom({Key? key}) : super(key: key);
+  final UserModel user; // User being chatted with - passed via constructor
+  final String chatRoomId; // Passed via constructor
+
+  ChatRoomScreenMaterial({
+    Key? key,
+    required this.user,
+    required this.chatRoomId,
+  }) : super(key: key);
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
@@ -31,9 +38,10 @@ class ChatRoom extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
-    final chatRoomData = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-    final UserModel user = chatRoomData['user']; // User being chatted with
-    final chatRoomId = chatRoomData['chatRoomId'] as String;
+    // Arguments are now passed via constructor
+    // final chatRoomData = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    // final UserModel user = chatRoomData['user']; // User being chatted with
+    // final chatRoomId = chatRoomData['chatRoomId'] as String;
 
     // Determine if the chat partner should have a verified badge
     bool isChatPartnerVerified = user.isAdmin == true ||
@@ -160,7 +168,7 @@ class ChatRoom extends StatelessWidget {
                     final messageDoc = snapshot.data!.docs[index];
                     try {
                       final message = MessageModel.fromSnapshot(messageDoc);
-                       return ChatBubble(message: message);
+                       return ChatBubbleMaterial(message: message); // Use ChatBubbleMaterial
                     } catch (e) {
                       return ListTile(title: Text('Error loading message: $e', style: TextStyle(color: colorScheme.error)));
                     }

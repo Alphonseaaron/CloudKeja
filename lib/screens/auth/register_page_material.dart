@@ -282,7 +282,7 @@ class _RegisterPageMaterialState extends State<RegisterPageMaterial> { // Rename
                       style: textTheme.bodyMedium?.copyWith(color: colorScheme.error),
                     ),
                   ),
-
+                
                 CustomPrimaryButton(textValue: 'Register', isLoading: _isLoading, onTap: _handleRegister),
                 const SizedBox(height: 24),
                 Row(

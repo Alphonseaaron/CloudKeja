@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For date formatting
 import 'package:cloudkeja/models/maintenance_request_model.dart'; // Import the model
 
-class MaintenanceRequestTile extends StatelessWidget {
+class MaintenanceRequestTileMaterial extends StatelessWidget { // Renamed class
   final MaintenanceRequestModel maintenanceRequest;
 
-  const MaintenanceRequestTile({
+  const MaintenanceRequestTileMaterial({ // Renamed constructor
     Key? key,
     required this.maintenanceRequest,
   }) : super(key: key);

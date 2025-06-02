@@ -71,7 +71,7 @@ class _SPEarningsReportScreenMaterialState extends State<SPEarningsReportScreenM
     }
 
     final file = await _controller.generateAndOpenPdfReport(currentUser);
-
+    
     if (mounted && _controller.pdfGenerationError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -86,7 +86,7 @@ class _SPEarningsReportScreenMaterialState extends State<SPEarningsReportScreenM
     }
     // If file is null and no error, it might mean no data, which is handled by controller state _pdfGenerationError.
   }
-
+  
   Widget _buildSummaryCard(BuildContext context, String title, String value, IconData icon, Color iconColor) {
     final theme = Theme.of(context);
     return Card(
@@ -118,7 +118,7 @@ class _SPEarningsReportScreenMaterialState extends State<SPEarningsReportScreenM
       appBar: AppBar(
         title: const Text('Earnings Report'),
         actions: [
-          _controller.isGeneratingPdf
+          _controller.isGeneratingPdf 
             ? const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
                 child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2.5)),
@@ -162,8 +162,8 @@ class _SPEarningsReportScreenMaterialState extends State<SPEarningsReportScreenM
                       padding: const EdgeInsets.symmetric(horizontal: 4.0),
                       child: ActionChip(
                         avatar: const Icon(Icons.calendar_month_outlined, size: 18),
-                        label: Text(_controller.activeDateFilterLabel == 'Custom' || !_controller.dateFilterOptions.containsKey(_controller.activeDateFilterLabel)
-                                    ? _controller.activeDateFilterLabel
+                        label: Text(_controller.activeDateFilterLabel == 'Custom' || !_controller.dateFilterOptions.containsKey(_controller.activeDateFilterLabel) 
+                                    ? _controller.activeDateFilterLabel 
                                     : 'Custom Range'),
                         onPressed: _selectCustomDateRange,
                       ),
@@ -207,7 +207,7 @@ class _SPEarningsReportScreenMaterialState extends State<SPEarningsReportScreenM
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               child: Card(
                 child: Container(
-                  height: 200,
+                  height: 200, 
                   padding: const EdgeInsets.only(top: 16, right: 16, bottom: 8, left: 8), // Padding for chart
                   alignment: Alignment.center,
                   child: (_controller.monthlyChartData.isEmpty && !_controller.isLoading)

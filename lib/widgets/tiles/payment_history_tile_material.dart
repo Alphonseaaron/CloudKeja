@@ -3,11 +3,11 @@ import 'package:intl/intl.dart'; // For date formatting
 import 'package:cloudkeja/models/payment_model.dart'; // Import the actual PaymentModel
 // import 'package:get/route_manager.dart'; // If navigation to details is added
 
-class PaymentHistoryTile extends StatelessWidget {
+class PaymentHistoryTileMaterial extends StatelessWidget { // Renamed class
   final PaymentModel paymentData;
   final bool isSkeleton; // To visually differentiate skeleton if needed
 
-  const PaymentHistoryTile({
+  const PaymentHistoryTileMaterial({ // Renamed constructor
     Key? key,
     required this.paymentData,
     this.isSkeleton = false, // Default to not a skeleton

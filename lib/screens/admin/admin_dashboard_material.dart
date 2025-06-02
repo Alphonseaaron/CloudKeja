@@ -8,8 +8,10 @@ import 'package:cloudkeja/models/space_model.dart';
 import 'package:cloudkeja/providers/invoice_provider.dart'; // For PdfInvoiceApi
 import 'package:cloudkeja/providers/payment_provider.dart'; // For getTransactions
 import 'package:cloudkeja/providers/post_provider.dart';
-import 'package:cloudkeja/screens/admin/all_landlords.dart';
-import 'package:cloudkeja/screens/admin/alll_users_screen.dart';
+// import 'package:cloudkeja/screens/admin/all_landlords.dart'; // Replaced by router
+// import 'package:cloudkeja/screens/admin/alll_users_screen.dart'; // Replaced by router
+import 'package:cloudkeja/screens/admin/all_landlords_screen_router.dart'; // Import router
+import 'package:cloudkeja/screens/admin/all_users_screen_router.dart';   // Import router
 import 'package:cloudkeja/screens/auth/login_page.dart';
 import 'package:cloudkeja/screens/chat/chat_screen.dart';
 // import 'package:cloudkeja/screens/landlord/landlord_analytics.dart'; // Not directly used
@@ -117,13 +119,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
       {
         'icon': Icons.people_alt_outlined,
         'title': 'Manage\nUsers',
-        'onPressed': () => Get.to(() => const AllUsersScreen()),
+        'onPressed': () => Get.to(() => const AllUsersScreenRouter()), // Use router
         'color': colorScheme.primary,
       },
       {
         'icon': Icons.real_estate_agent_outlined,
         'title': 'Manage\nLandlords',
-        'onPressed': () => Get.to(() => const AllLandlordsScreen()),
+        'onPressed': () => Get.to(() => const AllLandlordsScreenRouter()), // Use router
         'color': colorScheme.secondary,
       },
       {

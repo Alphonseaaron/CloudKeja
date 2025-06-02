@@ -28,7 +28,7 @@ class LandlordAnalyticsMaterial extends StatelessWidget {
       // Example of using a theme-derived container color for a feature
       Feature(
         title: "Maintenance Requests",
-        color: colorScheme.primaryContainer,
+        color: colorScheme.primaryContainer, 
         data: [0.2, 0.1, 0.1, 0.3, 0.2, 0.1, 0.05],
       ),
     ];

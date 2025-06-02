@@ -12,7 +12,7 @@ class MapsRouter extends StatelessWidget {
   Widget build(BuildContext context) {
     if (PlatformService.useCupertino) {
       // TODO: Rename CupertinoMapsPageStub to CupertinoMapsScreen when file is actually renamed
-      return const CupertinoMapsPageStub();
+      return const CupertinoMapsPageStub(); 
     } else {
       return const MapsScreen();
     }
