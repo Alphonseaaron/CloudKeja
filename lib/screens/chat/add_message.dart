@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:media_picker_widget/media_picker_widget.dart'; // For MediaPicker
 import 'package:provider/provider.dart';
+import 'package:cloudkeja/services/platform_service.dart'; // Added
 // import 'package:cloudkeja/helpers/constants.dart'; // kPrimaryColor replaced by theme
 import 'package:cloudkeja/providers/auth_provider.dart';
 import 'package:cloudkeja/models/chat_provider.dart'; // For ChatProvider
@@ -138,95 +140,181 @@ class _AddMessageState extends State<AddMessage> {
 
   // Media Picker Bottom Sheet
   void _openImagePicker(BuildContext context) {
-    final theme = Theme.of(context); // For theming picker decoration
-    final colorScheme = theme.colorScheme;
-    final textTheme = theme.textTheme;
+    final platformService = Provider.of<PlatformService>(context, listen: false);
+    final bool useCupertino = platformService.useCupertino;
     final currentUserId = Provider.of<AuthProvider>(context, listen: false).user?.userId;
 
     if (currentUserId == null) return;
 
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true, // Allows sheet to take full height if needed
-      backgroundColor: Colors.transparent, // Transparent for custom shape
-      shape: RoundedRectangleBorder( // Themed shape for the sheet
-        borderRadius: theme.bottomSheetTheme.shape is RoundedRectangleBorder
-            ? ((theme.bottomSheetTheme.shape as RoundedRectangleBorder).borderRadius as BorderRadiusGeometry)
-            : const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-      ),
-      builder: (BuildContext context) {
-        return GestureDetector( // To dismiss by tapping outside DraggableScrollableSheet
-          behavior: HitTestBehavior.opaque,
-          onTap: () => Navigator.of(context).pop(),
-          child: DraggableScrollableSheet(
-            initialChildSize: 0.6, // Initial height of the sheet
-            maxChildSize: 0.95,    // Max height
-            minChildSize: 0.4,     // Min height
-            builder: (BuildContext bContext, ScrollController scrollController) {
-              return Container( // Actual content container for media picker
-                decoration: BoxDecoration(
-                  color: colorScheme.surface, // Themed background for picker content
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                ),
-                child: MediaPicker(
-                  scrollController: scrollController,
-                  mediaList: _mediaList, // Pass current list
-                  onPick: (selectedList) async {
-                    // Handle picked media
-                    Navigator.of(context).pop(); // Close the picker first
-                    if (selectedList.isNotEmpty) {
-                      setState(() => _mediaList = selectedList); // Update local list
-                      // Process and send media messages
-                      for (var mediaFile in _mediaList) {
-                         if (mediaFile.file != null) {
-                           double mediaSize = mediaFile.file!.readAsBytesSync().lengthInBytes / (1024 * 1024);
-                           if (mediaSize > 5.0) { // Example: 5MB limit
-                             ScaffoldMessenger.of(bContext).showSnackBar(
-                               SnackBar(content: Text('File ${mediaFile.file!.path.split('/').last} exceeds 5MB limit.', style: TextStyle(color: colorScheme.onError)), backgroundColor: colorScheme.error),
-                             );
-                             continue; // Skip this file
-                           }
+    // Platform-specific theming for PickerDecoration
+    late PickerDecoration pickerDecoration;
+    if (useCupertino) {
+      final cupertinoTheme = CupertinoTheme.of(context);
+      pickerDecoration = PickerDecoration(
+        cancelIcon: Icon(CupertinoIcons.clear_circled_solid, color: cupertinoTheme.primaryColor),
+        albumTitleStyle: cupertinoTheme.textTheme.navTitleTextStyle.copyWith(fontWeight: FontWeight.bold),
+        actionBarPosition: ActionBarPosition.top,
+        blurStrength: 0,
+        completeText: 'Done',
+        completeTextStyle: cupertinoTheme.textTheme.navActionTextStyle.copyWith(color: cupertinoTheme.primaryColor, fontWeight: FontWeight.w600),
+        selectionColor: cupertinoTheme.primaryColor,
+        selectedCountBackgroundColor: cupertinoTheme.primaryColor,
+        selectedCountTextColor: cupertinoTheme.barBackgroundColor, // Typically white or light
+        backgroundColor: cupertinoTheme.scaffoldBackgroundColor, // Background for the picker area
+      );
+    } else {
+      final theme = Theme.of(context);
+      final colorScheme = theme.colorScheme;
+      final textTheme = theme.textTheme;
+      pickerDecoration = PickerDecoration(
+        cancelIcon: Icon(Icons.close, color: colorScheme.onSurface),
+        albumTitleStyle: textTheme.titleMedium?.copyWith(color: colorScheme.onSurface, fontWeight: FontWeight.bold),
+        actionBarPosition: ActionBarPosition.top,
+        blurStrength: 0,
+        completeText: 'Done',
+        completeTextStyle: textTheme.labelLarge?.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold),
+        selectionColor: colorScheme.primary,
+        selectedCountBackgroundColor: colorScheme.primary,
+        selectedCountTextColor: colorScheme.onPrimary,
+        backgroundColor: colorScheme.surface,
+      );
+    }
 
-                           await Provider.of<ChatProvider>(context, listen: false).sendMessage(
-                            chatRoomId: widget.chatRoomId,
-                            senderId: currentUserId,
-                            recipientId: widget.recipientId,
-                            message: MessageModel(
-                              message: '', // No text message, only media
-                              senderId: currentUserId,
-                              receiverId: widget.recipientId,
-                              mediaFiles: [mediaFile.file!], // Send one file at a time
-                              mediaType: mediaFile.mediaType == MediaType.image ? 'image' : 'video',
-                            ),
-                          );
-                         }
-                      }
-                      setState(() => _mediaList.clear()); // Clear list after sending
-                    }
-                  },
-                  onCancel: () => Navigator.of(context).pop(),
-                  mediaCount: MediaCount.multiple, // Or .single
-                  mediaType: MediaType.image,       // Or .video, .all
-                  decoration: PickerDecoration( // Themed decoration for MediaPicker
-                    cancelIcon: Icon(Icons.close, color: colorScheme.onSurface),
-                    albumTitleStyle: textTheme.titleMedium?.copyWith(color: colorScheme.onSurface, fontWeight: FontWeight.bold),
-                    actionBarPosition: ActionBarPosition.top, // Standard position
-                    blurStrength: 0, // No blur, use solid background
-                    completeText: 'Done', // Text for completion button
-                    completeTextStyle: textTheme.labelLarge?.copyWith(color: colorScheme.primary),
-                    selectionColor: colorScheme.primary, // Color for selection indicators
-                    selectedCountBackgroundColor: colorScheme.primary,
-                    selectedCountTextColor: colorScheme.onPrimary,
-                  ),
+    final mediaPickerWidget = MediaPicker(
+      mediaList: _mediaList,
+      onPick: (selectedList) async {
+        Navigator.of(context).pop(); // Close picker first
+        if (selectedList.isNotEmpty) {
+          setState(() => _mediaList = selectedList);
+          for (var mediaFile in _mediaList) {
+            if (mediaFile.file != null) {
+              double mediaSize = mediaFile.file!.readAsBytesSync().lengthInBytes / (1024 * 1024);
+              if (mediaSize > 5.0) { // 5MB limit
+                String fileName = mediaFile.file!.path.split('/').last;
+                String message = 'File $fileName exceeds 5MB limit.';
+                if (useCupertino) {
+                  showCupertinoDialog(
+                    context: context, // Using the builder's context for the dialog
+                    builder: (dialogContext) => CupertinoAlertDialog(
+                      title: const Text('File Too Large'),
+                      content: Text(message),
+                      actions: [
+                        CupertinoDialogAction(
+                          child: const Text('OK'),
+                          onPressed: () => Navigator.of(dialogContext).pop(),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text(message, style: TextStyle(color: Theme.of(context).colorScheme.onError)),
+                        backgroundColor: Theme.of(context).colorScheme.error),
+                  );
+                }
+                continue;
+              }
+              await Provider.of<ChatProvider>(context, listen: false).sendMessage(
+                chatRoomId: widget.chatRoomId,
+                senderId: currentUserId,
+                recipientId: widget.recipientId,
+                message: MessageModel(
+                  message: '',
+                  senderId: currentUserId,
+                  receiverId: widget.recipientId,
+                  mediaFiles: [mediaFile.file!],
+                  mediaType: mediaFile.mediaType == MediaType.image ? 'image' : 'video',
                 ),
               );
-            },
-          ),
-        );
+            }
+          }
+          setState(() => _mediaList.clear());
+        }
       },
+      onCancel: () => Navigator.of(context).pop(),
+      mediaCount: MediaCount.multiple,
+      mediaType: MediaType.image, // Default to image, can be changed
+      decoration: pickerDecoration,
     );
+
+    if (useCupertino) {
+      showCupertinoModalPopup<void>(
+        context: context,
+        builder: (BuildContext modalContext) {
+          // Use modalContext for dialogs shown from within the modal
+          return Container(
+            height: MediaQuery.of(context).size.height * 0.7, // Example height
+            decoration: BoxDecoration(
+              color: CupertinoTheme.of(modalContext).scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(16.0),
+                topRight: Radius.circular(16.0),
+              ),
+            ),
+            child: Column( // Added Column for potential title/drag handle
+              children: [
+                // Optional: Add a grabber or title bar for the Cupertino sheet
+                Container(
+                  height: 6,
+                  width: 40,
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  decoration: BoxDecoration(
+                    color: CupertinoColors.inactiveGray.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                ),
+                Expanded(
+                  child: mediaPickerWidget,
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    } else {
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: Theme.of(context).bottomSheetTheme.shape is RoundedRectangleBorder
+              ? ((Theme.of(context).bottomSheetTheme.shape as RoundedRectangleBorder).borderRadius as BorderRadiusGeometry)
+              : const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+        ),
+        builder: (BuildContext bottomSheetContext) {
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => Navigator.of(bottomSheetContext).pop(),
+            child: DraggableScrollableSheet(
+              initialChildSize: 0.6,
+              maxChildSize: 0.95,
+              minChildSize: 0.4,
+              builder: (BuildContext draggableContext, ScrollController scrollController) {
+                // Pass scrollController to MediaPicker if it needs to control scrolling within the DraggableScrollableSheet
+                return Container(
+                   decoration: BoxDecoration(
+                    color: pickerDecoration.backgroundColor ?? Theme.of(draggableContext).colorScheme.surface,
+                     borderRadius: const BorderRadius.only(
+                       topLeft: Radius.circular(20),
+                       topRight: Radius.circular(20),
+                     ),
+                   ),
+                  child: MediaPicker(
+                    scrollController: scrollController, // Pass the scroll controller here
+                    mediaList: _mediaList,
+                    onPick: mediaPickerWidget.onPick, // Reuse the onPick logic
+                    onCancel: mediaPickerWidget.onCancel,
+                    mediaCount: mediaPickerWidget.mediaCount,
+                    mediaType: mediaPickerWidget.mediaType,
+                    decoration: mediaPickerWidget.decoration,
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      );
+    }
   }
 }
