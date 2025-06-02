@@ -4,7 +4,8 @@ import 'package:cloudkeja/theme/app_theme.dart'; // To access AppTheme for color
 import 'package:cloudkeja/screens/home/home.dart'; // Import HomeScreen router
 import 'package:cloudkeja/screens/maps/cupertino_maps_page_stub.dart';
 import 'package:cloudkeja/screens/notifications/cupertino_notifications_page_stub.dart';
-import 'package:cloudkeja/screens/settings/cupertino_settings_page_stub.dart';
+// import 'package:cloudkeja/screens/settings/cupertino_settings_page_stub.dart'; // Replaced by SettingsScreen router
+import 'package:cloudkeja/screens/settings/settings_screen.dart'; // Import SettingsScreen router
 
 class MyNavCupertino extends StatelessWidget {
   const MyNavCupertino({super.key});
@@ -60,7 +61,7 @@ class MyNavCupertino extends StatelessWidget {
             break;
           case 3:
             returnValue = CupertinoTabView(builder: (context) {
-              return const CupertinoSettingsPageStub();
+              return const SettingsScreen(); // Changed to SettingsScreen router
             });
             break;
           default: // Should ideally not be reached
