@@ -40,6 +40,7 @@ class MyAppMaterial extends StatelessWidget {
       builder: (context, themeProvider, child) {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
+          defaultTransition: Transition.fadeIn, // Added for Web page transitions
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeProvider.themeMode,
