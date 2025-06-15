@@ -3,8 +3,8 @@ import 'package:flutter/material.dart'; // For NetworkImage, SnackBar (will repl
 import 'package:provider/provider.dart';
 import 'package:cloudkeja/models/user_model.dart';
 import 'package:cloudkeja/providers/admin_provider.dart';
-// TODO: Import actual user action methods or UserProfileScreen if available for Cupertino
-// For now, action sheet will have placeholder actions.
+import 'package:cloudkeja/screens/admin/user_actions_cupertino.dart'; // Import the new function
+
 
 class AllLandlordsScreenCupertino extends StatefulWidget {
   const AllLandlordsScreenCupertino({Key? key}) : super(key: key);
@@ -60,50 +60,9 @@ class _AllLandlordsScreenCupertinoState extends State<AllLandlordsScreenCupertin
   }
 
   void _showLandlordActions(BuildContext context, UserModel landlord) {
-    // Placeholder actions - these should ideally call methods in AdminProvider or navigate
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (BuildContext dialogContext) => CupertinoActionSheet(
-        title: Text(landlord.name ?? 'Landlord Actions'),
-        message: Text(landlord.email ?? 'Select an action'),
-        actions: <CupertinoActionSheetAction>[
-          CupertinoActionSheetAction(
-            child: const Text('View Profile'),
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              // TODO: Navigate to a Cupertino UserProfileScreen if available
-              print('View Profile for ${landlord.id}');
-               showCupertinoDialog(context: context, builder: (ctx) => CupertinoAlertDialog(title: const Text('Not Implemented'), content: const Text('View Profile not yet implemented for Cupertino.'), actions: [CupertinoDialogAction(isDefaultAction: true, child: const Text('OK'), onPressed: ()=>Navigator.pop(ctx))]));
-            },
-          ),
-          CupertinoActionSheetAction(
-            child: const Text('Toggle Admin Status'), // Example action
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              // TODO: Implement toggle admin status logic via AdminProvider
-              print('Toggle Admin Status for ${landlord.id}');
-              // Example: Provider.of<AdminProvider>(context, listen: false).toggleAdminStatus(landlord.userId, !landlord.isAdmin);
-              // Then refresh: _fetchLandlords();
-            },
-          ),
-          CupertinoActionSheetAction(
-            isDestructiveAction: true,
-            child: const Text('Delete Landlord'),
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              // TODO: Implement delete landlord logic via AdminProvider
-              print('Delete Landlord ${landlord.id}');
-            },
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          child: const Text('Cancel'),
-          onPressed: () {
-            Navigator.pop(dialogContext);
-          },
-        ),
-      ),
-    );
+    // Call the new Cupertino-specific action sheet function
+    // Note: 'landlord' is a UserModel, which is what showCupertinoUserActions expects.
+    showCupertinoUserActions(context, landlord, CupertinoTheme.of(context));
   }
 
   Widget _buildLandlordListTile(UserModel landlord) {
