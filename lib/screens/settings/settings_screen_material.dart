@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart'; // For signOut
+import 'package:firebase_auth/firebase_auth.dart'; // For signOut
 import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
 import 'package:provider/provider.dart';
 // import 'package:cloudkeja/helpers/constants.dart'; // kPrimaryColor replaced by theme
-import 'package:cloudkeja/helpers/loading_effect.dart'; // Themed loading effect
 import 'package:cloudkeja/models/user_model.dart';
 import 'package:cloudkeja/providers/auth_provider.dart';
 import 'package:cloudkeja/providers/theme_provider.dart'; // Import ThemeProvider
@@ -13,7 +13,7 @@ import 'package:cloudkeja/screens/auth/login_page.dart';
 import 'package:cloudkeja/screens/landlord/landlord_dashboard.dart';
 import 'package:cloudkeja/screens/chat/chat_screen.dart'; // Import ChatScreen
 // import 'package:cloudkeja/screens/notifications/notifications_screen.dart'; // Removed for redundancy
-import 'package:cloudkeja/screens/profile/edit_profile.dart'; // Still used
+import 'package:cloudkeja/screens/profile/edit_profile.dart';
 import 'package:cloudkeja/screens/profile/user_profile.dart'; // For "View Profile"
 import 'package:cloudkeja/screens/settings/request_landlord.dart';
 import 'package:cloudkeja/screens/settings/wishlist_screen.dart';
@@ -143,7 +143,7 @@ class SettingsScreenMaterial extends StatelessWidget {
         future: Provider.of<AuthProvider>(context, listen: false).getCurrentUser(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData && snapshot.connectionState != ConnectionState.done) {
-            return LoadingEffect.getSearchLoadingScreen(context);
+            return const Center(child: CircularProgressIndicator()); // Replaced loader
           }
           if (snapshot.hasError) {
             return Center(child: Text('Error loading user data.', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.error)));
