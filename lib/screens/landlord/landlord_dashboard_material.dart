@@ -1,36 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
 import 'package:provider/provider.dart';
-import 'package:cloudkeja/models/user_model.dart'; // For UserModel
+import 'package:cloudkeja/models/user_model.dart';
 import 'package:cloudkeja/providers/auth_provider.dart';
-import 'package:cloudkeja/providers/tenant_analytics_provider.dart'; // For test tenant IDs
-import 'package:cloudkeja/screens/landlord/add_space.dart';
-import 'package:cloudkeja/screens/landlord/all_tenants_screen.dart';
-import 'package:cloudkeja/screens/landlord/finances/finance_overview_screen.dart';
-import 'package:cloudkeja/screens/landlord/landlord_spaces.dart';
-import 'package:cloudkeja/screens/landlord/widgets/recent_tenants.dart';
-import 'package:cloudkeja/screens/landlord/landlord_view_tenant_details_screen.dart';
+import 'package:cloudkeja/providers/tenant_analytics_provider.dart';
+import 'package:cloudkeja/screens/landlord/add_space_router.dart'; // Use router
+import 'package:cloudkeja/screens/landlord/all_tenants_screen_router.dart'; // Use router
+import 'package:cloudkeja/screens/landlord/finances/finance_overview_screen.dart'; // Assuming this is Material or adaptive
+import 'package:cloudkeja/screens/landlord/landlord_spaces.dart'; // Assuming this is Material or adaptive
+import 'package:cloudkeja/screens/landlord/widgets/recent_tenants.dart'; // Adaptive router
+import 'package:cloudkeja/screens/landlord/landlord_view_tenant_details_screen.dart'; // Assuming this is Material or adaptive
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:cloudkeja/services/walkthrough_service.dart';
 
-class LandlordDashboard extends StatefulWidget {
-  const LandlordDashboard({Key? key}) : super(key: key);
+class LandlordDashboardMaterial extends StatefulWidget {
+  const LandlordDashboardMaterial({Key? key}) : super(key: key);
 
   @override
-  State<LandlordDashboard> createState() => _LandlordDashboardState();
+  State<LandlordDashboardMaterial> createState() => _LandlordDashboardMaterialState();
 }
 
-class _LandlordDashboardState extends State<LandlordDashboard> {
+class _LandlordDashboardMaterialState extends State<LandlordDashboardMaterial> {
   UserModel? _user;
   bool _isLoadingUser = true;
 
-  // GlobalKeys for ShowcaseView
   final _balanceCardKey = GlobalKey();
   final _actionButtonsRowKey = GlobalKey();
   final _recentTenantsSectionKey = GlobalKey();
-
-  List<GlobalKey> _showcaseKeys = [];
+  late List<GlobalKey> _showcaseKeys;
 
   @override
   void initState() {
@@ -42,17 +40,22 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
     ];
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      WalkthroughService.startShowcaseIfNeeded(
-        context: context,
-        walkthroughKey: 'landlordDashboardOverview_v1',
-        showcaseGlobalKeys: _showcaseKeys,
-      );
+      if (mounted) { // Check if widget is still in the tree
+        WalkthroughService.startShowcaseIfNeeded(
+          context: context,
+          walkthroughKey: 'landlordDashboardOverview_v1_material', // Unique key for Material
+          showcaseGlobalKeys: _showcaseKeys,
+        );
+      }
     });
     _fetchUserData();
   }
 
   Future<void> _fetchUserData() async {
-    final user = await Provider.of<AuthProvider>(context, listen: false).getCurrentUser();
+    // Ensure provider calls are safe if widget is disposed during async operation
+    if (!mounted) return;
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final user = await authProvider.getCurrentUser();
     if (mounted) {
       setState(() {
         _user = user;
@@ -68,7 +71,8 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      elevation: 2.0,
+      elevation: 2.0, // Keep some elevation for Material
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), // Consistent shape
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -76,7 +80,7 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
             Text(
               'AVAILABLE BALANCE',
               style: textTheme.labelMedium?.copyWith(
-                color: colorScheme.onSurface.withOpacity(0.7),
+                color: colorScheme.onSurfaceVariant, // Use onSurfaceVariant
                 letterSpacing: 0.5,
               ),
             ),
@@ -102,11 +106,16 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
     required IconData icon,
     required String title,
     required VoidCallback onPressed,
-    required Color iconContainerColor,
-    required Color iconColor,
+    required Color iconContainerColor, // This will be the themed color
+    // required Color iconColor, // iconColor can be derived or set to contrast iconContainerColor
   }) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+    // Determine icon color for good contrast with its container
+    final iconColor = ThemeData.estimateBrightnessForColor(iconContainerColor) == Brightness.dark
+        ? Colors.white
+        : Colors.black;
+
 
     return Expanded(
       child: InkWell(
@@ -120,16 +129,16 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: iconContainerColor.withOpacity(0.15),
+                  color: iconContainerColor.withOpacity(0.15), // Keep opacity for distinct look
                   borderRadius: BorderRadius.circular(12.0),
                 ),
-                child: Icon(icon, color: iconContainerColor, size: 28),
+                child: Icon(icon, color: iconContainerColor, size: 28), // Icon takes the direct color
               ),
               const SizedBox(height: 8),
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: textTheme.bodySmall?.copyWith(height: 1.2),
+                style: textTheme.bodySmall?.copyWith(height: 1.2, color: theme.colorScheme.onSurface),
               ),
             ],
           ),
@@ -139,11 +148,12 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
   }
 
   Widget _buildSectionTitle(BuildContext context, String title) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 20.0, bottom: 12.0),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onBackground),
       ),
     );
   }
@@ -155,7 +165,6 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
-    // Common showcase text style
     TextStyle? showcaseTitleStyle = textTheme.titleLarge?.copyWith(color: colorScheme.onPrimary);
     TextStyle? showcaseDescStyle = textTheme.bodyMedium?.copyWith(color: colorScheme.onPrimary.withOpacity(0.9));
 
@@ -163,7 +172,7 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
       {
         'icon': Icons.add_business_outlined,
         'title': 'List\nSpace',
-        'onPressed': () => Get.to(() => const AddSpaceScreen()),
+        'onPressed': () => Get.to(() => const AddSpaceRouter()), // Use router
         'color': colorScheme.primary,
       },
       {
@@ -180,27 +189,26 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
       },
       {
         'icon': Icons.people_alt_outlined,
-        'title': 'All\nTenants', // Changed title to reflect actual navigation
-        'onPressed': () {
-          Get.to(() => const AllTenantsScreen());
-        },
-        'color': Colors.deepOrange.shade400,
+        'title': 'All\nTenants',
+        'onPressed': () => Get.to(() => const AllTenantsScreenRouter()), // Use router
+        'color': colorScheme.tertiaryContainer, // Themed color
       },
     ];
 
     return ShowCaseWidget(
       onFinish: () {
-        WalkthroughService.markAsSeen('landlordDashboardOverview_v1');
+        WalkthroughService.markAsSeen('landlordDashboardOverview_v1_material');
       },
       builder: Builder(builder: (context) {
         return Scaffold(
           backgroundColor: colorScheme.background,
           appBar: AppBar(
             title: const Text('Landlord Dashboard'),
+            // AppBar theming is global
           ),
           body: RefreshIndicator(
             onRefresh: () async {
-              setState(() { _isLoadingUser = true; });
+              if(mounted) setState(() { _isLoadingUser = true; });
               await _fetchUserData();
             },
             child: ListView(
@@ -213,6 +221,9 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
                   titleTextStyle: showcaseTitleStyle,
                   descTextStyle: showcaseDescStyle,
                   showcaseBackgroundColor: colorScheme.primary,
+                  overlayColor: Colors.black.withOpacity(0.7),
+                  contentPadding: const EdgeInsets.all(12),
+                  shapeBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   child: _buildBalanceSection(context, _user),
                 ),
 
@@ -223,6 +234,9 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
                   titleTextStyle: showcaseTitleStyle,
                   descTextStyle: showcaseDescStyle,
                   showcaseBackgroundColor: colorScheme.primary,
+                  overlayColor: Colors.black.withOpacity(0.7),
+                  contentPadding: const EdgeInsets.all(12),
+                  // No specific shapeBorder for a Row, default rectangle is fine.
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
                     child: Row(
@@ -235,15 +249,11 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
                           title: action['title'] as String,
                           onPressed: action['onPressed'] as VoidCallback,
                           iconContainerColor: action['color'] as Color,
-                          iconColor: action['color'] as Color,
                         );
                       }).toList(),
                     ),
                   ),
                 ),
-
-                // --- Test Navigation Buttons for Tenant Payment Metrics ---
-                // This section is intentionally NOT part of the walkthrough
                 _buildSectionTitle(context, 'Test Tenant Payment Metrics'),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -251,31 +261,30 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
                     children: [
                       ElevatedButton(
                         child: const Text('View Good Payer Metrics (Test)'),
-                        onPressed: () => Get.to(() => const LandlordViewOfTenantDetailsScreen(tenantId: TenantAnalyticsProvider.goodPayerTestId)),
+                        onPressed: () => Get.to(() => LandlordViewOfTenantDetailsScreen(tenantId: TenantAnalyticsProvider.goodPayerTestId)), // Added const
                         style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 40)),
                       ),
                       const SizedBox(height: 8),
                       ElevatedButton(
                         child: const Text('View Bad Payer Metrics (Test)'),
-                        onPressed: () => Get.to(() => const LandlordViewOfTenantDetailsScreen(tenantId: TenantAnalyticsProvider.badPayerTestId)),
+                        onPressed: () => Get.to(() => LandlordViewOfTenantDetailsScreen(tenantId: TenantAnalyticsProvider.badPayerTestId)), // Added const
                         style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 40)),
                       ),
                       const SizedBox(height: 8),
                       ElevatedButton(
                         child: const Text('View Mixed Payer Metrics (Test)'),
-                        onPressed: () => Get.to(() => const LandlordViewOfTenantDetailsScreen(tenantId: TenantAnalyticsProvider.mixedPayerTestId)),
+                        onPressed: () => Get.to(() => LandlordViewOfTenantDetailsScreen(tenantId: TenantAnalyticsProvider.mixedPayerTestId)), // Added const
                         style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 40)),
                       ),
                        const SizedBox(height: 8),
-                      ElevatedButton( // Button for the original testTenant1 (default good payer)
+                      ElevatedButton(
                         child: const Text('View Default Test Tenant Metrics'),
-                        onPressed: () => Get.to(() => const LandlordViewOfTenantDetailsScreen(tenantId: TenantAnalyticsProvider.defaultTestTenantId)),
-                        style: ElevatedButton.stylefrom(minimumSize: const Size(double.infinity, 40)),
+                        onPressed: () => Get.to(() => LandlordViewOfTenantDetailsScreen(tenantId: TenantAnalyticsProvider.defaultTestTenantId)), // Added const
+                        style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 40)),
                       ),
                     ],
                   ),
                 ),
-                // --- End Test Navigation Buttons ---
 
                 Showcase(
                   key: _recentTenantsSectionKey,
@@ -284,15 +293,17 @@ class _LandlordDashboardState extends State<LandlordDashboard> {
                   titleTextStyle: showcaseTitleStyle,
                   descTextStyle: showcaseDescStyle,
                   showcaseBackgroundColor: colorScheme.primary,
-                  child: Column( // Wrap title and widget for single showcase item
+                  overlayColor: Colors.black.withOpacity(0.7),
+                  contentPadding: const EdgeInsets.all(12),
+                  shapeBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildSectionTitle(context, 'Recent Tenants'),
-                      const RecentTenantsWidget(),
+                      const RecentTenantsWidget(), // This is now an adaptive router
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 20),
               ],
             ),

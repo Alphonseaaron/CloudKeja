@@ -1,130 +1,46 @@
-import 'package:flutter/material.dart';
-import 'package:cloudkeja/helpers/constants.dart';
-import 'package:cloudkeja/helpers/my_loader.dart';
+import 'package:flutter/widgets.dart'; // For StatelessWidget, BuildContext, Key
+import 'package:provider/provider.dart';
+import 'package:cloudkeja/services/platform_service.dart';
+import 'package:cloudkeja/screens/landlord/finances/widget/withdraw_widget_material_content.dart';
+import 'package:cloudkeja/screens/landlord/finances/widget/withdraw_widget_cupertino_content.dart';
 
-class WithdrawWidget extends StatefulWidget {
-  const WithdrawWidget({
+// Renamed original WithdrawWidget to WithdrawWidgetRouter to act as the router
+class WithdrawWidgetRouter extends StatelessWidget {
+  final double? balance;
+
+  const WithdrawWidgetRouter({
     Key? key,
     this.balance,
   }) : super(key: key);
 
-  final double? balance;
-
-  @override
-  State<WithdrawWidget> createState() => _WithdrawWidgetState();
-}
-
-class _WithdrawWidgetState extends State<WithdrawWidget> {
-  String? amount;
-
-  bool isLoading = false;
-
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => Navigator.of(context).pop(),
-      child: GestureDetector(
-        onTap: () {},
-        child: DraggableScrollableSheet(
-          initialChildSize: 0.55,
-          maxChildSize: 0.8,
-          minChildSize: 0.3,
-          builder: (ctx, controller) => AnimatedContainer(
-            duration: const Duration(milliseconds: 500),
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20)),
-              ),
-              child: ListView(
-                controller: controller,
-                children: [
-                  Container(
-                      decoration: const BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(20),
-                            topRight: Radius.circular(20)),
-                      ),
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 10),
-                      margin: const EdgeInsets.only(bottom: 2),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Center(
-                            child: Container(
-                              width: 70,
-                              height: 5,
-                              decoration: BoxDecoration(
-                                  color: Colors.grey[300],
-                                  borderRadius: BorderRadius.circular(10)),
-                            ),
-                          ),
-                          const SizedBox(height: 22),
-                          const Text(
-                            'Withdraw Funds',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 18,
-                                color: Colors.pinkAccent),
-                          ),
-                          const Divider()
-                        ],
-                      )),
-                  Container(
-                    margin: const EdgeInsets.symmetric(
-                        horizontal: 15, vertical: 10),
-                    child: TextFormField(
-                      onChanged: (value) {
-                        setState(() {
-                          amount = value;
-                        });
-                        amount = value;
-                      },
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                          hintText: 'Enter amount',
-                          border: InputBorder.none,
-                          fillColor: Colors.grey[200],
-                          filled: true),
-                    ),
-                  ),
-                  Container(
-                      height: 45,
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 20),
-                      child: ElevatedButton(
-                        onPressed: isLoading ? null : () async {},
-                        style: ElevatedButton.styleFrom(
-                          primary: kPrimaryColor,
-                        ),
-                        child: isLoading
-                            ? const MyLoader()
-                            : const Text(
-                                'Withdraw',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                              ),
-                      )),
-                  Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 15),
-                    child: const Text(
-                      'The amount withdrawn will be credited to the phone number registered with the host provider account. Contact admin for any queries',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+    final platformService = Provider.of<PlatformService>(context, listen: false);
+
+    // The content widgets (MaterialContent and CupertinoContent) are designed
+    // to be the direct children of showModalBottomSheet's builder (for Material)
+    // or the child of a Container within showCupertinoModalPopup's builder (for Cupertino).
+    // This router returns the appropriate *content* widget.
+    // The presentation logic (showModalBottomSheet vs showCupertinoModalPopup)
+    // will be handled by the calling widgets (e.g., FinanceTopMaterial/FinanceTopCupertino).
+
+    if (platformService.useCupertino) {
+      return WithdrawWidgetCupertinoContent(
+        key: key, // Pass key
+        balance: balance,
+      );
+    } else {
+      // The Material version's DraggableScrollableSheet and GestureDetectors for dismissal
+      // were part of the original WithdrawWidget. For a pure content widget, they should be
+      // part of how it's shown.
+      // For this refactor, WithdrawWidgetMaterialContent contains the core UI.
+      // If the draggable/dismissal behavior is desired, the caller (FinanceTopMaterial)
+      // would need to wrap WithdrawWidgetMaterialContent in showModalBottomSheet with those features.
+      // The current WithdrawWidgetMaterialContent is simplified to be just the inner content.
+      return WithdrawWidgetMaterialContent(
+        key: key, // Pass key
+        balance: balance,
+      );
+    }
   }
 }
