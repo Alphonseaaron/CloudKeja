@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart'; // Added for Cupertino
+import 'package:provider/provider.dart'; // Added for Provider
+import 'package:cloudkeja/services/platform_service.dart'; // Added for PlatformService
 import 'package:shimmer/shimmer.dart';
 
-// LoadingThemeData is not used by getSearchLoadingScreen directly and can be removed if not used elsewhere.
-// For now, I will comment it out as the task is to make getSearchLoadingScreen theme-aware.
+// LoadingThemeData class is not used by getSearchLoadingScreen directly.
+// If it were to be made adaptive, it would require its own refactoring.
 /*
 class LoadingThemeData {
   late Color shimmerBaseColor, shimmerHighlightColor;
@@ -20,112 +23,142 @@ class LoadingThemeData {
 */
 
 class LoadingEffect {
-  static Widget getSearchLoadingScreen(BuildContext context, {int itemCount = 7}) { // Reduced item count for typical screen
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+  static Widget getSearchLoadingScreen(BuildContext context, {int itemCount = 7}) {
+    final platformService = Provider.of<PlatformService>(context, listen: false);
+    final bool isCupertino = platformService.useCupertino;
 
-    // Define theme-aware colors for shimmer and placeholders
-    final shimmerBaseColor = colorScheme.surfaceVariant.withOpacity(0.5); // More subtle base
-    final shimmerHighlightColor = colorScheme.surfaceVariant; // Slightly more opaque highlight
-    final placeholderColor = colorScheme.onSurface.withOpacity(0.1); // For static placeholder shapes
-    final borderColor = colorScheme.outline.withOpacity(0.2); // Subtle border
+    Color shimmerBaseColor;
+    Color shimmerHighlightColor;
+    Color placeholderColor;
+    Color itemBackgroundColor;
+    Border? itemBorder; // Nullable for Cupertino standard look
 
-    Widget singleLoadingItem = Shimmer.fromColors(
-      baseColor: shimmerBaseColor,
-      highlightColor: shimmerHighlightColor,
-      child: Container(
-        height: 96, // Original height
-        padding: const EdgeInsets.all(12), // Slightly reduced padding
-        width: MediaQuery.of(context).size.width,
+    if (isCupertino) {
+      final cupertinoTheme = CupertinoTheme.of(context);
+      shimmerBaseColor = CupertinoColors.systemGrey5.resolveFrom(context);
+      shimmerHighlightColor = CupertinoColors.systemGrey4.resolveFrom(context);
+      placeholderColor = CupertinoColors.systemGrey3.resolveFrom(context);
+      itemBackgroundColor = cupertinoTheme.barBackgroundColor.withOpacity(0.8); // Typical list item bg
+      // Optional: Add a bottom border to mimic CupertinoListTile separation
+      itemBorder = Border(bottom: BorderSide(color: CupertinoColors.separator.resolveFrom(context), width: 0.5));
+    } else {
+      final theme = Theme.of(context);
+      final colorScheme = theme.colorScheme;
+      shimmerBaseColor = colorScheme.surfaceVariant.withOpacity(0.5);
+      shimmerHighlightColor = colorScheme.surfaceVariant;
+      placeholderColor = colorScheme.onSurface.withOpacity(0.1);
+      itemBackgroundColor = theme.cardTheme.color ?? colorScheme.surface;
+      itemBorder = Border.all(color: colorScheme.outline.withOpacity(0.2));
+    }
+
+    Widget singleLoadingItemContent;
+
+    if (isCupertino) {
+      singleLoadingItemContent = Container(
+        height: 88, // Adjusted height for typical Cupertino list item with subtitle
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12), // Consistent with CardTheme
-          border: Border.all(color: borderColor),
-          color: theme.cardTheme.color ?? colorScheme.surface, // Use card background or surface
+          color: itemBackgroundColor,
+          border: itemBorder, // Apply bottom border for separation
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.max,
           children: <Widget>[
             Container( // Image Placeholder
-              height: 64, // Adjusted size
-              width: 64,  // Adjusted size
+              height: 56,
+              width: 56,
               decoration: BoxDecoration(
                 color: placeholderColor,
-                borderRadius: BorderRadius.circular(8), // Rounded corners for placeholder
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Distribute space better
+                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  // Line 1 & Icon
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        flex: 3,
-                        child: Container(
-                          height: 10, // Slightly thicker lines
-                          decoration: BoxDecoration(
-                            color: placeholderColor,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                      ),
-                      const Spacer(flex: 1), // Space before icon
-                      Icon(
-                        Icons.favorite_border, // Standard Material icon
-                        color: placeholderColor, // Themed icon color
-                        size: 20, // Slightly smaller
-                      ),
-                    ],
-                  ),
-                  // Line 2
-                  Container(
-                    height: 10,
-                    width: double.infinity, // Takes full available width of its parent
+                  Container( // Line 1
+                    height: 12,
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 6.0),
                     decoration: BoxDecoration(
                       color: placeholderColor,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                  // Line 3 & Small box
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        flex: 2,
-                        child: Container(
-                          height: 10,
-                          decoration: BoxDecoration(
-                            color: placeholderColor,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                      ),
-                      const Spacer(flex: 1),
-                      Container(
-                        height: 10,
-                        width: 40, // Adjusted width
-                        decoration: BoxDecoration(
-                          color: placeholderColor,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                    ],
+                  Container( // Line 2
+                    height: 10,
+                    width: MediaQuery.of(context).size.width * 0.5, // Shorter line
+                    decoration: BoxDecoration(
+                      color: placeholderColor,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
+                ],
+              ),
+            ),
+            // Optional: Trailing placeholder for an icon like chevron or favorite
+            // Icon(CupertinoIcons.heart, color: placeholderColor, size: 22),
+          ],
+        ),
+      );
+    } else { // Material version (existing structure, but using adaptive colors)
+      singleLoadingItemContent = Container(
+        height: 96,
+        padding: const EdgeInsets.all(12),
+        width: MediaQuery.of(context).size.width,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: itemBorder, // Material border
+          color: itemBackgroundColor,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            Container( // Image Placeholder
+              height: 64,
+              width: 64,
+              decoration: BoxDecoration(
+                color: placeholderColor,
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(children: <Widget>[
+                    Expanded(flex: 3, child: Container(height: 10, decoration: BoxDecoration(color: placeholderColor, borderRadius: BorderRadius.circular(4)))),
+                    const Spacer(flex: 1),
+                    Icon(Icons.favorite_border, color: placeholderColor, size: 20),
+                  ]),
+                  Container(height: 10, width: double.infinity, decoration: BoxDecoration(color: placeholderColor, borderRadius: BorderRadius.circular(4))),
+                  Row(children: <Widget>[
+                    Expanded(flex: 2, child: Container(height: 10, decoration: BoxDecoration(color: placeholderColor, borderRadius: BorderRadius.circular(4)))),
+                    const Spacer(flex: 1),
+                    Container(height: 10, width: 40, decoration: BoxDecoration(color: placeholderColor, borderRadius: BorderRadius.circular(4))),
+                  ]),
                 ],
               ),
             ),
           ],
         ),
-      ),
+      );
+    }
+
+    Widget singleLoadingItem = Shimmer.fromColors(
+      baseColor: shimmerBaseColor,
+      highlightColor: shimmerHighlightColor,
+      child: singleLoadingItemContent,
     );
 
     return ListView.separated(
       itemCount: itemCount,
-      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0), // Standard padding
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: isCupertino ? 0 : 16.0), // No horizontal padding for full-width Cupertino items
       itemBuilder: (context, index) => singleLoadingItem,
-      separatorBuilder: (context, index) => const SizedBox(height: 12), // Spacing between shimmer items
+      separatorBuilder: (context, index) => isCupertino ? const SizedBox.shrink() : const SizedBox(height: 12), // No separator if items have their own
     );
   }
 }

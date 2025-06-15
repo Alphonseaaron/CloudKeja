@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart'; // Added for Cupertino
+import 'package:provider/provider.dart'; // Added for Provider
+import 'package:cloudkeja/services/platform_service.dart'; // Added for PlatformService
 import 'package:cloudkeja/helpers/my_shimmer.dart';
 
 class ChatTileShimmer extends StatelessWidget {
@@ -7,14 +10,24 @@ class ChatTileShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final platformService = Provider.of<PlatformService>(context, listen: false);
+    final bool isCupertino = platformService.useCupertino;
+
+    Color placeholderColor;
+    if (isCupertino) {
+      placeholderColor = CupertinoColors.systemGrey5.resolveFrom(context);
+    } else {
+      placeholderColor = Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.7);
+    }
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10), // Adjusted vertical padding
       child: Row(
         children: [
-          const MyShimmer(
+          MyShimmer( // MyShimmer should ideally also adapt its base/highlight colors or be transparent
             child: CircleAvatar(
               radius: 24,
-              backgroundColor: Colors.grey,
+              backgroundColor: placeholderColor, // Applied platform-adaptive color
             ),
           ),
           const SizedBox(width: 10),
@@ -26,17 +39,23 @@ class ChatTileShimmer extends StatelessWidget {
                 child: Container(
                   height: 20,
                   width: size.width * 0.6,
-                  color: Colors.grey,
+                  decoration: BoxDecoration( // Using decoration for rounded corners
+                    color: placeholderColor, // Applied platform-adaptive color
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
               ),
               const SizedBox(
-                height: 5,
+                height: 8, // Adjusted spacing
               ),
               MyShimmer(
                 child: Container(
                   height: 15,
                   width: size.width * 0.4,
-                  color: Colors.grey,
+                   decoration: BoxDecoration(
+                    color: placeholderColor, // Applied platform-adaptive color
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
               ),
             ],
