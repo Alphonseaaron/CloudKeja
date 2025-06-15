@@ -2,13 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:draw_graph/draw_graph.dart';
 import 'package:draw_graph/models/feature.dart';
 
-class CupertinoMyGraph extends StatelessWidget {
+class CupertinoLineGraph extends StatelessWidget { // Renamed class
   final List<Feature> features;
   final List<String> labelX;
   final List<String> labelY;
   final String? title; // Optional title for the graph
 
-  const CupertinoMyGraph({
+  const CupertinoLineGraph({ // Renamed constructor
     Key? key,
     required this.features,
     required this.labelX,
