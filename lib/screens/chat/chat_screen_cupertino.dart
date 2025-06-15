@@ -96,16 +96,20 @@ class _ChatScreenWidgetCupertinoState extends State<ChatScreenWidgetCupertino> {
         bool isLoading = snapshot.connectionState == ConnectionState.waiting; // Simpler loading check for FutureBuilder
 
         if (isLoading && (snapshot.data == null || snapshot.data!.isEmpty)) { // Show skeleton if loading and no data yet
+          final cupertinoTheme = CupertinoTheme.of(context); // Needed for colors
+          final shimmerBaseColor = CupertinoColors.systemGrey5.resolveFrom(context);
+          final shimmerHighlightColor = CupertinoColors.systemGrey4.resolveFrom(context);
+
           return Skeletonizer( 
             enabled: true,
-            // Consider custom shimmer colors for Cupertino if default is too Material
-            // effect: ShimmerEffect(
-            //   baseColor: CupertinoColors.systemGrey5.resolveFrom(context),
-            //   highlightColor: CupertinoColors.systemGrey4.resolveFrom(context),
-            // ),
+            effect: ShimmerEffect(
+              baseColor: shimmerBaseColor,
+              highlightColor: shimmerHighlightColor,
+              period: const Duration(milliseconds: 1500), // Standard shimmer period
+            ),
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
-              itemCount: 5,
+              itemCount: 5, // Number of skeleton items
               itemBuilder: (context, index) => _buildChatTileSkeleton(context),
               separatorBuilder: (context, index) => Divider(indent: 72, endIndent: 16, height: 0.5, color: CupertinoColors.separator.resolveFrom(context)),
             ),
