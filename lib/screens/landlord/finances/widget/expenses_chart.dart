@@ -1,19 +1,60 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart'; // Added for Cupertino
+import 'package:provider/provider.dart'; // Added for Provider
+import 'package:cloudkeja/services/platform_service.dart'; // Added for PlatformService
 import 'package:intl/intl.dart'; // For formatting month names
 
-// Renamed mainData to getThemedLineChartData for clarity and to accept parameters
-LineChartData getThemedLineChartData({
-  required BuildContext context, // To access Theme
-  required Map<String, double> monthlyIncomeData, // "YYYY-MM": amount
+// Renamed to getAdaptiveLineChartData and made platform-adaptive
+LineChartData getAdaptiveLineChartData({
+  required BuildContext context,
+  required Map<String, double> monthlyIncomeData,
   required bool isLoading,
 }) {
-  final theme = Theme.of(context);
-  final colorScheme = theme.colorScheme;
-  final textTheme = theme.textTheme;
+  final platformService = Provider.of<PlatformService>(context, listen: false);
+  final bool isCupertino = platformService.useCupertino;
+
+  // Platform-specific theming
+  Color gridColor;
+  Color borderColor;
+  TextStyle? titleTextStyle;
+  TextStyle? tooltipTextStyle;
+  Color tooltipBgColor;
+  List<Color> lineGradientColors;
+  Color dotColor;
+  Color dotStrokeColor;
+  List<Color> belowBarGradientColors;
+
+  if (isCupertino) {
+    final cupertinoTheme = CupertinoTheme.of(context);
+    gridColor = CupertinoColors.separator.resolveFrom(context).withOpacity(0.5);
+    borderColor = CupertinoColors.separator.resolveFrom(context).withOpacity(0.7);
+    titleTextStyle = cupertinoTheme.textTheme.tabLabelTextStyle.copyWith(
+        color: CupertinoColors.secondaryLabel.resolveFrom(context), fontSize: 10); // Smaller for axis
+    tooltipTextStyle = cupertinoTheme.textTheme.caption1.copyWith(
+        color: CupertinoColors.label.resolveFrom(context), fontWeight: FontWeight.bold);
+    tooltipBgColor = CupertinoColors.systemGrey5.resolveFrom(context).withOpacity(0.9);
+    lineGradientColors = [cupertinoTheme.primaryColor, cupertinoTheme.primaryColor.withOpacity(0.5)];
+    dotColor = cupertinoTheme.primaryColor;
+    dotStrokeColor = cupertinoTheme.scaffoldBackgroundColor; // Contrast with dot
+    belowBarGradientColors = [cupertinoTheme.primaryColor.withOpacity(0.3), cupertinoTheme.primaryColor.withOpacity(0.05)];
+  } else {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+    gridColor = colorScheme.outline.withOpacity(0.2);
+    borderColor = colorScheme.outline.withOpacity(0.3);
+    titleTextStyle = textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant);
+    tooltipTextStyle = textTheme.bodySmall!.copyWith(color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold);
+    tooltipBgColor = colorScheme.surfaceVariant.withOpacity(0.9);
+    lineGradientColors = [colorScheme.primary, colorScheme.primary.withOpacity(0.3)];
+    dotColor = colorScheme.primary;
+    dotStrokeColor = colorScheme.surface;
+    belowBarGradientColors = [colorScheme.primary.withOpacity(0.2), colorScheme.primary.withOpacity(0.0)];
+  }
 
   List<FlSpot> spots = [];
-  List<String> monthLabels = []; // To store "MMM" labels for bottom titles
+  List<String> monthLabels = [];
 
   if (!isLoading && monthlyIncomeData.isNotEmpty) {
     // Sort keys to ensure chronological order if not already sorted
@@ -73,10 +114,10 @@ LineChartData getThemedLineChartData({
     gridData: FlGridData(
       show: true,
       drawVerticalLine: true,
-      horizontalInterval: maxY / (maxY > 10 ? 5 : (maxY > 2 ? maxY/2 : 1)), // Dynamic interval
-      verticalInterval: 1, // Show line for each month if possible
-      getDrawingHorizontalLine: (value) => FlLine(color: colorScheme.outline.withOpacity(0.2), strokeWidth: 0.5),
-      getDrawingVerticalLine: (value) => FlLine(color: colorScheme.outline.withOpacity(0.2), strokeWidth: 0.5),
+      horizontalInterval: maxY / (maxY > 10 ? 5 : (maxY > 2 ? maxY / 2 : 1)),
+      verticalInterval: 1,
+      getDrawingHorizontalLine: (value) => FlLine(color: gridColor, strokeWidth: 0.5),
+      getDrawingVerticalLine: (value) => FlLine(color: gridColor, strokeWidth: 0.5),
     ),
     titlesData: FlTitlesData(
       show: true,
@@ -86,14 +127,14 @@ LineChartData getThemedLineChartData({
         sideTitles: SideTitles(
           showTitles: true,
           reservedSize: 30,
-          interval: 1, // Show label for each spot
+          interval: 1,
           getTitlesWidget: (value, meta) {
             int index = value.toInt();
             if (index >= 0 && index < monthLabels.length) {
               return SideTitleWidget(
                 axisSide: meta.axisSide,
                 space: 8.0,
-                child: Text(monthLabels[index], style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant)),
+                child: Text(monthLabels[index], style: titleTextStyle),
               );
             }
             return const SizedBox.shrink();
@@ -103,31 +144,28 @@ LineChartData getThemedLineChartData({
       leftTitles: AxisTitles(
         sideTitles: SideTitles(
           showTitles: true,
-          interval: maxY / (maxY > 10 ? 5 : (maxY > 2 ? maxY/2 : 1)), // Dynamic interval
-          getTitlesWidget: (value, meta) => Text(
-            '${value.toInt()}k', // Assuming Y is in thousands
-            style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
-          ),
+          interval: maxY / (maxY > 10 ? 5 : (maxY > 2 ? maxY / 2 : 1)),
+          getTitlesWidget: (value, meta) => Text('${value.toInt()}k', style: titleTextStyle),
           reservedSize: 42,
         ),
       ),
     ),
-    borderData: FlBorderData(show: true, border: Border.all(color: colorScheme.outline.withOpacity(0.3))),
+    borderData: FlBorderData(show: true, border: Border.all(color: borderColor)),
     minX: 0,
     maxX: maxX,
     minY: minY,
     maxY: maxY,
     lineTouchData: LineTouchData(
-      enabled: !isLoading, // Disable touch if loading
+      enabled: !isLoading,
       touchTooltipData: LineTouchTooltipData(
-        tooltipBgColor: colorScheme.surfaceVariant.withOpacity(0.9),
+        tooltipBgColor: tooltipBgColor,
         getTooltipItems: (touchedSpots) {
           return touchedSpots.map((touchedSpot) {
             final monthIndex = touchedSpot.spotIndex;
             String monthLabel = (monthIndex >= 0 && monthIndex < monthLabels.length) ? monthLabels[monthIndex] : '';
             return LineTooltipItem(
               '${monthLabel.isNotEmpty ? monthLabel + ": " : ""}KES ${(touchedSpot.y * 1000).toStringAsFixed(0)}',
-              textTheme.bodySmall!.copyWith(color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.bold),
+              tooltipTextStyle!,
             );
           }).toList();
         },
@@ -138,28 +176,27 @@ LineChartData getThemedLineChartData({
       LineChartBarData(
         spots: spots,
         isCurved: true,
-        gradient: LinearGradient(colors: [colorScheme.primary, colorScheme.primary.withOpacity(0.3)]),
-        barWidth: 3, // Slightly thicker line
+        gradient: LinearGradient(colors: lineGradientColors),
+        barWidth: 3,
         isStrokeCapRound: true,
         dotData: FlDotData(
-          show: spots.length < 15, // Show dots if not too many points
+          show: spots.length < 15,
           getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
             radius: 3,
-            color: colorScheme.primary,
+            color: dotColor,
             strokeWidth: 1,
-            strokeColor: colorScheme.surface, // Dot border to match chart background
+            strokeColor: dotStrokeColor,
           )
         ),
         belowBarData: BarAreaData(
           show: true,
           gradient: LinearGradient(
-            colors: [colorScheme.primary.withOpacity(0.2), colorScheme.primary.withOpacity(0.0)],
+            colors: belowBarGradientColors,
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
         ),
       ),
-      // Removed the second static LineChartBarData as per instructions for now
     ],
   );
 }
