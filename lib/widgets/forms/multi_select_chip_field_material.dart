@@ -83,8 +83,8 @@ class _MultiSelectChipFieldMaterialState extends State<MultiSelectChipFieldMater
               // Example explicit styling (usually not needed if theme is set):
               // selectedColor: theme.chipTheme.selectedColor ?? theme.colorScheme.primary,
               // backgroundColor: theme.chipTheme.backgroundColor ?? theme.colorScheme.surfaceVariant,
-              // labelStyle: isSelected 
-              //   ? theme.chipTheme.labelStyle?.copyWith(color: theme.chipTheme.selectedColor) 
+              // labelStyle: isSelected
+              //   ? theme.chipTheme.labelStyle?.copyWith(color: theme.chipTheme.selectedColor)
               //   : theme.chipTheme.labelStyle, // This logic might need refinement based on theme
               // checkmarkColor: theme.chipTheme.checkmarkColor,
             );

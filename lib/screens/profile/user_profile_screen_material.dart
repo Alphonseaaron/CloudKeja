@@ -360,13 +360,13 @@ void showUserPaymentDialog(BuildContext context, SpaceModel space) {
     context: context,
     builder: (ctx) => Dialog(
       // Ensure UserPaymentDialogMaterialContent is used if renaming is done in place
-      child: UserPaymentDialogMaterialContent(space: space), 
+      child: UserPaymentDialogMaterialContent(space: space),
     ),
   );
 }
 
 // Renamed to UserPaymentDialogMaterialContent
-class UserPaymentDialogMaterialContent extends StatefulWidget { 
+class UserPaymentDialogMaterialContent extends StatefulWidget {
   const UserPaymentDialogMaterialContent({Key? key, required this.space}) : super(key: key);
   final SpaceModel space;
 
@@ -375,7 +375,7 @@ class UserPaymentDialogMaterialContent extends StatefulWidget {
 }
 
 // Renamed state class
-class _UserPaymentDialogMaterialContentState extends State<UserPaymentDialogMaterialContent> { 
+class _UserPaymentDialogMaterialContentState extends State<UserPaymentDialogMaterialContent> {
   String? _selectedPaymentOption;
   String? _selectedPaymentMethod;
   bool _isProcessingPayment = false;

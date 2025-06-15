@@ -150,7 +150,7 @@ class _UserProfileScreenCupertinoState extends State<UserProfileScreenCupertino>
             ],
           ),
         );
-      } else if (paymentSuccessful == false && mounted) { 
+      } else if (paymentSuccessful == false && mounted) {
         // Optional: Handle explicit cancellation if needed, though often just closing is fine.
         // If UserPaymentDialogCupertinoContent pops with `false` for failure, handle here.
         // Currently, it shows its own error or pops with true for success.

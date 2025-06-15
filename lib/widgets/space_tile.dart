@@ -23,7 +23,7 @@ class SpaceTile extends StatelessWidget { // Changed to StatelessWidget
     // If PlatformService needs context (e.g., InheritedWidget or Provider)
     // final platformService = Provider.of<PlatformService>(context);
     // final bool shouldUseCupertino = platformService.useCupertino;
-    
+
     // Direct static access for simplicity, assuming PlatformService is set up for it.
     // Ensure PlatformService is initialized before this widget builds.
     // Example: PlatformService.init(); in main.dart

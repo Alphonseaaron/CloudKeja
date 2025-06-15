@@ -97,7 +97,7 @@ class _UserPaymentDialogCupertinoContentState extends State<UserPaymentDialogCup
   Widget build(BuildContext context) {
     final cupertinoTheme = CupertinoTheme.of(context);
     final titleStyle = cupertinoTheme.textTheme.navTitleTextStyle.copyWith(fontSize: 16, fontWeight: FontWeight.w600);
-    
+
     return SizedBox( // Constrain width for dialog content
       width: MediaQuery.of(context).size.width * 0.8, // Example width constraint
       child: Column(
@@ -135,13 +135,13 @@ class _UserPaymentDialogCupertinoContentState extends State<UserPaymentDialogCup
 
           _buildSummaryRow(context, 'Amount Due:', 'KES ${widget.space.price?.toStringAsFixed(0) ?? '0'}'),
           const SizedBox(height: 8),
-          
+
           // Using a simple line for divider in Cupertino
           Container(height: 0.5, color: CupertinoColors.separator.resolveFrom(context), margin: const EdgeInsets.symmetric(vertical: 10)),
           _buildSummaryRow(context, 'Total to Pay:', 'KES ${widget.space.price?.toStringAsFixed(0) ?? '0'}', isTotal: true),
           const SizedBox(height: 24),
 
-          if (_errorMessage != null) 
+          if (_errorMessage != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 10.0),
               child: Text(

@@ -5,8 +5,8 @@ import 'package:cloudkeja/models/notification_model.dart'; // Assuming this mode
 
 // TODO: Rename this file to cupertino_notifications_screen.dart after confirming functionality
 
-class CupertinoNotificationsPageStub extends StatelessWidget {
-  const CupertinoNotificationsPageStub({super.key});
+class CupertinoNotificationsScreen extends StatelessWidget { // Renamed class
+  const CupertinoNotificationsScreen({super.key}); // Renamed constructor
 
   @override
   Widget build(BuildContext context) {

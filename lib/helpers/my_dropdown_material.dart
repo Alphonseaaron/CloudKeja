@@ -4,22 +4,22 @@ class MyDropDownMaterial extends StatefulWidget {
   const MyDropDownMaterial({
     Key? key,
     this.hintText,
-    required this.selectedOption, 
+    required this.selectedOption,
     this.options,
-    this.currentValue, 
+    this.currentValue,
   }) : super(key: key);
 
   final String? hintText;
   final List<String>? options;
   final Function(String option) selectedOption;
-  final String? currentValue; 
+  final String? currentValue;
 
   @override
   State<MyDropDownMaterial> createState() => _MyDropDownMaterialState();
 }
 
 class _MyDropDownMaterialState extends State<MyDropDownMaterial> {
-  String? _locallySelectedOption; 
+  String? _locallySelectedOption;
 
   @override
   void initState() {
@@ -55,9 +55,9 @@ class _MyDropDownMaterialState extends State<MyDropDownMaterial> {
 
         showModalBottomSheet(
           context: context,
-          isScrollControlled: true, 
-          backgroundColor: Colors.transparent, 
-          shape: theme.bottomSheetTheme.shape ?? const RoundedRectangleBorder( 
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          shape: theme.bottomSheetTheme.shape ?? const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(16),
               topRight: Radius.circular(16),
@@ -69,21 +69,21 @@ class _MyDropDownMaterialState extends State<MyDropDownMaterial> {
 
             return _DropDownOptionsMaterial( // Renamed helper class
               options: sortedOptions,
-              title: widget.hintText?.toUpperCase() ?? 'SELECT OPTION', 
-              selectedOptionCallback: (val) { 
+              title: widget.hintText?.toUpperCase() ?? 'SELECT OPTION',
+              selectedOptionCallback: (val) {
                 setState(() {
                   _locallySelectedOption = val;
                 });
-                widget.selectedOption(val); 
+                widget.selectedOption(val);
               },
-              currentlySelected: _locallySelectedOption, 
+              currentlySelected: _locallySelectedOption,
             );
           },
         );
       },
       child: Container(
-        height: 50, 
-        padding: const EdgeInsets.symmetric(horizontal: 12.0), 
+        height: 50,
+        padding: const EdgeInsets.symmetric(horizontal: 12.0),
         decoration: BoxDecoration(
           color: inputDecorationTheme.fillColor ?? colorScheme.surfaceVariant.withOpacity(0.5),
           borderRadius: (inputDecorationTheme.border as OutlineInputBorder?)?.borderRadius ?? BorderRadius.circular(8.0),
@@ -95,7 +95,7 @@ class _MyDropDownMaterialState extends State<MyDropDownMaterial> {
         alignment: Alignment.centerLeft,
         child: Row(
           children: [
-            Expanded( 
+            Expanded(
               child: Text(
                 displayText,
                 style: effectiveTextStyle,
@@ -104,8 +104,8 @@ class _MyDropDownMaterialState extends State<MyDropDownMaterial> {
             ),
             const SizedBox(width: 8),
             Icon(
-              Icons.arrow_drop_down_rounded, 
-              color: colorScheme.onSurfaceVariant.withOpacity(0.7), 
+              Icons.arrow_drop_down_rounded,
+              color: colorScheme.onSurfaceVariant.withOpacity(0.7),
               size: 24,
             )
           ],
@@ -116,7 +116,7 @@ class _MyDropDownMaterialState extends State<MyDropDownMaterial> {
 }
 
 // Renamed helper class specific to Material version
-class _DropDownOptionsMaterial extends StatelessWidget { 
+class _DropDownOptionsMaterial extends StatelessWidget {
   const _DropDownOptionsMaterial({
     Key? key,
     required this.options,
@@ -137,18 +137,18 @@ class _DropDownOptionsMaterial extends StatelessWidget {
     final textTheme = theme.textTheme;
 
     return GestureDetector(
-      onTap: () {}, 
+      onTap: () {},
       child: DraggableScrollableSheet(
-        initialChildSize: 0.4, 
-        maxChildSize: 0.7,     
-        minChildSize: 0.2,     
-        expand: false, 
+        initialChildSize: 0.4,
+        maxChildSize: 0.7,
+        minChildSize: 0.2,
+        expand: false,
         builder: (BuildContext context, ScrollController scrollController) {
           return Container(
             decoration: BoxDecoration(
-              color: theme.bottomSheetTheme.backgroundColor ?? colorScheme.surface, 
+              color: theme.bottomSheetTheme.backgroundColor ?? colorScheme.surface,
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16), 
+                topLeft: Radius.circular(16),
                 topRight: Radius.circular(16),
               ),
             ),
@@ -158,7 +158,7 @@ class _DropDownOptionsMaterial extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 8.0, left: 16.0, right: 16.0, bottom: 4.0),
                   child: Column(
                     children: [
-                      Container( 
+                      Container(
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
@@ -169,7 +169,7 @@ class _DropDownOptionsMaterial extends StatelessWidget {
                       const SizedBox(height: 12),
                       Text(
                         title,
-                        style: textTheme.titleSmall?.copyWith( 
+                        style: textTheme.titleSmall?.copyWith(
                           color: colorScheme.onSurface.withOpacity(0.8),
                           fontWeight: FontWeight.w600,
                         ),
@@ -179,7 +179,7 @@ class _DropDownOptionsMaterial extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: ListView.builder( 
+                  child: ListView.builder(
                     controller: scrollController,
                     itemCount: options.length,
                     itemBuilder: (context, index) {
@@ -194,10 +194,10 @@ class _DropDownOptionsMaterial extends StatelessWidget {
                           ),
                         ),
                         selected: isSelected,
-                        selectedTileColor: colorScheme.primary.withOpacity(0.1), 
+                        selectedTileColor: colorScheme.primary.withOpacity(0.1),
                         onTap: () {
                           selectedOptionCallback(option);
-                          Navigator.of(context).pop(); 
+                          Navigator.of(context).pop();
                         },
                         contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
                       );

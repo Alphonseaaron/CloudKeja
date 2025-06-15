@@ -53,7 +53,7 @@ class _MyDropDownCupertinoState extends State<MyDropDownCupertino> {
 
 
     String tempSelectedValue = _locallySelectedOption ?? (pickerOptions.isNotEmpty ? pickerOptions[initialItemIndex] : '');
-    
+
     FixedExtentScrollController scrollController = FixedExtentScrollController(initialItem: initialItemIndex);
 
 

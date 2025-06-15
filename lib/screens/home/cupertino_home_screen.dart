@@ -206,7 +206,7 @@ class _CupertinoHomeScreenState extends State<CupertinoHomeScreen> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: CupertinoListTile(
-          leadingSize: 36, 
+          leadingSize: 36,
           leading: Icon(
             CupertinoIcons.person_badge_plus_fill,
             color: theme.primaryColor,
@@ -226,7 +226,7 @@ class _CupertinoHomeScreenState extends State<CupertinoHomeScreen> {
             )
           ),
           trailing: const CupertinoListTileChevron(),
-          onTap: () => Get.to(() => const SearchSPScreen()), 
+          onTap: () => Get.to(() => const SearchSPScreen()),
         ),
       ),
     );
@@ -265,7 +265,7 @@ class _CupertinoHomeScreenState extends State<CupertinoHomeScreen> {
           ),
         ),
         SizedBox(
-          height: 290, 
+          height: 290,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: _isLoading ? 3 : spaces.length, // Show 3 skeleton items or actual items
@@ -305,7 +305,7 @@ class _CupertinoHomeScreenState extends State<CupertinoHomeScreen> {
           title: 'Best Offers',
           description: 'Discover special offers and deals on properties. Tap "See All" for more.',
           child: Padding(
-            padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 24.0, bottom: 0.0), 
+            padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 24.0, bottom: 0.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -319,7 +319,7 @@ class _CupertinoHomeScreenState extends State<CupertinoHomeScreen> {
                 CupertinoButton(
                   padding: EdgeInsets.zero,
                   child: const Text('See All'),
-                  onPressed: () => Get.to(() => const ViewAllScreen(title: 'Best Offers')), 
+                  onPressed: () => Get.to(() => const ViewAllScreen(title: 'Best Offers')),
                 ),
               ],
             ),
@@ -348,7 +348,7 @@ class _CupertinoHomeScreenState extends State<CupertinoHomeScreen> {
     final cupertinoTheme = CupertinoTheme.of(context);
     // Define Cupertino Showcase Styles
     final TextStyle? showcaseTitleStyle = cupertinoTheme.textTheme.navTitleTextStyle.copyWith(
-      color: CupertinoColors.white, 
+      color: CupertinoColors.white,
       fontWeight: FontWeight.bold,
     );
     final TextStyle? showcaseDescStyle = cupertinoTheme.textTheme.textStyle.copyWith(
@@ -408,19 +408,19 @@ class _CupertinoHomeScreenState extends State<CupertinoHomeScreen> {
                    _buildCupertinoSearchInput(context),
                    _buildWelcomeText(context),
                    // The _build methods are already wrapped with Showcase internally now.
-                   _buildCupertinoSearchInput(context), 
-                   _buildCupertinoCategories(context), 
-                   _buildCupertinoSPCtaCard(context), 
+                   _buildCupertinoSearchInput(context),
+                   _buildCupertinoCategories(context),
+                   _buildCupertinoSPCtaCard(context),
                    _buildCupertinoRecommended(context, _spaces),
                    _buildCupertinoBestOffers(context, _spaces),
-                   const SizedBox(height: 20), 
+                   const SizedBox(height: 20),
                  ],
                );
              }
            ),
         ),
         );
-      }), 
+      }),
     );
   }
 }
