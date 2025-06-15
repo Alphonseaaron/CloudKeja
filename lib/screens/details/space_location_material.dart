@@ -5,12 +5,12 @@ import 'package:marker_icon/marker_icon.dart';
 
 class SpaceLocationMaterial extends StatefulWidget { // Renamed widget
   final LatLng? location;
-  final String? imageUrl; 
-  final String? spaceName; 
+  final String? imageUrl;
+  final String? spaceName;
 
   const SpaceLocationMaterial({ // Renamed constructor
     Key? key,
-    required this.location, 
+    required this.location,
     this.imageUrl,
     this.spaceName,
   }) : super(key: key);
@@ -22,7 +22,7 @@ class SpaceLocationMaterial extends StatefulWidget { // Renamed widget
 class _SpaceLocationMaterialState extends State<SpaceLocationMaterial> { // Renamed state class
   GoogleMapController? _mapController;
   final Set<Marker> _markers = {};
-  bool _isMarkerReady = false; 
+  bool _isMarkerReady = false;
 
   @override
   void initState() {
@@ -58,14 +58,14 @@ class _SpaceLocationMaterialState extends State<SpaceLocationMaterial> { // Rena
     BitmapDescriptor markerIcon;
     try {
       markerIcon = await MarkerIcon.downloadResizePictureCircle(
-        widget.imageUrl ?? 'https://via.placeholder.com/100/CCCCCC/FFFFFF?Text=Place', 
-        borderSize: 5, 
-        size: 120,    
+        widget.imageUrl ?? 'https://via.placeholder.com/100/CCCCCC/FFFFFF?Text=Place',
+        borderSize: 5,
+        size: 120,
         addBorder: true,
-        borderColor: Theme.of(context).colorScheme.primary, 
+        borderColor: Theme.of(context).colorScheme.primary,
       );
     } catch (e) {
-      markerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure); 
+      markerIcon = BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure);
     }
 
     final marker = Marker(
@@ -77,7 +77,7 @@ class _SpaceLocationMaterialState extends State<SpaceLocationMaterial> { // Rena
 
     if (mounted) {
       setState(() {
-        _markers.clear(); 
+        _markers.clear();
         _markers.add(marker);
         _isMarkerReady = true;
       });
@@ -123,27 +123,27 @@ class _SpaceLocationMaterialState extends State<SpaceLocationMaterial> { // Rena
           ),
           const SizedBox(height: 12.0),
           AspectRatio(
-            aspectRatio: 16 / 10, 
+            aspectRatio: 16 / 10,
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12.0), 
+                borderRadius: BorderRadius.circular(12.0),
                 border: Border.all(
-                  color: colorScheme.outline.withOpacity(0.5), 
+                  color: colorScheme.outline.withOpacity(0.5),
                   width: 1,
                 ),
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(11.0), 
+                borderRadius: BorderRadius.circular(11.0),
                 child: GoogleMap(
-                  mapToolbarEnabled: false, 
-                  zoomControlsEnabled: true, 
-                  myLocationButtonEnabled: false, 
-                  myLocationEnabled: false, 
+                  mapToolbarEnabled: false,
+                  zoomControlsEnabled: true,
+                  myLocationButtonEnabled: false,
+                  myLocationEnabled: false,
                   onMapCreated: _onMapCreated,
-                  markers: _isMarkerReady ? _markers : {}, 
+                  markers: _isMarkerReady ? _markers : {},
                   initialCameraPosition: CameraPosition(
                     target: widget.location!,
-                    zoom: 14, 
+                    zoom: 14,
                   ),
                 ),
               ),

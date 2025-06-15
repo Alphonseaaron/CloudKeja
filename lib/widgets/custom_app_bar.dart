@@ -49,14 +49,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight); 
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
   // Both CustomMaterialAppBar and CustomCupertinoAppBar are designed to use kToolbarHeight
   // so the router can consistently return this.
   // If CustomCupertinoAppBar needed a different height (e.g. kMinInteractiveDimensionCupertino),
   // this getter would need to check the platform:
   // return Size.fromHeight(
   //   PlatformService.useCupertino // (this would need static access or instance from Provider if used here)
-  //       ? kMinInteractiveDimensionCupertino 
+  //       ? kMinInteractiveDimensionCupertino
   //       : kToolbarHeight
   // );
   // But for this task, kToolbarHeight is used for both for simplicity and consistency.

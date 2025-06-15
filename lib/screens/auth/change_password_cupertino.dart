@@ -105,10 +105,10 @@ class _ChangePasswordCupertinoState extends State<ChangePasswordCupertino> {
     try {
       AuthCredential credential = EmailAuthProvider.credential(
           email: user.email!, password: _currentPassword!);
-      
+
       await FirebaseAuth.instance.currentUser!.reauthenticateWithCredential(credential);
       await FirebaseAuth.instance.currentUser!.updatePassword(_newPassword!);
-      
+
       // Firestore update (consider security implications as mentioned before)
       await FirebaseFirestore.instance
           .collection('users')

@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloudkeja/screens/details/space_location_cupertino.dart';
 // Import for HttpOverrides, if needed for more complex image network mocking
-// import 'dart.io'; 
+// import 'dart.io';
 // import 'package:mockito/mockito.dart';
 
 // Helper class to mock HTTP client for image loading if TestHttpOverrides is used
@@ -55,7 +55,7 @@ void main() {
 
     // Wait for any async operations like _createMarker and map style loading to settle.
     // A longer pumpAndSettle might be needed if there are significant async tasks.
-    await tester.pumpAndSettle(const Duration(seconds: 2)); 
+    await tester.pumpAndSettle(const Duration(seconds: 2));
 
 
     expect(find.text('Location'), findsOneWidget);
@@ -78,7 +78,7 @@ void main() {
    testWidgets('SpaceLocationCupertino displays map correctly even if image download fails for marker', (WidgetTester tester) async {
     const testLocation = LatLng(34.0522, -118.2437);
     // Provide an invalid image URL to simulate download failure
-    const testImageUrl = 'http://invalid-url-for-testing.com/image.png'; 
+    const testImageUrl = 'http://invalid-url-for-testing.com/image.png';
     const testSpaceName = 'Space With Failing Image';
 
     // HttpOverrides.runZoned(() async { // If using HttpOverrides

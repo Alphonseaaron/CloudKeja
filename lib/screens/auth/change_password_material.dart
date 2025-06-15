@@ -42,7 +42,7 @@ class _ChangePasswordMaterialState extends State<ChangePasswordMaterial> {
           children: [
             Container(
               // Constrained height to avoid overflow issues with keyboard
-              height: size.height - MediaQuery.of(context).padding.top, 
+              height: size.height - MediaQuery.of(context).padding.top,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,19 +187,19 @@ class _ChangePasswordMaterialState extends State<ChangePasswordMaterial> {
                           // The original code checks user.password which is insecure and likely incorrect.
                           // Assuming user.password was a local copy which is bad practice.
                           // Firebase requires recent login.
-                          
+
                           setState(() { isLoading = true; });
 
                           try {
                             // Step 1: Re-authenticate user
                             AuthCredential credential = EmailAuthProvider.credential(
                                 email: user.email!, password: initialPassword!); // Ensure user.email is available
-                            
+
                             await FirebaseAuth.instance.currentUser!.reauthenticateWithCredential(credential);
 
                             // Step 2: If re-authentication is successful, update password
                             await FirebaseAuth.instance.currentUser!.updatePassword(_password!);
-                            
+
                             // Step 3: Update password in Firestore (if you store it there, be cautious)
                             // Storing passwords directly in Firestore is generally not recommended unless hashed securely.
                             // If it's just for reference or some other logic, ensure it's handled safely.
@@ -230,7 +230,7 @@ class _ChangePasswordMaterialState extends State<ChangePasswordMaterial> {
                           }
                         }
                       },
-                      child: isLoading 
+                      child: isLoading
                           ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3,))
                           : const Text(
                         'Change Password',
@@ -239,7 +239,7 @@ class _ChangePasswordMaterialState extends State<ChangePasswordMaterial> {
                     ),
                   ),
                   const SizedBox( // Bottom padding
-                    height: 40, 
+                    height: 40,
                   )
                 ],
               ),

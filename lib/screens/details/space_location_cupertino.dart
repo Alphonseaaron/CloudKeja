@@ -33,7 +33,7 @@ class _SpaceLocationCupertinoState extends State<SpaceLocationCupertino> {
       _createMarker();
     }
   }
-  
+
   Future<void> _loadMapStyle() async {
     try {
       _mapStyle = await rootBundle.loadString('assets/map_style.json');
@@ -138,9 +138,9 @@ class _SpaceLocationCupertinoState extends State<SpaceLocationCupertino> {
             'Location',
             style: cupertinoTheme.textTheme.navTitleTextStyle.copyWith(
                 // Making it a bit larger and bolder if navTitleTextStyle is too small for a section header
-                fontSize: 20, 
+                fontSize: 20,
                 fontWeight: FontWeight.bold
-            ), 
+            ),
           ),
           const SizedBox(height: 12.0),
           AspectRatio(

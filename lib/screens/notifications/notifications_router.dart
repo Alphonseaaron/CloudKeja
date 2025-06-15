@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:cloudkeja/services/platform_service.dart';
-import 'package:cloudkeja/screens/notifications/cupertino_notifications_page_stub.dart'; // Our new Cupertino screen
+import 'package:cloudkeja/screens/notifications/cupertino_notifications_screen.dart'; // Updated import
 import 'package:cloudkeja/screens/notifications/notifications_screen.dart'; // The existing Material screen
 
 class NotificationsRouter extends StatelessWidget {
@@ -11,7 +11,7 @@ class NotificationsRouter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (PlatformService.useCupertino) {
-      return const CupertinoNotificationsPageStub(); // TODO: Rename this to CupertinoNotificationsScreen when file is renamed
+      return const CupertinoNotificationsScreen(); // Use the renamed and updated screen
     } else {
       return const NotificationsScreen();
     }

@@ -67,7 +67,7 @@ class _MultiSelectChipFieldCupertinoState extends State<MultiSelectChipFieldCupe
               style: cupertinoTheme.textTheme.navTitleTextStyle.copyWith(
                 fontSize: 17, // Typical size for section titles or prominent labels
                 color: CupertinoColors.label.resolveFrom(context)
-              ), 
+              ),
             ),
           ),
         GestureDetector(
@@ -108,8 +108,8 @@ class _MultiSelectChipFieldCupertinoState extends State<MultiSelectChipFieldCupe
                   child: Text(
                     _getSelectedOptionsDisplayString(),
                     style: cupertinoTheme.textTheme.textStyle.copyWith(
-                      color: _currentSelectedOptions.isEmpty 
-                          ? CupertinoColors.secondaryLabel.resolveFrom(context) 
+                      color: _currentSelectedOptions.isEmpty
+                          ? CupertinoColors.secondaryLabel.resolveFrom(context)
                           : CupertinoColors.label.resolveFrom(context),
                     ),
                     overflow: TextOverflow.ellipsis,

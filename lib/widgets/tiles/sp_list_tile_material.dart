@@ -117,16 +117,16 @@ class SPListTileMaterialSkeleton extends StatelessWidget { // Renamed skeleton
   @override
   Widget build(BuildContext context) {
     return const SPListTileMaterial( // Uses SPListTileMaterial
-      serviceProvider: UserModel( 
+      serviceProvider: UserModel(
         userId: 'skeleton',
         name: 'Service Provider Name',
-        profile: '', 
+        profile: '',
         serviceProviderTypes: ['Primary Service Type'],
         spCounty: 'Location County',
         spCountry: 'Country',
-        isVerified: true 
+        isVerified: true
       ),
-      isSkeleton: true, 
+      isSkeleton: true,
     );
   }
 }

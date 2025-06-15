@@ -66,7 +66,7 @@ class SPListTileCupertino extends StatelessWidget {
           ),
           // No explicit card-like border radius for standard Cupertino list items,
           // but can be added if a carded look is desired.
-          // borderRadius: BorderRadius.circular(8.0) 
+          // borderRadius: BorderRadius.circular(8.0)
         ),
         child: Row(
           children: [
@@ -120,8 +120,8 @@ class SPListTileCupertino extends StatelessWidget {
                   ] else if (isSkeleton) ...[
                      const SizedBox(height: 4),
                      Container(
-                        height: 12, 
-                        width: 100, 
+                        height: 12,
+                        width: 100,
                         color: CupertinoColors.systemGrey5.resolveFrom(context)
                       ), // Placeholder for location
                   ]

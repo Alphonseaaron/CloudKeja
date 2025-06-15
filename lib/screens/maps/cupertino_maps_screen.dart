@@ -71,14 +71,14 @@ class _CupertinoMapsScreenState extends State<CupertinoMapsScreen> {
         spaces = await postProvider.getSpaces();
         _allSpaces = spaces; // Store all spaces when no search query
       }
-      
+
       if (!mounted) return;
 
       Set<Marker> tempMarkers = {};
       for (SpaceModel space in spaces) {
         if (space.location?.latitude != null && space.location?.longitude != null) {
           // Ensure context is available for CupertinoTheme before this loop or pass theme data
-          final primaryColor = CupertinoTheme.of(context).primaryColor; 
+          final primaryColor = CupertinoTheme.of(context).primaryColor;
           tempMarkers.add(
             Marker(
               markerId: MarkerId(space.id!),
@@ -87,7 +87,7 @@ class _CupertinoMapsScreenState extends State<CupertinoMapsScreen> {
               },
               icon: await MarkerIcon.downloadResizePictureCircle(
                 space.images?.firstWhere((img) => img.isNotEmpty, orElse: () => 'https://via.placeholder.com/100') ?? 'https://via.placeholder.com/100',
-                size: 130, 
+                size: 130,
                 borderSize: 10,
                 addBorder: true,
                 borderColor: primaryColor, // Use fetched primary color
@@ -126,11 +126,11 @@ class _CupertinoMapsScreenState extends State<CupertinoMapsScreen> {
       }
     }
   }
-  
+
   void _showCupertinoDialog(String title, String content) {
     // Ensure this context is valid and has CupertinoLocalizations
     // It's generally safe if called from widget lifecycle methods or event handlers within the widget.
-    if (!mounted) return; 
+    if (!mounted) return;
     showCupertinoDialog(
       context: context, // Use the widget's context
       builder: (BuildContext dialogContext) => CupertinoAlertDialog(
@@ -151,12 +151,12 @@ class _CupertinoMapsScreenState extends State<CupertinoMapsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final locationProvider = Provider.of<LocationProvider>(context); 
+    final locationProvider = Provider.of<LocationProvider>(context);
     final initialLocationData = locationProvider.locationData;
     final initialCameraPosition = CameraPosition(
       target: initialLocationData != null && initialLocationData.latitude != null && initialLocationData.longitude != null
           ? LatLng(initialLocationData.latitude!, initialLocationData.longitude!)
-          : const LatLng(-1.286389, 36.817223), 
+          : const LatLng(-1.286389, 36.817223),
       zoom: 14,
     );
 
@@ -172,11 +172,11 @@ class _CupertinoMapsScreenState extends State<CupertinoMapsScreen> {
             mapType: MapType.normal,
             myLocationButtonEnabled: true,
             myLocationEnabled: true,
-            zoomControlsEnabled: false, 
+            zoomControlsEnabled: false,
             initialCameraPosition: initialCameraPosition,
           ),
            Positioned(
-            top: 0, 
+            top: 0,
             left: 0,
             right: 0,
             child: Container(
@@ -192,7 +192,7 @@ class _CupertinoMapsScreenState extends State<CupertinoMapsScreen> {
                 placeholder: 'Search by name or location',
                 onSubmitted: (String query) {
                   if (query.isEmpty) {
-                     _fetchSpacesAndSetMarkers(); 
+                     _fetchSpacesAndSetMarkers();
                   } else {
                     _fetchSpacesAndSetMarkers(searchQuery: query);
                   }
@@ -200,7 +200,7 @@ class _CupertinoMapsScreenState extends State<CupertinoMapsScreen> {
                 onSuffixTap: (){
                   _searchController.clear();
                   FocusScope.of(context).unfocus(); // Dismiss keyboard
-                  _fetchSpacesAndSetMarkers(); 
+                  _fetchSpacesAndSetMarkers();
                 },
               ),
             ),

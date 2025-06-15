@@ -70,7 +70,7 @@ Widget createTestableWidget({
     ],
     // Using GetMaterialApp because CupertinoMapsScreen uses Get.to for navigation
     // Tests might fail on navigation if not wrapped in GetMaterialApp or similar
-    child: GetMaterialApp( 
+    child: GetMaterialApp(
       home: CupertinoApp( // Wrap with CupertinoApp for Cupertino theming and context
         home: child,
       ),
@@ -168,7 +168,7 @@ void main() {
     expect(find.text('Error'), findsOneWidget);
     expect(find.text('Could not load spaces. Please try again.'), findsOneWidget);
   });
-  
+
   testWidgets('CupertinoMapsScreen shows error dialog on searchSpaces failure', (WidgetTester tester) async {
     when(mockPostProvider.getSpaces()).thenAnswer((_) async => []); // Initial load fine
     when(mockPostProvider.searchSpaces(any)).thenThrow(Exception('Search failed'));
@@ -188,6 +188,6 @@ void main() {
     expect(find.byType(CupertinoAlertDialog), findsOneWidget);
     expect(find.text('Error'), findsOneWidget);
     // The actual message depends on the implementation, this is what was in _fetchSpacesAndSetMarkers
-    expect(find.text('Could not load spaces. Please try again.'), findsOneWidget); 
+    expect(find.text('Could not load spaces. Please try again.'), findsOneWidget);
   });
 }

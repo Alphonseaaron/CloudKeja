@@ -72,7 +72,7 @@ class CustomCupertinoAppBar extends StatelessWidget implements ObstructingPrefer
         ),
       );
     }
-    
+
     Widget? trailing;
     if (trailingWidgets.isNotEmpty) {
       trailing = Row(
