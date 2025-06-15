@@ -3,7 +3,8 @@ import 'package:flutter/material.dart'; // For NetworkImage, Icons (some placeho
 import 'package:provider/provider.dart';
 import 'package:cloudkeja/models/user_model.dart';
 import 'package:cloudkeja/providers/admin_provider.dart';
-// TODO: Import actual user action methods or UserProfileScreen if available for Cupertino
+import 'package:cloudkeja/screens/admin/user_actions_cupertino.dart'; // Import the new function
+
 
 class AllUsersScreenCupertino extends StatefulWidget {
   const AllUsersScreenCupertino({Key? key}) : super(key: key);
@@ -138,22 +139,8 @@ class _AllUsersScreenCupertinoState extends State<AllUsersScreenCupertino> {
   }
   
   void _showUserActions(BuildContext context, UserModel user) {
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (BuildContext dialogContext) => CupertinoActionSheet(
-        title: Text(user.name ?? 'User Actions'),
-        message: Text(user.email ?? 'Select an action'),
-        actions: <CupertinoActionSheetAction>[
-          CupertinoActionSheetAction(child: const Text('View Profile'), onPressed: () { Navigator.pop(dialogContext); /* TODO */ }),
-          CupertinoActionSheetAction(child: const Text('Toggle Admin Status'), onPressed: () { Navigator.pop(dialogContext); /* TODO */ }),
-          CupertinoActionSheetAction(child: const Text('Toggle Landlord Status'), onPressed: () { Navigator.pop(dialogContext); /* TODO */ }),
-          if (user.role == 'ServiceProvider')
-            CupertinoActionSheetAction(child: Text(user.isVerified == true ? 'Unverify SP' : 'Verify SP'), onPressed: () { Navigator.pop(dialogContext); /* TODO */ }),
-          CupertinoActionSheetAction(isDestructiveAction: true, child: const Text('Delete User'), onPressed: () { Navigator.pop(dialogContext); /* TODO */ }),
-        ],
-        cancelButton: CupertinoActionSheetAction(child: const Text('Cancel'), onPressed: () => Navigator.pop(dialogContext)),
-      ),
-    );
+    // Call the new Cupertino-specific action sheet function
+    showCupertinoUserActions(context, user, CupertinoTheme.of(context));
   }
 
   Widget _buildUserListTile(UserModel user, CupertinoThemeData theme) {
@@ -245,26 +232,21 @@ class _AllUsersScreenCupertinoState extends State<AllUsersScreenCupertino> {
                     return const Center(child: CupertinoActivityIndicator(radius: 15));
                   }
                   if (_errorMessage != null && _filteredUsers.isEmpty) {
-                    return Center( /* Error display */ ); // Simplified for brevity
+                    // Display error message more clearly
+                    return Center(child: Padding(padding: const EdgeInsets.all(16.0), child: Text('Error: $_errorMessage', style: TextStyle(color: CupertinoColors.destructiveRed.resolveFrom(context)))));
                   }
                   if (_filteredUsers.isEmpty) {
-                    return Center( /* Empty state display */ ); // Simplified for brevity
+                     // Display no users found message
+                    return Center(child: Padding(padding: const EdgeInsets.all(16.0), child: Text('No users found matching your criteria.', style: theme.textTheme.textStyle.copyWith(color: CupertinoColors.secondaryLabel.resolveFrom(context)))));
                   }
-                  return CustomScrollView(
-                    slivers: <Widget>[
-                      CupertinoSliverRefreshControl(onRefresh: _fetchUsers),
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            if (index.isOdd) return Divider(indent: 16, endIndent: 0, height: 0.5, color: CupertinoColors.separator.resolveFrom(context));
-                            final itemIndex = index ~/ 2;
-                            if (itemIndex >= _filteredUsers.length) return null;
-                            return _buildUserListTile(_filteredUsers[itemIndex], theme);
-                          },
-                          childCount: _filteredUsers.length * 2 -1,
-                        ),
-                      ),
-                    ],
+                  // Use ListView.separated for clarity if dividers are intended between all items.
+                  // The current SliverChildBuilderDelegate with index.isOdd is okay but less direct.
+                  return ListView.separated(
+                    itemCount: _filteredUsers.length,
+                    itemBuilder: (context, index) {
+                      return _buildUserListTile(_filteredUsers[index], theme);
+                    },
+                    separatorBuilder: (context, index) => Divider(indent: 16, endIndent: 0, height: 0.5, color: CupertinoColors.separator.resolveFrom(context)),
                   );
                 },
               ),

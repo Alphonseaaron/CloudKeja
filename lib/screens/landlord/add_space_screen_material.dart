@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/route_manager.dart';
@@ -80,9 +83,13 @@ class _AddSpaceScreenMaterialState extends State<AddSpaceScreenMaterial> { // Re
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Get theme instance
+    final colorScheme = theme.colorScheme; // Get colorScheme for easier access
+
     return Scaffold(
         appBar: AppBar(
           title: const Text("Add a Listing"),
+          // AppBar theme is applied globally, specific overrides can be done here if needed
         ),
         body: ListView(
           padding: const EdgeInsets.only(top: 10, left: 15, right: 15),
@@ -135,7 +142,7 @@ class _AddSpaceScreenMaterialState extends State<AddSpaceScreenMaterial> { // Re
                             ),
                             borderSide: BorderSide.none),
                         filled: true,
-                        fillColor: Color(0xfff0f0f0),
+                        fillColor: colorScheme.surfaceVariant.withOpacity(0.5), // Theme color
                         prefixIcon: Icon(
                           Icons.person,
                           size: 22,
@@ -184,7 +191,7 @@ class _AddSpaceScreenMaterialState extends State<AddSpaceScreenMaterial> { // Re
                             ),
                             borderSide: BorderSide.none),
                         filled: true,
-                        fillColor: Color(0xfff0f0f0),
+                        fillColor: colorScheme.surfaceVariant.withOpacity(0.5), // Theme color
                         prefixIcon: Icon(
                           Icons.more_vert,
                           size: 22,
@@ -241,7 +248,7 @@ class _AddSpaceScreenMaterialState extends State<AddSpaceScreenMaterial> { // Re
                             ),
                             borderSide: BorderSide.none),
                         filled: true,
-                        fillColor: Color(0xfff0f0f0),
+                        fillColor: colorScheme.surfaceVariant.withOpacity(0.5), // Theme color
                         prefixIcon: Icon(
                           Icons.sell_outlined,
                           size: 22,
@@ -309,7 +316,7 @@ class _AddSpaceScreenMaterialState extends State<AddSpaceScreenMaterial> { // Re
                       ),
                       borderSide: BorderSide.none),
                   filled: true,
-                  fillColor: Color(0xfff0f0f0),
+                        fillColor: colorScheme.surfaceVariant.withOpacity(0.5), // Theme color
                   prefixIcon: Icon(Icons.location_on_outlined),
                   isDense: true,
                   contentPadding: EdgeInsets.all(0),
@@ -325,28 +332,38 @@ class _AddSpaceScreenMaterialState extends State<AddSpaceScreenMaterial> { // Re
                       propertyLocation = val;
                     });
                   },
+                  initialLocation: propertyLocation, // Pass current location if editing
+                  isEditing: propertyLocation != null,  // Set isEditing based on location presence
                 ));
               },
               child: Container(
                   margin: const EdgeInsets.only(top: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 8.0), // Add some padding for better tap target
+                  decoration: BoxDecoration( // Optional: Add a border or background to make it look more tappable
+                    border: Border.all(color: colorScheme.outline.withOpacity(0.5)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                   child: Row(
                     children: [
-                      CircleAvatar(
-                          backgroundColor: kPrimaryColor.withOpacity(0.2),
-                          child: const Icon(
-                            Icons.location_on_outlined,
-                            color: kPrimaryColor,
-                          )),
-                      const SizedBox(
-                        width: 10,
+                      Padding( // Padding for the icon within the tappable area
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                        child: CircleAvatar(
+                            backgroundColor: colorScheme.primary.withOpacity(0.1), // Theme color
+                            child: Icon(
+                              Icons.location_on_outlined,
+                              color: colorScheme.primary, // Theme color
+                            )),
                       ),
                       const Text('Location on Map'),
                       const Spacer(),
-                      Icon(
-                        Icons.check_circle,
-                        color: propertyLocation == null
-                            ? Colors.grey[400]
-                            : kPrimaryColor,
+                      Padding( // Padding for the check icon
+                        padding: const EdgeInsets.only(right: 12.0),
+                        child: Icon(
+                          Icons.check_circle,
+                          color: propertyLocation == null
+                              ? colorScheme.onSurface.withOpacity(0.4) // Theme color for unchecked
+                              : colorScheme.primary, // Theme color for checked
+                        ),
                       )
                     ],
                   )),
@@ -393,10 +410,10 @@ class _AddSpaceScreenMaterialState extends State<AddSpaceScreenMaterial> { // Re
                     },
                     child: Container(
                         padding: const EdgeInsets.all(20),
-                        color: kPrimaryColor.withOpacity(0.2),
-                        child: const Icon(
+                        color: colorScheme.primary.withOpacity(0.1), // Theme color
+                        child: Icon(
                           Icons.camera_alt_outlined,
-                          color: kPrimaryColor,
+                          color: colorScheme.primary, // Theme color
                         )),
                   ),
                   const SizedBox(
@@ -489,13 +506,13 @@ class _AddSpaceScreenMaterialState extends State<AddSpaceScreenMaterial> { // Re
                         : const Text("Add Property",
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Colors.white)),
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(
-                          kPrimaryColor,
-                        ),
-                        padding: MaterialStateProperty.all(
-                            const EdgeInsets.symmetric(horizontal: 16))),
+                            color: colorScheme.onPrimary)), // Theme color
+                    style: ElevatedButton.styleFrom( // Use ElevatedButton.styleFrom for newer Flutter versions
+                        backgroundColor: colorScheme.primary, // Theme color
+                        foregroundColor: colorScheme.onPrimary, // Theme color for text/icon
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), // Adjust padding
+                        textStyle: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)
+                    ),
                   ),
                 ),
               ),
@@ -560,16 +577,17 @@ class _AddSpaceScreenMaterialState extends State<AddSpaceScreenMaterial> { // Re
                       isCover ? MediaCount.single : MediaCount.multiple,
                       mediaType: MediaType.image,
                       decoration: PickerDecoration(
-                        cancelIcon: const Icon(Icons.close),
-                        albumTitleStyle: TextStyle(
-                            color: Theme.of(context).iconTheme.color,
-                            fontWeight: FontWeight.bold),
+                        cancelIcon: Icon(Icons.close, color: colorScheme.onSurface), // Theme color
+                        albumTitleStyle: textTheme.titleMedium?.copyWith(color: colorScheme.onSurface, fontWeight: FontWeight.bold), // Theme style
                         actionBarPosition: ActionBarPosition.top,
-                        blurStrength: 2,
-                        completeButtonStyle: const ButtonStyle(),
-                        completeTextStyle:
-                        TextStyle(color: Theme.of(context).iconTheme.color),
-                        completeText: 'Select',
+                        blurStrength: 2, // Keep or adjust as desired
+                        // completeButtonStyle: ButtonStyle(), // Can be themed if needed
+                        completeTextStyle: textTheme.labelLarge?.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold), // Theme style
+                        completeText: 'Done', // Changed to "Done" for consistency
+                        selectionColor: colorScheme.primary,
+                        selectedCountBackgroundColor: colorScheme.primary,
+                        selectedCountTextColor: colorScheme.onPrimary,
+                        backgroundColor: colorScheme.surface, // Theme color for picker background
                       ),
                     )),
               ));

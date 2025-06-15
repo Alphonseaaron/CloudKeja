@@ -167,23 +167,44 @@ class _AddSpaceScreenCupertinoState extends State<AddSpaceScreenCupertino> {
   }
 
   void _openMediaPicker(PickerType type) {
-     List<Media> tempMediaList = []; // For MediaPicker
-     showCupertinoModalPopup( // Using CupertinoModalPopup to host MediaPicker
-        context: context,
-        builder: (BuildContext context) => MediaPicker(
-        mediaList: tempMediaList,
-        onPick: (selectedList) {
-          setState(() {
-            _imageFiles.addAll(selectedList.where((m) => m.file != null).map((m) => m.file!));
-          });
-          Navigator.pop(context);
-        },
-        onCancel: () => Navigator.pop(context),
-        mediaCount: MediaCount.multiple, // Allow multiple images
-        mediaType: MediaType.image,
-        pickerType: type, // Pass camera or gallery
-        decoration: const PickerDecoration(completeText: 'Done'), // Minimal decoration
-      )
+    List<Media> tempMediaList = []; // For MediaPicker
+    final cupertinoTheme = CupertinoTheme.of(context); // Get theme for PickerDecoration
+
+    showCupertinoModalPopup( // Using CupertinoModalPopup to host MediaPicker
+      context: context,
+      builder: (BuildContext modalContext) => Container( // Wrap MediaPicker in a themed Container
+        height: MediaQuery.of(context).size.height * 0.7, // Example height
+        color: cupertinoTheme.scaffoldBackgroundColor, // Background for the sheet
+        child: MediaPicker(
+          mediaList: tempMediaList,
+          onPick: (selectedList) {
+            setState(() {
+              _imageFiles.addAll(selectedList.where((m) => m.file != null).map((m) => m.file!));
+            });
+            Navigator.pop(modalContext); // Use modalContext to pop the picker's modal
+          },
+          onCancel: () => Navigator.pop(modalContext), // Use modalContext
+          mediaCount: MediaCount.multiple, // Allow multiple images
+          mediaType: MediaType.image,
+          pickerType: type, // Pass camera or gallery
+          decoration: PickerDecoration( // Cupertino themed decoration
+            cancelIcon: Icon(CupertinoIcons.clear_circled_solid, color: cupertinoTheme.primaryColor),
+            albumTitleStyle: cupertinoTheme.textTheme.navTitleTextStyle.copyWith(
+              color: cupertinoTheme.textTheme.textStyle.color, // Use default text color from theme
+              fontWeight: FontWeight.bold
+            ),
+            actionBarPosition: ActionBarPosition.top,
+            blurStrength: 0, // No blur for solid background
+            completeText: 'Done',
+            completeTextStyle: cupertinoTheme.textTheme.navActionTextStyle.copyWith(
+                color: cupertinoTheme.primaryColor, fontWeight: FontWeight.bold),
+            selectionColor: cupertinoTheme.primaryColor,
+            selectedCountBackgroundColor: cupertinoTheme.primaryColor,
+            selectedCountTextColor: cupertinoTheme.barBackgroundColor, // Text color on primary for count
+            backgroundColor: cupertinoTheme.scaffoldBackgroundColor, // Picker's own background area
+          ),
+        ),
+      ),
     );
   }
 
@@ -314,10 +335,24 @@ class _AddSpaceScreenCupertinoState extends State<AddSpaceScreenCupertino> {
                   additionalInfo: Text(_propertyLocation == null ? 'Not Set' : 'Location Set ✓'),
                   trailing: const CupertinoListTileChevron(),
                   onTap: () async {
-                    final LatLng? result = await Navigator.of(context).push<LatLng>(
-                      MaterialPageRoute(builder: (ctx) => AddOnMap(onChanged: (val){}, initialLocation: _propertyLocation, isEditing: _propertyLocation != null)), // AddOnMap is Material
+                    // final LatLng? result = await Navigator.of(context).push<LatLng>(
+                    //   MaterialPageRoute(builder: (ctx) => AddOnMap(onChanged: (val){}, initialLocation: _propertyLocation, isEditing: _propertyLocation != null)), // AddOnMap is Material
+                    // );
+                    // The above MaterialPageRoute is replaced by CupertinoPageRoute
+                    final selectedLocation = await Navigator.of(context).push<LatLng>(
+                      CupertinoPageRoute(builder: (ctx) => AddOnMap(
+                        onChanged: (val) {
+                          // This callback in AddOnMap is used if it pops itself after selection.
+                          // However, AddOnMap (both versions) now pops itself after calling onChanged.
+                          // The value from pop is what we use.
+                        },
+                        initialLocation: _propertyLocation,
+                        isEditing: _propertyLocation != null,
+                      )),
                     );
-                    if (result != null) setState(() => _propertyLocation = result);
+                    if (selectedLocation != null) {
+                      setState(() => _propertyLocation = selectedLocation);
+                    }
                   },
                 ),
                 CupertinoListTile.notched(

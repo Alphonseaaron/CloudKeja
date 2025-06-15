@@ -1,75 +1,44 @@
-import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter/widgets.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart'; // For LatLng type
 import 'package:provider/provider.dart';
-import 'package:cloudkeja/providers/location_provider.dart';
+import 'package:cloudkeja/services/platform_service.dart';
+import 'package:cloudkeja/screens/landlord/widgets/add_on_map_material.dart';
+import 'package:cloudkeja/screens/landlord/widgets/add_on_map_cupertino.dart';
 
-class AddOnMap extends StatefulWidget {
-  static const routeName = '/add-on-map';
+class AddOnMap extends StatelessWidget {
+  // The routeName can be kept here if this router widget is registered in a route map.
+  // However, often the router itself is not a route, but a decision maker for what to display.
+  // static const routeName = '/add-on-map';
 
-  const AddOnMap({Key? key, this.onChanged}) : super(key: key);
-  final Function(LatLng loc)? onChanged;
-  @override
-  _AddOnMapState createState() => _AddOnMapState();
-}
+  final Function(LatLng loc) onChanged;
+  final LatLng? initialLocation;
+  final bool isEditing;
 
-class _AddOnMapState extends State<AddOnMap> {
-  GoogleMapController? mapController;
-
-  void _onMapCreated(GoogleMapController controller) async {
-    mapController = controller;
-    String value = await DefaultAssetBundle.of(context)
-        .loadString('assets/map_style.json');
-    mapController!.setMapStyle(value);
-  }
+  const AddOnMap({
+    Key? key,
+    required this.onChanged,
+    this.initialLocation,
+    this.isEditing = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final _locationData =
-        Provider.of<LocationProvider>(context, listen: false).locationData;
+    final platformService = Provider.of<PlatformService>(context, listen: false);
 
-    return Scaffold(
-      body: SafeArea(
-        child: GoogleMap(
-          onTap: (value) {
-            showDialog(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                      content: const Text('Confirm the location'),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            widget.onChanged!(value);
-                            Navigator.of(context).pop();
-                            Navigator.of(context).pop();
-                          },
-                          child: Container(
-                              margin:
-                                  const EdgeInsets.symmetric(horizontal: 20),
-                              child: const Text('Yes')),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Container(
-                              margin: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 20),
-                              child: const Text('No')),
-                        ),
-                      ],
-                    ));
-          },
-          onMapCreated: _onMapCreated,
-          compassEnabled: true,
-          myLocationEnabled: true,
-          zoomGesturesEnabled: true,
-          myLocationButtonEnabled: true,
-          initialCameraPosition: CameraPosition(
-              target:
-                  LatLng(_locationData!.latitude!, _locationData.longitude!),
-              zoom: 16),
-        ),
-      ),
-    );
+    if (platformService.useCupertino) {
+      return AddOnMapCupertino(
+        key: key, // Pass key
+        onChanged: onChanged,
+        initialLocation: initialLocation,
+        isEditing: isEditing,
+      );
+    } else {
+      return AddOnMapMaterial(
+        key: key, // Pass key
+        onChanged: onChanged,
+        initialLocation: initialLocation,
+        isEditing: isEditing,
+      );
+    }
   }
 }
