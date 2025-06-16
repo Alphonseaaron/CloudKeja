@@ -28,6 +28,12 @@ class UserModel {
   final String? spCounty;
   final String? spSubCounty; // Or spCity, spTown, etc.
 
+  // New fields for subscription and usage
+  final String? subscriptionTier;
+  final Timestamp? subscriptionExpiryDate;
+  final int? propertyCount;
+  final int? adminUserCount;
+
   UserModel({
     this.userId,
     this.name,
@@ -53,7 +59,15 @@ class UserModel {
     this.spCountry,                     // New constructor parameter
     this.spCounty,                      // New constructor parameter
     this.spSubCounty,                   // New constructor parameter
-  }) : serviceProviderTypes = serviceProviderTypes ?? const []; // Initialize to empty list if null
+    // New constructor parameters for subscription and usage
+    String? subscriptionTier,
+    this.subscriptionExpiryDate,
+    int? propertyCount,
+    int? adminUserCount,
+  }) : serviceProviderTypes = serviceProviderTypes ?? const [],
+       subscriptionTier = subscriptionTier ?? "Starter Plan", // Default value
+       propertyCount = propertyCount ?? 0, // Default value
+       adminUserCount = adminUserCount ?? 0; // Default value
 
 
   Map<String, dynamic> toJson() => {
@@ -82,6 +96,11 @@ class UserModel {
         'spCountry': spCountry,
         'spCounty': spCounty,
         'spSubCounty': spSubCounty,
+        // New fields for JSON
+        'subscriptionTier': subscriptionTier,
+        'subscriptionExpiryDate': subscriptionExpiryDate,
+        'propertyCount': propertyCount,
+        'adminUserCount': adminUserCount,
       };
 
   factory UserModel.fromJson(dynamic json) {
@@ -126,6 +145,11 @@ class UserModel {
       spCountry: data['spCountry'] as String?,
       spCounty: data['spCounty'] as String?,
       spSubCounty: data['spSubCounty'] as String?,
+      // New fields from JSON
+      subscriptionTier: data['subscriptionTier'] as String? ?? "Starter Plan", // Default value
+      subscriptionExpiryDate: data['subscriptionExpiryDate'] as Timestamp?,
+      propertyCount: data['propertyCount'] as int? ?? 0, // Default value
+      adminUserCount: data['adminUserCount'] as int? ?? 0, // Default value
     );
   }
 
@@ -155,6 +179,11 @@ class UserModel {
     String? spCountry,
     String? spCounty,
     String? spSubCounty,
+    // New fields for copyWith
+    String? subscriptionTier,
+    Timestamp? subscriptionExpiryDate,
+    int? propertyCount,
+    int? adminUserCount,
   }) {
     return UserModel(
       userId: userId ?? this.userId,
@@ -181,6 +210,11 @@ class UserModel {
       spCountry: spCountry ?? this.spCountry,
       spCounty: spCounty ?? this.spCounty,
       spSubCounty: spSubCounty ?? this.spSubCounty,
+      // New fields for copyWith
+      subscriptionTier: subscriptionTier ?? this.subscriptionTier,
+      subscriptionExpiryDate: subscriptionExpiryDate ?? this.subscriptionExpiryDate,
+      propertyCount: propertyCount ?? this.propertyCount,
+      adminUserCount: adminUserCount ?? this.adminUserCount,
     );
   }
 }

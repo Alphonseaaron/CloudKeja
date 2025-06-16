@@ -14,7 +14,11 @@ import 'package:cloudkeja/helpers/constants.dart';
 import 'package:cloudkeja/helpers/my_dropdown.dart';
 import 'package:cloudkeja/helpers/my_loader.dart';
 import 'package:cloudkeja/models/space_model.dart';
+import 'package:cloudkeja/models/user_model.dart'; // Added
+import 'package:cloudkeja/providers/auth_provider.dart'; // Added
 import 'package:cloudkeja/providers/post_provider.dart';
+import 'package:cloudkeja/providers/subscription_provider.dart'; // Added
+import 'package:cloudkeja/screens/subscription/subscription_plans_screen.dart'; // Added
 import 'package:cloudkeja/screens/landlord/widgets/add_on_map.dart';
 
 class AddSpaceScreenMaterial extends StatefulWidget { // Renamed class
@@ -471,6 +475,31 @@ class _AddSpaceScreenMaterialState extends State<AddSpaceScreenMaterial> { // Re
                     onPressed: imageFiles.isEmpty || propertyLocation == null
                         ? null
                         : () async {
+                      // --- Subscription Check ---
+                      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                      final UserModel? currentUser = authProvider.user;
+                      final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
+
+                      if (currentUser == null) {
+                        // Should not happen if user is properly authenticated to reach this screen
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("User not found. Please re-login.")),
+                        );
+                        return;
+                      }
+
+                      if (!subscriptionProvider.canAddProperty(currentUser)) {
+                        _showUpgradeDialog(context);
+                        return; // Prevent form submission
+                      }
+                      // --- End Subscription Check ---
+
+                      if (!formKey.currentState!.validate()) {
+                        return; // Form validation failed
+                      }
+                      formKey.currentState!.save();
+
+
                       setState(() {
                         isLoading = true;
                       });
@@ -514,7 +543,7 @@ class _AddSpaceScreenMaterialState extends State<AddSpaceScreenMaterial> { // Re
                         backgroundColor: colorScheme.primary, // Theme color
                         foregroundColor: colorScheme.onPrimary, // Theme color for text/icon
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), // Adjust padding
-                        textStyle: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)
+                        textStyle: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold) // Ensure textTheme is available
                     ),
                   ),
                 ),
@@ -595,6 +624,34 @@ class _AddSpaceScreenMaterialState extends State<AddSpaceScreenMaterial> { // Re
                     )),
               ));
         });
+  }
+
+  void _showUpgradeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          title: const Text('Property Limit Reached'),
+          content: const Text(
+              'You have reached the maximum number of properties for your current subscription plan. Please upgrade to add more.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Upgrade Plan'),
+              onPressed: () {
+                Navigator.of(ctx).pop(); // Close the dialog
+                Navigator.of(context).pushNamed(SubscriptionPlansScreen.routeName);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 

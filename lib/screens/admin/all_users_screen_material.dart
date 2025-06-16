@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart'; // For Timestamp
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // For date formatting
 import 'package:provider/provider.dart';
-// import 'package:cloudkeja/helpers/constants.dart'; // kPrimaryColor replaced by theme
 import 'package:cloudkeja/helpers/loading_effect.dart'; // Themed loading effect
 import 'package:cloudkeja/models/user_model.dart';
 import 'package:cloudkeja/providers/admin_provider.dart';
+import 'package:cloudkeja/providers/subscription_provider.dart'; // Added
 import 'package:cloudkeja/screens/admin/user_actions.dart'; // For actionSheet
 import 'package:skeletonizer/skeletonizer.dart'; // For better loading visuals
 
@@ -231,18 +233,22 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
                             label: Text(
                               user.isVerified == true ? 'Verified' : 'Pending',
                               style: textTheme.labelSmall?.copyWith(
-                                color: user.isVerified == true ? colorScheme.onPrimaryContainer : colorScheme.onErrorContainer, // Example contrast colors
+                                color: user.isVerified == true ? colorScheme.onPrimaryContainer : colorScheme.onErrorContainer,
                               ),
                             ),
                             backgroundColor: user.isVerified == true
-                                ? Colors.green.shade100.withOpacity(0.7) // Light green for verified
-                                : Colors.orange.shade100.withOpacity(0.7), // Light orange for pending
+                                ? Colors.green.shade100.withOpacity(0.7)
+                                : Colors.orange.shade100.withOpacity(0.7),
                             side: BorderSide.none,
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
                             visualDensity: VisualDensity.compact,
                           );
                         }
 
+                        String formattedExpiryDate = 'N/A';
+                        if (user.subscriptionExpiryDate != null) {
+                          formattedExpiryDate = DateFormat('dd MMM yyyy').format(user.subscriptionExpiryDate!.toDate());
+                        }
 
                         return ListTile(
                           leading: CircleAvatar(
@@ -260,15 +266,34 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
                               Flexible(child: Text(user.name ?? 'N/A User', style: textTheme.titleSmall, overflow: TextOverflow.ellipsis)),
                               if (user.isAdmin == true) ...[
                                 const SizedBox(width: 5),
-                                Icon(Icons.shield_outlined, color: colorScheme.secondary, size: 16), // Admin icon
+                                Icon(Icons.shield_outlined, color: colorScheme.secondary, size: 16),
                               ],
                             ],
                           ),
-                          subtitle: Text(user.email ?? 'No email', style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurface.withOpacity(0.7))),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(user.email ?? 'No email', style: textTheme.bodySmall?.copyWith(color: colorScheme.onSurface.withOpacity(0.7))),
+                              const SizedBox(height: 2),
+                              Text(
+                                "Tier: ${user.subscriptionTier ?? 'N/A'} (Expires: $formattedExpiryDate)",
+                                style: textTheme.bodySmall?.copyWith(fontSize: 11, color: colorScheme.onSurface.withOpacity(0.6)),
+                              ),
+                              Text(
+                                "Props: ${user.propertyCount ?? 0}, Admins: ${user.adminUserCount ?? 0}",
+                                style: textTheme.bodySmall?.copyWith(fontSize: 11, color: colorScheme.onSurface.withOpacity(0.6)),
+                              ),
+                            ],
+                          ),
                           trailing: trailingWidget,
                           onTap: () {
-                            // Pass theme data to actionSheet for consistent styling
-                            actionSheet(context, user, theme);
+                            actionSheet(
+                              context,
+                              user,
+                              theme,
+                              onEditSubscription: () => _showEditSubscriptionDialog(context, user, theme),
+                              onSetAdminLimit: () => _showSetAdminLimitDialog(context, user, theme),
+                            );
                           },
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
                         );
@@ -280,6 +305,163 @@ class _AllUsersScreenState extends State<AllUsersScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showEditSubscriptionDialog(BuildContext context, UserModel user, ThemeData theme) {
+    final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
+    final adminProvider = Provider.of<AdminProvider>(context, listen: false);
+    final plans = subscriptionProvider.getSubscriptionPlans();
+    String? selectedTierId = user.subscriptionTier ?? plans.first['id'];
+    DateTime? selectedExpiryDate = user.subscriptionExpiryDate?.toDate();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(builder: (stfContext, stfSetState) {
+          return AlertDialog(
+            title: Text('Edit Subscription for ${user.name}', style: theme.textTheme.titleLarge),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  DropdownButtonFormField<String>(
+                    value: selectedTierId,
+                    decoration: InputDecoration(labelText: 'Subscription Tier', border: OutlineInputBorder()),
+                    items: plans.map((plan) {
+                      return DropdownMenuItem<String>(
+                        value: plan['id'] as String,
+                        child: Text(plan['name'] as String),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      stfSetState(() {
+                        selectedTierId = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  ListTile(
+                    title: Text(selectedExpiryDate == null
+                        ? 'Set Expiry Date'
+                        : 'Expires: ${DateFormat('dd MMM yyyy').format(selectedExpiryDate!)}'),
+                    trailing: Icon(Icons.calendar_today, color: theme.colorScheme.primary),
+                    onTap: () async {
+                      final DateTime? picked = await showDatePicker(
+                        context: stfContext, // Use StatefulBuilder context for date picker
+                        initialDate: selectedExpiryDate ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2101),
+                      );
+                      if (picked != null && picked != selectedExpiryDate) {
+                        stfSetState(() {
+                          selectedExpiryDate = picked;
+                        });
+                      }
+                    },
+                  ),
+                  if (selectedExpiryDate != null)
+                    TextButton(
+                      child: Text('Clear Expiry Date', style: TextStyle(color: theme.colorScheme.error)),
+                      onPressed: () {
+                        stfSetState(() {
+                          selectedExpiryDate = null;
+                        });
+                      },
+                    ),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Cancel'),
+                onPressed: () => Navigator.of(dialogContext).pop(),
+              ),
+              ElevatedButton(
+                child: const Text('Save Changes'),
+                onPressed: () async {
+                  if (selectedTierId == null) return; // Should not happen
+                  final expiryTimestamp = selectedExpiryDate != null ? Timestamp.fromDate(selectedExpiryDate!) : null;
+                  try {
+                    await adminProvider.updateUserSubscriptionTier(user.userId!, selectedTierId!, expiryTimestamp);
+                    Navigator.of(dialogContext).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Subscription updated for ${user.name}.'), backgroundColor: Colors.green),
+                    );
+                    _fetchUsers(forceRefresh: true);
+                  } catch (e) {
+                    Navigator.of(dialogContext).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to update subscription: $e'), backgroundColor: theme.colorScheme.error),
+                    );
+                  }
+                },
+              ),
+            ],
+          );
+        });
+      },
+    );
+  }
+
+  void _showSetAdminLimitDialog(BuildContext context, UserModel user, ThemeData theme) {
+    final adminProvider = Provider.of<AdminProvider>(context, listen: false);
+    final TextEditingController countController = TextEditingController(text: (user.adminUserCount ?? 1).toString());
+    final GlobalKey<FormState> dialogFormKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text('Set Admin Limit for ${user.name}', style: theme.textTheme.titleLarge),
+          content: Form(
+            key: dialogFormKey,
+            child: TextFormField(
+              controller: countController,
+              decoration: InputDecoration(
+                labelText: 'Admin User Count',
+                hintText: 'Enter number (e.g., 1, 5)',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'Count cannot be empty.';
+                final count = int.tryParse(value);
+                if (count == null) return 'Invalid number.';
+                if (count < 1) return 'Count must be at least 1.';
+                return null;
+              },
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.of(dialogContext).pop(),
+            ),
+            ElevatedButton(
+              child: const Text('Save Limit'),
+              onPressed: () async {
+                if (dialogFormKey.currentState!.validate()) {
+                  final newCount = int.parse(countController.text);
+                  try {
+                    await adminProvider.updateLandlordAdminUserCount(user.userId!, newCount);
+                    Navigator.of(dialogContext).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Admin user limit updated for ${user.name}.'), backgroundColor: Colors.green),
+                    );
+                    _fetchUsers(forceRefresh: true);
+                  } catch (e) {
+                    Navigator.of(dialogContext).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Failed to update admin limit: $e'), backgroundColor: theme.colorScheme.error),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

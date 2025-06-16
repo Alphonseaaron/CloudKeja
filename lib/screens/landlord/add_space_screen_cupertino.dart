@@ -9,7 +9,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart'; // For LatLng fro
 import 'package:media_picker_widget/media_picker_widget.dart'; // Material-based picker
 
 import 'package:cloudkeja/models/space_model.dart';
+import 'package:cloudkeja/models/user_model.dart'; // Added
+import 'package:cloudkeja/providers/auth_provider.dart'; // Added
 import 'package:cloudkeja/providers/post_provider.dart';
+import 'package:cloudkeja/providers/subscription_provider.dart'; // Added
+import 'package:cloudkeja/screens/subscription/subscription_plans_screen.dart'; // Added
 import 'package:cloudkeja/screens/landlord/widgets/add_on_map.dart'; // Material-based map screen
 import 'package:cloudkeja/screens/landlord/widgets/cupertino_property_type_picker.dart';
 import 'package:cloudkeja/screens/landlord/widgets/cupertino_amenities_picker.dart';
@@ -83,6 +87,22 @@ class _AddSpaceScreenCupertinoState extends State<AddSpaceScreenCupertino> {
   }
 
   Future<void> _submitForm() async {
+    // --- Subscription Check ---
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final UserModel? currentUser = authProvider.user; // Assuming this holds the current user
+    final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
+
+    if (currentUser == null) {
+      _showErrorDialog('Error', 'User not found. Please re-login.');
+      return;
+    }
+
+    if (!subscriptionProvider.canAddProperty(currentUser)) {
+      _showCupertinoUpgradeDialog(context);
+      return; // Prevent form submission
+    }
+    // --- End Subscription Check ---
+
     if (!_formKey.currentState!.validate()) {
       // Validation messages will be shown by CupertinoTextFormFieldRow
       return;
@@ -95,11 +115,11 @@ class _AddSpaceScreenCupertinoState extends State<AddSpaceScreenCupertino> {
       _showErrorDialog('Images Missing', 'Please upload at least one image for the property.');
       return;
     }
-     if (_selectedCategory == null) {
+    if (_selectedCategory == null) {
       _showErrorDialog('Category Missing', 'Please select a property category.');
       return;
     }
-     if (_selectedRentRate == null) {
+    if (_selectedRentRate == null) {
       _showErrorDialog('Rent Rate Missing', 'Please select a rent rate.');
       return;
     }
@@ -152,6 +172,37 @@ class _AddSpaceScreenCupertinoState extends State<AddSpaceScreenCupertino> {
         content: Text(content),
         actions: [CupertinoDialogAction(isDefaultAction: true, child: const Text('OK'), onPressed: () => Navigator.pop(ctx))],
       ),
+    );
+  }
+
+  void _showCupertinoUpgradeDialog(BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return CupertinoAlertDialog(
+          title: const Text('Property Limit Reached'),
+          content: const Text(
+              'You have reached the maximum number of properties for your current subscription plan. Please upgrade to add more.'),
+          actions: <CupertinoDialogAction>[
+            CupertinoDialogAction(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              child: const Text('Upgrade Plan'),
+              onPressed: () {
+                Navigator.of(ctx).pop(); // Close the dialog
+                // Use pushNamed for consistency if routes are set up, otherwise direct push
+                Navigator.of(context).push(CupertinoPageRoute(
+                    builder: (_) => const SubscriptionPlansScreen()));
+              },
+            ),
+          ],
+        );
+      },
     );
   }
   

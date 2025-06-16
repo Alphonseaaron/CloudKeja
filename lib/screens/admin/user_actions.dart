@@ -7,12 +7,23 @@ import 'package:provider/provider.dart';
 import 'package:cloudkeja/models/chat_provider.dart'; // For initiating chat
 import 'package:cloudkeja/models/user_model.dart';
 import 'package:cloudkeja/providers/admin_provider.dart';
+import 'package:cloudkeja/providers/subscription_provider.dart'; // Added
+import 'package:cloudkeja/screens/admin/all_users_screen_material.dart'; // Potentially for dialogs, or move dialogs
 import 'package:cloudkeja/screens/chat/chat_room.dart';
 import 'package:url_launcher/url_launcher.dart'; // For launching URLs
 import 'package:get/route_manager.dart'; // For Get.to() if needed for profile navigation
+// Note: Dialogs will be called via methods passed to this sheet, or by assuming they exist on the calling screen's context.
+// For simplicity, we'll assume the calling screen (AllUsersScreen) handles showing the dialogs.
+// We'll add callbacks for the new actions.
 
-// Updated signature to accept ThemeData
-void actionSheet(BuildContext context, UserModel user, ThemeData theme) {
+// Updated signature to accept ThemeData and new callbacks
+void actionSheet(
+  BuildContext context,
+  UserModel user,
+  ThemeData theme, {
+  required VoidCallback onEditSubscription, // Callback for editing subscription
+  required VoidCallback onSetAdminLimit,    // Callback for setting admin limit
+}) {
   final String? currentAdminUid = FirebaseAuth.instance.currentUser?.uid; // For chat initiation
   final colorScheme = theme.colorScheme;
   final textTheme = theme.textTheme;
@@ -131,8 +142,31 @@ void actionSheet(BuildContext context, UserModel user, ThemeData theme) {
                   Navigator.pop(buildContext);
                   await adminProvider.setUserLandlordStatus(user.userId!, !(user.isLandlord ?? false));
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Landlord status updated for ${user.name ?? 'User'}.")));
+                  // Consider calling a refresh callback if the main list needs it
                 },
               ),
+              Divider(color: theme.dividerColor),
+
+              // Subscription and Limit Management
+              ListTile(
+                dense: true,
+                leading: Icon(Icons.subscriptions_outlined, size: 22, color: colorScheme.primary),
+                title: Text("Edit Subscription", style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface)),
+                onTap: () {
+                  Navigator.pop(buildContext); // Close sheet
+                  onEditSubscription(); // Call the callback
+                },
+              ),
+              if (user.isLandlord == true)
+                ListTile(
+                  dense: true,
+                  leading: Icon(Icons.admin_panel_settings_outlined, size: 22, color: colorScheme.primary),
+                  title: Text("Set Admin User Limit", style: textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface)),
+                  onTap: () {
+                    Navigator.pop(buildContext); // Close sheet
+                    onSetAdminLimit(); // Call the callback
+                  },
+                ),
 
               // Service Provider Specific Actions
               if (user.role == 'ServiceProvider') ...[
@@ -143,8 +177,7 @@ void actionSheet(BuildContext context, UserModel user, ThemeData theme) {
                     "Service Provider Actions",
                     style: textTheme.titleSmall?.copyWith(
                         color: colorScheme.secondary,
-                        fontWeight: FontWeight.w600
-                    ),
+                        fontWeight: FontWeight.w600),
                   ),
                 ),
                 ListTile(
@@ -219,6 +252,7 @@ void actionSheet(BuildContext context, UserModel user, ThemeData theme) {
                       Navigator.pop(buildContext);
                       await adminProvider.setServiceProviderVerificationStatus(user.userId!, true);
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${user.name ?? 'Provider'} has been VERIFIED.")));
+                      // Consider refresh callback
                     },
                   )
                 else // user.isVerified == true
@@ -230,6 +264,7 @@ void actionSheet(BuildContext context, UserModel user, ThemeData theme) {
                       Navigator.pop(buildContext);
                       await adminProvider.setServiceProviderVerificationStatus(user.userId!, false);
                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("${user.name ?? 'Provider'} has been UNVERIFIED.")));
+                       // Consider refresh callback
                     },
                   ),
               ],

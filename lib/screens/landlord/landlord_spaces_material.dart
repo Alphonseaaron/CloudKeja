@@ -1,13 +1,45 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb_auth; // Aliased
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-// import 'package:cloudkeja/helpers/loading_effect.dart'; // Replaced
 import 'package:cloudkeja/models/space_model.dart';
+import 'package:cloudkeja/models/user_model.dart'; // Added
+import 'package:cloudkeja/providers/auth_provider.dart'; // Added
 import 'package:cloudkeja/providers/post_provider.dart';
+import 'package:cloudkeja/providers/subscription_provider.dart'; // Added
+import 'package:cloudkeja/screens/landlord/add_space_screen_router.dart'; // Added
+import 'package:cloudkeja/screens/subscription/subscription_plans_screen.dart'; // Added
 import 'package:cloudkeja/widgets/space_tile.dart'; // Adaptive SpacerTile router
 
 class LandlordSpacesMaterial extends StatelessWidget {
   const LandlordSpacesMaterial({Key? key}) : super(key: key);
+
+  void _showUpgradeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          title: const Text('Property Limit Reached'),
+          content: const Text(
+              'You have reached the maximum number of properties for your current subscription plan. Please upgrade to add more.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Upgrade Plan'),
+              onPressed: () {
+                Navigator.of(ctx).pop(); // Close the dialog
+                Navigator.of(context).pushNamed(SubscriptionPlansScreen.routeName);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +52,31 @@ class LandlordSpacesMaterial extends StatelessWidget {
       appBar: AppBar(
         title: Text('Your Spaces', style: theme.appBarTheme.titleTextStyle ?? textTheme.titleLarge), // Themed title
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          final authProvider = Provider.of<AuthProvider>(context, listen: false);
+          final UserModel? currentUser = authProvider.user;
+          final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
+
+          if (currentUser == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("User not found. Please re-login.")),
+            );
+            return;
+          }
+
+          if (subscriptionProvider.canAddProperty(currentUser)) {
+            Navigator.of(context).pushNamed(AddSpaceScreenRouter.routeName);
+          } else {
+            _showUpgradeDialog(context);
+          }
+        },
+        child: const Icon(Icons.add),
+        tooltip: 'Add New Property',
+      ),
       body: FutureBuilder<List<SpaceModel>>(
         future: Provider.of<PostProvider>(context, listen: false)
-            .fetchLandlordSpaces(FirebaseAuth.instance.currentUser!.uid),
+            .fetchLandlordSpaces(fb_auth.FirebaseAuth.instance.currentUser!.uid),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator()); // Standard Material loader
