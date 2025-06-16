@@ -24,6 +24,7 @@ class SpaceModel {
   final int? numBathrooms;      // e.g., 1, 2
   final List<String>? amenities; // e.g., ["Parking", "Pets Allowed"]
   final bool isAvailable;      // To filter out unavailable spaces, defaults to true
+  final List<Map<String, dynamic>>? units;
 
   // For testing - can be removed from final model
   final bool? needsAttention;
@@ -50,8 +51,10 @@ class SpaceModel {
     this.numBathrooms,
     List<String>? amenities, // Initialize to empty list if null
     this.isAvailable = true, // Default to true for new spaces
+    this.units,
     this.needsAttention, // For testing
-  }) : amenities = amenities ?? const [];
+  }) : amenities = amenities ?? const [],
+       units = units ?? const [];
 
   Map<String, dynamic> toJson() {
     return {
@@ -74,6 +77,7 @@ class SpaceModel {
       'numBathrooms': numBathrooms,
       'amenities': amenities,
       'isAvailable': isAvailable,
+      'units': units?.map((u) => u).toList(),
       // 'searchKeywords': _generateSearchKeywords(), // Example for search field
     };
   }
@@ -125,6 +129,7 @@ class SpaceModel {
       numBathrooms: data['numBathrooms'] as int?,
       amenities: data['amenities'] != null ? List<String>.from(data['amenities']) : const [],
       isAvailable: data['isAvailable'] as bool? ?? true, // Default to true if missing
+      units: data['units'] != null ? List<Map<String, dynamic>>.from(data['units']) : const [],
       needsAttention: data['needsAttention'] as bool?, // For testing
     );
   }
@@ -149,6 +154,7 @@ class SpaceModel {
     int? numBathrooms,
     List<String>? amenities,
     bool? isAvailable,
+    List<Map<String, dynamic>>? units,
     bool? needsAttention,
   }) {
     return SpaceModel(
@@ -171,6 +177,7 @@ class SpaceModel {
       numBathrooms: numBathrooms ?? this.numBathrooms,
       amenities: amenities ?? this.amenities,
       isAvailable: isAvailable ?? this.isAvailable,
+      units: units ?? this.units,
       needsAttention: needsAttention ?? this.needsAttention,
     );
   }
@@ -196,6 +203,7 @@ class SpaceModel {
       numBathrooms: 0,
       amenities: List.generate(3, (index) => 'Amenity ${index+1}        '), // Placeholder amenities
       isAvailable: true,
+      units: const [],
       needsAttention: false,
     );
   }

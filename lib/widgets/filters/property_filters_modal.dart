@@ -282,6 +282,32 @@ class _PropertyFiltersModalState extends State<PropertyFiltersModal> {
                         },
                       ),
                     ),
+                    Divider(color: theme.dividerColor.withOpacity(0.5)), // Add a divider
+
+                    _buildSectionTitle(context, 'Listing Type'), // New section title
+                    Wrap(
+                      spacing: 8.0,
+                      runSpacing: 4.0,
+                      children: kListingCategories.map((categoryValue) { // Renamed category to categoryValue to avoid conflict
+                        bool isSelected = (_currentFilters.selectedListingCategory == categoryValue && categoryValue != 'Any') ||
+                                          (_currentFilters.selectedListingCategory == null && categoryValue == 'Any');
+                        return ChoiceChip(
+                          label: Text(categoryValue),
+                          selected: isSelected,
+                          onSelected: (bool selected) {
+                            if (selected) {
+                              setState(() {
+                                if (categoryValue == 'Any') {
+                                  _currentFilters = _currentFilters.copyWith(clearSelectedListingCategory: true);
+                                } else {
+                                  _currentFilters = _currentFilters.copyWith(selectedListingCategory: categoryValue);
+                                }
+                              });
+                            }
+                          },
+                        );
+                      }).toList(),
+                    ),
                     const SizedBox(height: 20),
                   ],
                 ),

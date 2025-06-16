@@ -47,6 +47,9 @@ class PostProvider with ChangeNotifier {
     }
     // Consider adding other searchable fields to a 'searchKeywords' array in spaceData
 
+    // Note: space.units are saved here if present in spaceData (from space.toJson()).
+    // Unit management (populating space.units) is typically handled elsewhere,
+    // e.g., on the property details screen after initial creation.
     await docRef.set(spaceData);
     _spaces.insert(0, space);
     notifyListeners();
@@ -72,6 +75,9 @@ class PostProvider with ChangeNotifier {
       spaceData['spaceName_lowercase'] = space.spaceName!.toLowerCase();
     }
 
+    // Note: space.units are saved here if present in spaceData (from space.toJson()).
+    // Unit management (populating/modifying space.units) is typically handled elsewhere,
+    // e.g., on the property details screen.
     await docRef.update(spaceData);
     int index = _spaces.indexWhere((s) => s.id == space.id);
     if (index != -1) {
@@ -149,6 +155,13 @@ class PostProvider with ChangeNotifier {
         } else {
           query = query.where('numBathrooms', isEqualTo: filters.selectedBathrooms);
         }
+      }
+
+      // Add new filter for Listing Category (For Rent / For Sale)
+      // Assumes 'category' field in Firestore stores this distinction.
+      // Assumes filters.selectedListingCategory will be null if "Any" is selected.
+      if (filters.selectedListingCategory != null) {
+        query = query.where('category', isEqualTo: filters.selectedListingCategory);
       }
     }
 
