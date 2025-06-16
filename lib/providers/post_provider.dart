@@ -9,7 +9,8 @@ import 'package:cloudkeja/models/review_model.dart';
 import 'package:cloudkeja/models/space_model.dart';
 import 'package:cloudkeja/models/user_model.dart';
 import 'package:cloudkeja/models/property_filter_state_model.dart'; // Import for filters
-import 'package:cloudkeja/providers/auth_provider.dart'; // For usersRef
+// import 'package:cloudkeja/providers/auth_provider.dart'; // usersRef not directly used here for user updates, _firestore.collection('users') is used.
+import 'package:cloudkeja/providers/subscription_provider.dart'; // Added import
 
 // Define a constant for max price if using < for price range filter end
 const double kMaxPriceForFilter = 10000000.0; // Example: 10 Million KES
@@ -24,7 +25,34 @@ class PostProvider with ChangeNotifier {
     return [..._spaces];
   }
 
+  // Helper to get user model - can be moved to a user service/provider if used frequently
+  Future<UserModel?> _getUserModel(String userId) async {
+    final userDoc = await _firestore.collection('users').doc(userId).get();
+    if (userDoc.exists) {
+      return UserModel.fromJson(userDoc);
+    }
+    return null;
+  }
+
   Future<void> addSpace(SpaceModel space) async {
+    if (space.ownerId == null) {
+      throw Exception("Owner ID is required to add a space.");
+    }
+
+    // --- Subscription Check ---
+    final subscriptionProvider = SubscriptionProvider(); // Instantiate directly
+    final userModel = await _getUserModel(space.ownerId!);
+
+    if (userModel == null) {
+      throw Exception("Owner (user) not found. Cannot verify subscription.");
+    }
+
+    if (!subscriptionProvider.canAddProperty(userModel)) {
+      throw Exception(
+          "You have reached the maximum number of properties for your current subscription plan. Please upgrade to add more.");
+    }
+    // --- End Subscription Check ---
+
     final spaceCollection = _firestore.collection('spaces');
     final docRef = spaceCollection.doc();
     space.id = docRef.id;
@@ -51,7 +79,22 @@ class PostProvider with ChangeNotifier {
     // Unit management (populating space.units) is typically handled elsewhere,
     // e.g., on the property details screen after initial creation.
     await docRef.set(spaceData);
-    _spaces.insert(0, space);
+
+    // --- Increment Property Count ---
+    try {
+      final currentPropertyCount = userModel.propertyCount ?? 0;
+      await _firestore.collection('users').doc(space.ownerId!).update({
+        'propertyCount': currentPropertyCount + 1,
+      });
+    } catch (e) {
+      // Log this error, but don't let it fail the space creation.
+      // Or, decide on a rollback strategy if property count update is critical.
+      print("Error updating property count for user ${space.ownerId}: $e");
+      // Potentially rethrow if this is a critical failure, or handle gracefully.
+    }
+    // --- End Increment Property Count ---
+
+    _spaces.insert(0, space); // Add to local cache
     notifyListeners();
   }
 

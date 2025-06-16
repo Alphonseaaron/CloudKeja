@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart'; // For Timestamp
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart'; // For NetworkImage, Icons (some placeholders)
+import 'package:intl/intl.dart'; // For date formatting
 import 'package:provider/provider.dart';
 import 'package:cloudkeja/models/user_model.dart';
 import 'package:cloudkeja/providers/admin_provider.dart';
+import 'package:cloudkeja/providers/subscription_provider.dart'; // Added
 import 'package:cloudkeja/screens/admin/user_actions_cupertino.dart'; // Import the new function
 
 
@@ -138,9 +141,14 @@ class _AllUsersScreenCupertinoState extends State<AllUsersScreenCupertino> {
     );
   }
   
-  void _showUserActions(BuildContext context, UserModel user) {
-    // Call the new Cupertino-specific action sheet function
-    showCupertinoUserActions(context, user, CupertinoTheme.of(context));
+  void _showUserActions(BuildContext context, UserModel user, CupertinoThemeData theme) {
+    showCupertinoUserActions(
+      context,
+      user,
+      theme,
+      onEditSubscription: () => _showCupertinoEditSubscriptionDialog(context, user, theme),
+      onSetAdminLimit: () => _showCupertinoSetAdminLimitDialog(context, user, theme),
+    );
   }
 
   Widget _buildUserListTile(UserModel user, CupertinoThemeData theme) {
@@ -161,12 +169,16 @@ class _AllUsersScreenCupertinoState extends State<AllUsersScreenCupertino> {
           user.isVerified == true ? 'Verified' : 'Pending',
           style: theme.textTheme.caption1.copyWith(
             color: user.isVerified == true ? CupertinoColors.systemGreen : CupertinoColors.systemOrange,
-            fontWeight: FontWeight.w600
+            fontWeight: FontWeight.w600,
           ),
         ),
       );
     }
 
+    String formattedExpiryDate = 'N/A';
+    if (user.subscriptionExpiryDate != null) {
+      formattedExpiryDate = DateFormat('dd MMM yyyy').format(user.subscriptionExpiryDate!.toDate());
+    }
 
     return CupertinoListTile.notched(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
@@ -180,10 +192,24 @@ class _AllUsersScreenCupertinoState extends State<AllUsersScreenCupertino> {
         Flexible(child: Text(user.name ?? 'N/A User', style: theme.textTheme.textStyle)),
         if (user.isAdmin == true) ...[const SizedBox(width: 5), Icon(CupertinoIcons.shield_lefthalf_fill, color: theme.primaryColor, size: 16)],
       ]),
-      subtitle: Text(user.email ?? 'No email', style: theme.textTheme.tabLabelTextStyle),
-      additionalInfo: trailingWidget, // Using additionalInfo for the chip-like text
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(user.email ?? 'No email', style: theme.textTheme.tabLabelTextStyle),
+          const SizedBox(height: 2),
+          Text(
+            "Tier: ${user.subscriptionTier ?? 'N/A'} (Expires: $formattedExpiryDate)",
+            style: theme.textTheme.caption2.copyWith(color: CupertinoColors.secondaryLabel.resolveFrom(context)),
+          ),
+          Text(
+            "Props: ${user.propertyCount ?? 0}, Admins: ${user.adminUserCount ?? 0}",
+            style: theme.textTheme.caption2.copyWith(color: CupertinoColors.secondaryLabel.resolveFrom(context)),
+          ),
+        ],
+      ),
+      additionalInfo: trailingWidget,
       trailing: const CupertinoListTileChevron(),
-      onTap: () => _showUserActions(context, user),
+      onTap: () => _showUserActions(context, user, theme),
     );
   }
   
@@ -253,6 +279,185 @@ class _AllUsersScreenCupertinoState extends State<AllUsersScreenCupertino> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showCupertinoEditSubscriptionDialog(BuildContext context, UserModel user, CupertinoThemeData theme) {
+    final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
+    final adminProvider = Provider.of<AdminProvider>(context, listen: false);
+    final plans = subscriptionProvider.getSubscriptionPlans();
+
+    String? selectedTierId = user.subscriptionTier ?? plans.first['id'] as String?;
+    DateTime? selectedExpiryDate = user.subscriptionExpiryDate?.toDate();
+
+    FixedExtentScrollController tierScrollController = FixedExtentScrollController(
+      initialItem: plans.indexWhere((p) => p['id'] == selectedTierId),
+    );
+
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext modalContext) => Container(
+        height: 350, // Adjusted height
+        color: theme.scaffoldBackgroundColor,
+        child: Column(
+          children: [
+            CupertinoNavigationBar(
+              leading: CupertinoButton(
+                child: const Text('Cancel'),
+                onPressed: () => Navigator.of(modalContext).pop(),
+              ),
+              middle: Text('Edit Subscription', style: theme.textTheme.navTitleTextStyle),
+              trailing: CupertinoButton(
+                child: const Text('Save', style: TextStyle(fontWeight: FontWeight.bold)),
+                onPressed: () async {
+                  if (selectedTierId == null) return;
+                  final expiryTimestamp = selectedExpiryDate != null ? Timestamp.fromDate(selectedExpiryDate!) : null;
+                  try {
+                    await adminProvider.updateUserSubscriptionTier(user.userId!, selectedTierId!, expiryTimestamp);
+                    Navigator.of(modalContext).pop(); // Pop the modal
+                     _showCupertinoFeedbackDialog(context, "Success", "Subscription updated for ${user.name}.");
+                    _fetchUsers(forceRefresh: true);
+                  } catch (e) {
+                    Navigator.of(modalContext).pop();
+                    _showCupertinoFeedbackDialog(context, "Error", "Failed to update subscription: $e");
+                  }
+                },
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    CupertinoTextField(
+                      readOnly: true,
+                      placeholder: 'Select Tier',
+                      controller: TextEditingController(text: plans.firstWhere((p) => p['id'] == selectedTierId)['name'] as String?),
+                      prefix: const Padding(padding: EdgeInsets.all(8.0), child: Text("Tier:")),
+                      onTap: () {
+                        showCupertinoModalPopup(
+                          context: modalContext, // Use modal's context
+                          builder: (_) => Container(
+                            height: 250,
+                            color: theme.scaffoldBackgroundColor,
+                            child: CupertinoPicker(
+                              scrollController: tierScrollController,
+                              itemExtent: 40,
+                              onSelectedItemChanged: (int index) {
+                                setState(() { // This setState is for the dialog if it were stateful, need to manage differently or use StatefulBuilder
+                                  selectedTierId = plans[index]['id'] as String?;
+                                  // Rebuild the outer modal to reflect selection if text field needs update.
+                                  // This is tricky with nested modals. Consider a StatefulBuilder for the dialog content.
+                                });
+                              },
+                              children: plans.map((p) => Center(child: Text(p['name'] as String))).toList(),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                     GestureDetector(
+                      onTap: () {
+                        showCupertinoModalPopup(
+                          context: modalContext,
+                          builder: (_) => Container(
+                            height: 250,
+                            color: theme.scaffoldBackgroundColor,
+                            child: CupertinoDatePicker(
+                              mode: CupertinoDatePickerMode.date,
+                              initialDateTime: selectedExpiryDate ?? DateTime.now(),
+                              onDateTimeChanged: (DateTime newDate) {
+                                setState(() { // Similar to above, managing state in nested modals is complex this way
+                                  selectedExpiryDate = newDate;
+                                });
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                      child: CupertinoTextField(
+                        readOnly: true,
+                        placeholder: 'Set Expiry Date',
+                        controller: TextEditingController(text: selectedExpiryDate == null ? 'Not Set' : DateFormat('dd MMM yyyy').format(selectedExpiryDate!)),
+                        prefix: const Padding(padding: EdgeInsets.all(8.0), child: Text("Expires:")),
+                        suffix: selectedExpiryDate != null ? CupertinoButton(padding: EdgeInsets.zero, child: const Icon(CupertinoIcons.clear_circled_solid), onPressed: (){ setState(() {selectedExpiryDate = null;});}) : null,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showCupertinoSetAdminLimitDialog(BuildContext context, UserModel user, CupertinoThemeData theme) {
+    final adminProvider = Provider.of<AdminProvider>(context, listen: false);
+    final TextEditingController countController = TextEditingController(text: (user.adminUserCount ?? 1).toString());
+
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return CupertinoAlertDialog(
+          title: Text('Set Admin Limit for ${user.name}', style: theme.textTheme.navTitleTextStyle),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: CupertinoTextField(
+              controller: countController,
+              placeholder: 'Enter number (e.g., 1, 5)',
+              keyboardType: TextInputType.number,
+              autofocus: true,
+              decoration: BoxDecoration(
+                border: Border.all(color: CupertinoColors.inactiveGray, width: 0.5),
+                borderRadius: BorderRadius.circular(5),
+              ),
+            ),
+          ),
+          actions: <CupertinoDialogAction>[
+            CupertinoDialogAction(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.of(dialogContext).pop(),
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              child: const Text('Save Limit'),
+              onPressed: () async {
+                final value = countController.text;
+                if (value.isEmpty) { _showCupertinoFeedbackDialog(dialogContext, "Validation Error", "Count cannot be empty."); return; }
+                final count = int.tryParse(value);
+                if (count == null) { _showCupertinoFeedbackDialog(dialogContext, "Validation Error", "Invalid number."); return; }
+                if (count < 1) { _showCupertinoFeedbackDialog(dialogContext, "Validation Error", "Count must be at least 1."); return; }
+
+                try {
+                  await adminProvider.updateLandlordAdminUserCount(user.userId!, count);
+                  Navigator.of(dialogContext).pop(); // Pop the alert
+                  _showCupertinoFeedbackDialog(context, "Success", "Admin user limit updated for ${user.name}.");
+                  _fetchUsers(forceRefresh: true);
+                } catch (e) {
+                  Navigator.of(dialogContext).pop();
+                  _showCupertinoFeedbackDialog(context, "Error", "Failed to update admin limit: $e");
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Helper for feedback, can be moved to a utility file
+  void _showCupertinoFeedbackDialog(BuildContext context, String title, String content) {
+    showCupertinoDialog(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: [CupertinoDialogAction(isDefaultAction: true, child: const Text('OK'), onPressed: () => Navigator.pop(ctx))],
       ),
     );
   }

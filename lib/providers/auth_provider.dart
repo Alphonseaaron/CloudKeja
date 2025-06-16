@@ -23,12 +23,22 @@ class AuthProvider with ChangeNotifier {
   Future<void> signUp(UserModel userModel) async {
     final result = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: userModel.email!.trim(), password: userModel.password!.trim());
-    userModel.userId = result.user!.uid;
+
+    // userModel.userId = result.user!.uid; // userId is already set in the constructor or copyWith
     final id = result.user!.uid;
 
-    await usersRef.doc(id).set(userModel.toJson());
+    // Create a new UserModel with the additional fields set
+    UserModel newUser = userModel.copyWith(
+      userId: id, // Ensure userId is correctly set from auth result
+      subscriptionTier: "Starter Plan",
+      propertyCount: 0,
+      adminUserCount: 1, // Landlord themselves
+      subscriptionExpiryDate: null, // Explicitly null, can be Timestamp.now() or other logic if needed
+    );
 
-    getCurrentUser();
+    await usersRef.doc(id).set(newUser.toJson());
+
+    getCurrentUser(); // This will fetch the newly created user data
   }
 
   Future<UserModel> getCurrentUser() async {

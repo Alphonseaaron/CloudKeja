@@ -117,4 +117,46 @@ class AdminProvider with ChangeNotifier {
       throw error; // Rethrow to be caught by UI and show appropriate message
     }
   }
+
+  // --- Subscription Management by Admin ---
+
+  Future<void> updateUserSubscriptionTier(String targetUserId, String newTierId, Timestamp? expiryDate) async {
+    try {
+      await _usersCollection.doc(targetUserId).update({
+        'subscriptionTier': newTierId,
+        'subscriptionExpiryDate': expiryDate,
+        'updatedAt': Timestamp.now(), // Track when this change was made
+      });
+      debugPrint('Subscription tier for $targetUserId updated to $newTierId with expiry $expiryDate');
+      // notifyListeners(); // If admin UI has a live view of user details that needs refresh
+    } catch (error) {
+      debugPrint('Error updating subscription tier for $targetUserId: $error');
+      throw error;
+    }
+  }
+
+  // --- Admin User Count Management for Landlord by Admin ---
+
+  Future<void> updateLandlordAdminUserCount(String landlordUserId, int newAdminUserCount) async {
+    if (newAdminUserCount < 1) {
+      throw ArgumentError("Admin user count cannot be less than 1.");
+    }
+    try {
+      // Optional: Verify the user is indeed a landlord if necessary
+      // final userDoc = await _usersCollection.doc(landlordUserId).get();
+      // if (!userDoc.exists || !(userDoc.data() as Map<String, dynamic>)['isLandlord']) {
+      //   throw Exception("Target user is not a landlord.");
+      // }
+
+      await _usersCollection.doc(landlordUserId).update({
+        'adminUserCount': newAdminUserCount,
+        'updatedAt': Timestamp.now(), // Track when this change was made
+      });
+      debugPrint('Admin user count for landlord $landlordUserId updated to $newAdminUserCount');
+      // notifyListeners(); // If admin UI has a live view of user details
+    } catch (error) {
+      debugPrint('Error updating admin user count for landlord $landlordUserId: $error');
+      throw error;
+    }
+  }
 }

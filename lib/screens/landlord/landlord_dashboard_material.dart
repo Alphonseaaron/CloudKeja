@@ -10,6 +10,8 @@ import 'package:cloudkeja/screens/landlord/finances/finance_overview_screen.dart
 import 'package:cloudkeja/screens/landlord/landlord_spaces.dart'; // Assuming this is Material or adaptive
 import 'package:cloudkeja/screens/landlord/widgets/recent_tenants.dart'; // Adaptive router
 import 'package:cloudkeja/screens/landlord/landlord_view_tenant_details_screen.dart'; // Assuming this is Material or adaptive
+import 'package:cloudkeja/providers/subscription_provider.dart'; // Added
+import 'package:cloudkeja/screens/subscription/subscription_plans_screen.dart'; // Added
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:cloudkeja/services/walkthrough_service.dart';
@@ -191,7 +193,29 @@ class _LandlordDashboardMaterialState extends State<LandlordDashboardMaterial> {
         'icon': Icons.people_alt_outlined,
         'title': 'All\nTenants',
         'onPressed': () => Get.to(() => const AllTenantsScreenRouter()), // Use router
-        'color': colorScheme.tertiaryContainer, // Themed color
+        'color': colorScheme.errorContainer, // Changed for variety, ensure it's defined in theme
+      },
+      {
+        'icon': Icons.group_add_outlined,
+        'title': 'Manage\nTeam',
+        'onPressed': () {
+          if (_user == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("User data not loaded yet. Please wait.")),
+            );
+            return;
+          }
+          final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
+          if (subscriptionProvider.canAddAdminUser(_user!)) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Navigate to Manage Team Screen (Not Implemented)")),
+            );
+            // TODO: Implement navigation to actual Manage Team screen
+          } else {
+            _showAdminLimitUpgradeDialog(context);
+          }
+        },
+        'color': colorScheme.surfaceTint, // Example color, ensure good contrast
       },
     ];
 
@@ -208,7 +232,7 @@ class _LandlordDashboardMaterialState extends State<LandlordDashboardMaterial> {
           ),
           body: RefreshIndicator(
             onRefresh: () async {
-              if(mounted) setState(() { _isLoadingUser = true; });
+              if(mounted) setState(() { _isLoadingUser = true; }); // Check mounted before setState
               await _fetchUserData();
             },
             child: ListView(
@@ -239,18 +263,26 @@ class _LandlordDashboardMaterialState extends State<LandlordDashboardMaterial> {
                   // No specific shapeBorder for a Row, default rectangle is fine.
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: actions.map((action) {
-                        return _buildActionButton(
-                          context: context,
-                          icon: action['icon'] as IconData,
-                          title: action['title'] as String,
-                          onPressed: action['onPressed'] as VoidCallback,
-                          iconContainerColor: action['color'] as Color,
+                    child: LayoutBuilder( // Use LayoutBuilder for responsive row if needed
+                      builder: (context, constraints) {
+                        final itemWidth = constraints.maxWidth / actions.length;
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: actions.map((action) {
+                            return SizedBox( // Ensure items don't overflow if titles are long
+                              width: itemWidth > 80 ? 80 : itemWidth, // Example width constraint
+                              child: _buildActionButton(
+                                context: context,
+                                icon: action['icon'] as IconData,
+                                title: action['title'] as String,
+                                onPressed: action['onPressed'] as VoidCallback,
+                                iconContainerColor: action['color'] as Color,
+                              ),
+                            );
+                          }).toList(),
                         );
-                      }).toList(),
+                      }
                     ),
                   ),
                 ),
@@ -310,6 +342,34 @@ class _LandlordDashboardMaterialState extends State<LandlordDashboardMaterial> {
           ),
         );
       }),
+    );
+  }
+
+  void _showAdminLimitUpgradeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          title: const Text('Admin User Limit Reached'),
+          content: const Text(
+              'You have reached the maximum number of admin users for your current subscription plan. Please upgrade to add more.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Upgrade Plan'),
+              onPressed: () {
+                Navigator.of(ctx).pop(); // Close the dialog
+                Navigator.of(context).pushNamed(SubscriptionPlansScreen.routeName);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -10,6 +10,8 @@ import 'package:cloudkeja/screens/landlord/finances/finance_overview_screen.dart
 import 'package:cloudkeja/screens/landlord/landlord_spaces.dart'; // Assuming adaptive or Material for now
 import 'package:cloudkeja/screens/landlord/widgets/recent_tenants.dart'; // Adaptive Router
 import 'package:cloudkeja/screens/landlord/landlord_view_tenant_details_screen.dart'; // Assuming adaptive or Material
+import 'package:cloudkeja/providers/subscription_provider.dart'; // Added
+import 'package:cloudkeja/screens/subscription/subscription_plans_screen.dart'; // Added
 import 'package:showcaseview/showcaseview.dart';
 import 'package:cloudkeja/services/walkthrough_service.dart';
 
@@ -163,6 +165,37 @@ class _LandlordDashboardCupertinoState extends State<LandlordDashboardCupertino>
       {'icon': CupertinoIcons.square_list_fill, 'title': 'View\nSpaces', 'onPressed': () => Get.to(() => const LandlordSpaces())},
       {'icon': CupertinoIcons.money_dollar_circle_fill, 'title': 'View\nFinances', 'onPressed': () => Get.to(() => const FinanceOverviewScreen())},
       {'icon': CupertinoIcons.person_3_fill, 'title': 'All\nTenants', 'onPressed': () => Get.to(() => const AllTenantsScreenRouter())},
+      {
+        'icon': CupertinoIcons.group,
+        'title': 'Manage\nTeam',
+        'onPressed': () {
+          if (_user == null) {
+             showCupertinoDialog(
+                context: context,
+                builder: (ctx) => CupertinoAlertDialog(
+                  title: const Text('Error'),
+                  content: const Text('User data not loaded yet. Please wait.'),
+                  actions: [CupertinoDialogAction(isDefaultAction: true, child: const Text('OK'), onPressed: () => Navigator.pop(ctx))],
+                ),
+              );
+            return;
+          }
+          final subscriptionProvider = Provider.of<SubscriptionProvider>(context, listen: false);
+          if (subscriptionProvider.canAddAdminUser(_user!)) {
+            showCupertinoDialog(
+              context: context,
+              builder: (ctx) => CupertinoAlertDialog(
+                title: const Text('Manage Team'),
+                content: const Text('Navigation to Manage Team Screen (Not Implemented).'),
+                actions: [CupertinoDialogAction(isDefaultAction: true, child: const Text('OK'), onPressed: () => Navigator.pop(ctx))],
+              ),
+            );
+            // TODO: Implement navigation
+          } else {
+            _showCupertinoAdminLimitUpgradeDialog(context);
+          }
+        }
+      },
     ];
 
     return ShowCaseWidget(
@@ -268,6 +301,36 @@ class _LandlordDashboardCupertinoState extends State<LandlordDashboardCupertino>
           ),
         );
       }),
+    );
+  }
+
+  void _showCupertinoAdminLimitUpgradeDialog(BuildContext context) {
+    showCupertinoDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return CupertinoAlertDialog(
+          title: const Text('Admin User Limit Reached'),
+          content: const Text(
+              'You have reached the maximum number of admin users for your current subscription plan. Please upgrade to add more.'),
+          actions: <CupertinoDialogAction>[
+            CupertinoDialogAction(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              child: const Text('Upgrade Plan'),
+              onPressed: () {
+                Navigator.of(ctx).pop(); // Close the dialog
+                Navigator.of(context).push(CupertinoPageRoute(
+                    builder: (_) => const SubscriptionPlansScreen()));
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

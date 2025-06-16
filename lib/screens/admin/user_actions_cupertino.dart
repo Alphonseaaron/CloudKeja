@@ -55,7 +55,13 @@ Future<bool> _showCupertinoConfirmationDialog(BuildContext context, String title
 }
 
 
-void showCupertinoUserActions(BuildContext context, UserModel user, CupertinoThemeData cupertinoTheme) {
+void showCupertinoUserActions(
+  BuildContext context,
+  UserModel user,
+  CupertinoThemeData cupertinoTheme, {
+  required VoidCallback onEditSubscription,
+  required VoidCallback onSetAdminLimit,
+}) {
   final String? currentAdminUid = FirebaseAuth.instance.currentUser?.uid;
   final adminProvider = Provider.of<AdminProvider>(context, listen: false);
 
@@ -148,6 +154,29 @@ void showCupertinoUserActions(BuildContext context, UserModel user, CupertinoThe
       }
     },
   ));
+
+  // --- Subscription Management ---
+  actions.add(CupertinoActionSheetAction(
+    leading: Icon(CupertinoIcons.money_dollar_circle, color: cupertinoTheme.primaryColor), // Or CupertinoIcons.pencil_ellipsis_rectangle
+    child: Text("Edit Subscription", style: TextStyle(color: cupertinoTheme.primaryColor)),
+    onPressed: () {
+      Navigator.pop(context); // Close action sheet
+      onEditSubscription();
+    },
+  ));
+
+  if (user.isLandlord == true) {
+    actions.add(CupertinoActionSheetAction(
+      leading: Icon(CupertinoIcons.person_crop_circle_badge_plus, color: cupertinoTheme.primaryColor),
+      child: Text("Set Admin User Limit", style: TextStyle(color: cupertinoTheme.primaryColor)),
+      onPressed: () {
+        Navigator.pop(context); // Close action sheet
+        onSetAdminLimit();
+      },
+    ));
+  }
+  // --- End Subscription Management ---
+
 
   // Service Provider Specific Actions
   if (user.role == 'ServiceProvider') {
