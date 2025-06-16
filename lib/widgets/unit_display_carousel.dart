@@ -259,7 +259,49 @@ class UnitDisplayCarousel extends StatelessWidget {
                 Navigator.of(dialogContext).pop();
               },
             ),
-            TextButton(
+            if (isEditing)
+              TextButton(
+                child: Text('Delete', style: TextStyle(color: Theme.of(dialogContext).colorScheme.error)),
+                onPressed: () {
+                  // Show confirmation dialog logic
+                  showDialog(
+                    context: dialogContext, // Shows on top of the current edit dialog
+                    builder: (BuildContext confirmCtx) {
+                      return AlertDialog(
+                        title: Text('Confirm Delete'),
+                        content: Text('Are you sure you want to delete unit "${existingUnit!['unitNumber']}"? This cannot be undone.'),
+                        actions: [
+                          TextButton(
+                            child: const Text('Cancel'),
+                            onPressed: () => Navigator.of(confirmCtx).pop(),
+                          ),
+                          TextButton(
+                            child: Text('Delete', style: TextStyle(color: Theme.of(dialogContext).colorScheme.error)),
+                            onPressed: () {
+                              Provider.of<PostProvider>(context, listen: false)
+                                  .deleteUnitFromSpace(spaceId, existingUnit['unitId'] as String)
+                                  .then((_) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Unit "${existingUnit['unitNumber']}" deleted successfully.')),
+                                    );
+                                    Navigator.of(confirmCtx).pop(); // Close confirmation dialog
+                                    Navigator.of(dialogContext).pop(); // Close edit unit dialog
+                                  })
+                                  .catchError((error) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Error deleting unit: $error'), backgroundColor: Colors.red),
+                                    );
+                                    Navigator.of(confirmCtx).pop(); // Close confirmation dialog
+                                  });
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+            TextButton( // This is the main action button (Save/Add)
               child: Text(isEditing ? 'Save Changes' : 'Add Unit'),
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
@@ -277,21 +319,20 @@ class UnitDisplayCarousel extends StatelessWidget {
                     'unitNumber': unitNumber,
                     'status': status,
                     'floor': floor,
-                    // Add other fields as necessary, e.g., tenantId: null
                   };
 
                   if (isEditing) {
                     postProvider.updateUnitInSpace(spaceId, unitId, unitData)
                       .then((_) => Navigator.of(dialogContext).pop())
                       .catchError((err) {
-                        Navigator.of(dialogContext).pop(); // Pop the dialog
+                        // Navigator.of(dialogContext).pop(); // Optionally pop on error too
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error updating unit: $err'), backgroundColor: Colors.red));
                       });
                   } else {
                     postProvider.addUnitToSpace(spaceId, unitData)
                       .then((_) => Navigator.of(dialogContext).pop())
                       .catchError((err) {
-                         Navigator.of(dialogContext).pop(); // Pop the dialog
+                         // Navigator.of(dialogContext).pop(); // Optionally pop on error too
                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error adding unit: $err'), backgroundColor: Colors.red));
                       });
                   }
