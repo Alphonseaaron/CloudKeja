@@ -223,4 +223,90 @@ class PostProvider with ChangeNotifier {
     _spaces.removeWhere((space) => space.id == id);
     notifyListeners();
   }
+
+  Future<void> addUnitToSpace(String spaceId, Map<String, dynamic> newUnitData) async {
+    if (newUnitData['unitId'] == null) {
+      throw ArgumentError("New unit data must include a unique 'unitId'.");
+    }
+    final docRef = _firestore.collection('spaces').doc(spaceId);
+    await docRef.update({
+      'units': FieldValue.arrayUnion([newUnitData])
+    });
+
+    // Optional: Update local cache if necessary
+    int index = _spaces.indexWhere((s) => s.id == spaceId);
+    if (index != -1) {
+      // Create a new list of units for the updated space
+      List<Map<String, dynamic>> updatedUnits =
+          List<Map<String, dynamic>>.from(_spaces[index].units ?? []);
+      updatedUnits.add(newUnitData);
+      _spaces[index] = _spaces[index].copyWith(units: updatedUnits);
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateUnitInSpace(String spaceId, String unitIdToUpdate, Map<String, dynamic> updatedUnitData) async {
+    if (updatedUnitData['unitId'] == null || updatedUnitData['unitId'] != unitIdToUpdate) {
+      throw ArgumentError("Updated unit data must include a matching 'unitId'.");
+    }
+    final docRef = _firestore.collection('spaces').doc(spaceId);
+
+    // Read-modify-write
+    return _firestore.runTransaction((transaction) async {
+      DocumentSnapshot snapshot = await transaction.get(docRef);
+      if (!snapshot.exists) {
+        throw Exception("Space document not found!");
+      }
+
+      List<Map<String, dynamic>> units = List<Map<String, dynamic>>.from(
+          (snapshot.data() as Map<String, dynamic>)['units'] ?? []);
+
+      int unitIndex = units.indexWhere((u) => u['unitId'] == unitIdToUpdate);
+
+      if (unitIndex != -1) {
+        units[unitIndex] = updatedUnitData; // Replace the old unit with the new data
+        transaction.update(docRef, {'units': units});
+
+        // Optional: Update local cache
+        int spaceIndexInCache = _spaces.indexWhere((s) => s.id == spaceId);
+        if (spaceIndexInCache != -1) {
+          _spaces[spaceIndexInCache] = _spaces[spaceIndexInCache].copyWith(units: List<Map<String,dynamic>>.from(units));
+          notifyListeners();
+        }
+      } else {
+        // Handle case where unit to update is not found, though this shouldn't happen if UI is correct
+        debugPrint("Unit with ID $unitIdToUpdate not found in space $spaceId for update.");
+      }
+    });
+  }
+
+  Future<void> deleteUnitFromSpace(String spaceId, String unitIdToDelete) async {
+    final docRef = _firestore.collection('spaces').doc(spaceId);
+
+    // Read-modify-write for robust deletion based on ID
+    return _firestore.runTransaction((transaction) async {
+      DocumentSnapshot snapshot = await transaction.get(docRef);
+      if (!snapshot.exists) {
+        throw Exception("Space document not found!");
+      }
+
+      List<Map<String, dynamic>> units = List<Map<String, dynamic>>.from(
+          (snapshot.data() as Map<String, dynamic>)['units'] ?? []);
+
+      List<Map<String, dynamic>> updatedUnits = units.where((u) => u['unitId'] != unitIdToDelete).toList();
+
+      if (units.length != updatedUnits.length) { // Check if a unit was actually removed
+          transaction.update(docRef, {'units': updatedUnits});
+
+          // Optional: Update local cache
+          int spaceIndexInCache = _spaces.indexWhere((s) => s.id == spaceId);
+          if (spaceIndexInCache != -1) {
+              _spaces[spaceIndexInCache] = _spaces[spaceIndexInCache].copyWith(units: updatedUnits);
+              notifyListeners();
+          }
+      } else {
+          debugPrint("Unit with ID $unitIdToDelete not found in space $spaceId for deletion.");
+      }
+    });
+  }
 }

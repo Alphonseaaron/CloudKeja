@@ -21,6 +21,7 @@ import 'package:cloudkeja/widgets/content_intro.dart';
 // import 'package:cloudkeja/widgets/details_app_bar.dart'; // Replaced by DetailsAppBarRouter
 import 'package:cloudkeja/widgets/details_app_bar_router.dart'; // Import the router
 import 'package:cloudkeja/widgets/house_info.dart';
+import 'package:cloudkeja/widgets/unit_display_carousel.dart';
 
 class DetailsScreenMaterial extends StatelessWidget { // Renamed class
   final SpaceModel space;
@@ -56,6 +57,14 @@ class DetailsScreenMaterial extends StatelessWidget { // Renamed class
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
 
+    // Unit Counts Logic
+    int totalUnits = space.units?.length ?? 0;
+    int vacantUnits = space.units?.where((u) => u['status'] == 'vacant').length ?? 0; // Inlined status
+    int availableUnits = space.units?.where((u) => u['status'] == 'vacant' || u['status'] == 'pending_move_out').length ?? 0; // Inlined status
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final bool isOwner = authProvider.user?.userId == space.ownerId;
+
     return Scaffold(
       backgroundColor: colorScheme.background,
       // Using Stack to keep the bottom action bar persistent over scrollable content
@@ -71,6 +80,33 @@ class DetailsScreenMaterial extends StatelessWidget { // Renamed class
               _buildSectionContent(const HouseInfo()), // Assumes HouseInfo has its own padding
               _buildSectionContent(OwnerTile(userId: space.ownerId)),
               _buildSectionContent(About(space: space)),
+
+              // Unit Counts Section
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Unit Information', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      if (totalUnits > 0) ...[ // Only show if there's unit data
+                        Text('Total Units: $totalUnits', style: textTheme.bodyLarge),
+                        Text('Available Units (Vacant or Pending): $availableUnits', style: textTheme.bodyLarge),
+                        Text('Strictly Vacant Units: $vacantUnits', style: textTheme.bodyLarge),
+                        const SizedBox(height: 16),
+                        UnitDisplayCarousel(
+                          units: space.units ?? [],
+                          isOwner: isOwner, // Pass the isOwner flag
+                          spaceId: space.id!, // Pass the spaceId
+                        ),
+                      ] else ...[
+                        Text('No unit information available for this property.', style: textTheme.bodyLarge?.copyWith(fontStyle: FontStyle.italic)),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
 
               _buildSectionTitle(context, 'Reviews & Ratings'),
               _buildSectionContent(SpaceReviews(spaceId: space.id!)),
