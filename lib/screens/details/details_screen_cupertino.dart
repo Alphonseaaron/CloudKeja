@@ -18,6 +18,7 @@ import 'package:cloudkeja/helpers/review_widget.dart';      // UserReview for di
 import 'package:cloudkeja/screens/details/space_location.dart';
 import 'package:cloudkeja/screens/payment/payment_screen.dart'; // Assuming this screen is adaptive or will be handled by its own router
 import 'package:cloudkeja/screens/chat/chat_room.dart'; // Assuming this screen is adaptive or will be handled by its own router
+import 'package:cloudkeja/widgets/unit_display_carousel.dart';
 
 
 class DetailsScreenCupertino extends StatelessWidget {
@@ -56,6 +57,14 @@ class DetailsScreenCupertino extends StatelessWidget {
   Widget build(BuildContext context) {
     final cupertinoTheme = CupertinoTheme.of(context);
 
+    // Unit Counts Logic
+    int totalUnits = space.units?.length ?? 0;
+    int vacantUnits = space.units?.where((u) => u['status'] == 'vacant').length ?? 0; // Inlined status
+    int availableUnits = space.units?.where((u) => u['status'] == 'vacant' || u['status'] == 'pending_move_out').length ?? 0; // Inlined status
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final bool isOwner = authProvider.user?.userId == space.ownerId;
+
     // TODO: Adapt ContentIntro, HouseInfo, OwnerTile, About, SpaceReviews, UserReview, SpaceLocation
     // to be more Cupertino-styled or create Cupertino variants if they are too Material-specific.
     // For now, they are used as-is.
@@ -74,6 +83,36 @@ class DetailsScreenCupertino extends StatelessWidget {
               _buildSectionContent(const HouseInfo()), // Needs review
               _buildSectionContent(OwnerTile(userId: space.ownerId)), // Needs review
               _buildSectionContent(About(space: space)), // Needs review
+
+              // Unit Counts Section (Cupertino styled)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0), // Standard padding
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Unit Information',
+                        style: CupertinoTheme.of(context).textTheme.navTitleTextStyle.copyWith(fontSize: 20),
+                      ),
+                      const SizedBox(height: 8),
+                      if (totalUnits > 0) ...[
+                        Text('Total Units: $totalUnits', style: CupertinoTheme.of(context).textTheme.textStyle),
+                        Text('Available Units (Vacant or Pending): $availableUnits', style: CupertinoTheme.of(context).textTheme.textStyle),
+                        Text('Strictly Vacant Units: $vacantUnits', style: CupertinoTheme.of(context).textTheme.textStyle),
+                        const SizedBox(height: 16),
+                        UnitDisplayCarousel(
+                          units: space.units ?? [],
+                          isOwner: isOwner, // Pass the isOwner flag
+                          spaceId: space.id!, // Pass the spaceId
+                        ), // The carousel is Material-based for now
+                      ] else ...[
+                         Text('No unit information available for this property.', style: CupertinoTheme.of(context).textTheme.textStyle.copyWith(fontStyle: FontStyle.italic)),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
 
               _buildSectionTitle(context, 'Reviews & Ratings'),
               _buildSectionContent(SpaceReviews(spaceId: space.id!)), // Needs review
