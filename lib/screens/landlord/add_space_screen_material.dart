@@ -45,7 +45,10 @@ class _AddSpaceScreenMaterialState extends State<AddSpaceScreenMaterial> { // Re
   String? rentTime;
   String? rentRate;
 
+  // TODO: Consider moving category options to a centralized config (e.g., app_config.dart)
   List<String> options = [
+    'For Rent', // Added
+    'For Sale', // Added
     'Apartment',
     'Airbnb',
     'Conference Room',

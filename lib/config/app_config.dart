@@ -71,6 +71,8 @@ const List<int> kBedroomOptions = [0, 1, 2, 3, 4, 5];
 // Options for number of bathrooms. 0 represents "Any", 3 represents "3+".
 const List<int> kBathroomOptions = [0, 1, 2, 3];
 
+// Options for listing category (e.g., For Rent, For Sale).
+const List<String> kListingCategories = ['Any', 'For Rent', 'For Sale'];
 
 // Example of other app-wide configurations that might go here:
 // const String kAppVersion = "1.0.0";

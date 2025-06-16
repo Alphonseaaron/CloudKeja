@@ -45,7 +45,10 @@ class _EditSpaceScreenMaterialState extends State<EditSpaceScreenMaterial> {
   String? rentRate; // String representation e.g. "Monthly"
   // int? rentTime; // Integer representation for calculation, derived from rentRate
 
+  // TODO: Consider moving category options to a centralized config (e.g., app_config.dart)
   List<String> options = [
+    'For Rent', // Added
+    'For Sale', // Added
     'Apartment', 'Airbnb', 'Conference Room', 'Event Grounds', 'House',
     'Hostel', 'Hotel', 'Office', 'Stall', 'Store shelf', 'Warehouse', 'Utility',
   ];

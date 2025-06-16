@@ -15,7 +15,19 @@ import 'package:cloudkeja/screens/landlord/widgets/cupertino_property_type_picke
 import 'package:cloudkeja/screens/landlord/widgets/cupertino_amenities_picker.dart';
 // TODO: Define kPropertyTypes, kPropertyAmenities, kRentRates if not globally available from app_config.dart
 // For now, using placeholder lists.
-const List<String> _kPropertyTypes = ['Apartment', 'House', 'Condo', 'Townhouse', 'Office', 'Shop', 'Warehouse', 'Other'];
+// TODO: Consider moving property type options to a centralized config (e.g., app_config.dart)
+const List<String> _kPropertyTypes = [
+  'For Rent', // Added
+  'For Sale', // Added
+  'Apartment',
+  'House',
+  'Condo',
+  'Townhouse',
+  'Office',
+  'Shop',
+  'Warehouse',
+  'Other'
+];
 const List<String> _kPropertyAmenities = ['WiFi', 'Parking', 'Balcony', 'Security', 'Pool', 'Gym', 'Furnished', 'Pet Friendly'];
 const List<String> _kRentRates = ['Daily', 'Weekly', 'Monthly', 'Yearly'];
 
